@@ -1,13 +1,15 @@
 cmake_minimum_required(VERSION 2.6)
 
-project(slitherss)
+project(slither_server)
+
+message ("** " ${PROJECT_NAME})
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 file (GLOB_RECURSE SOURCE_FILES src/*.cpp)
 file (GLOB_RECURSE HEADER_FILES src/*.hpp)
 
-#include_directories (src)
+include_directories (src)
 include_directories (third_party/websocketpp)
 
 set (Boost_FIND_REQUIRED TRUE)
@@ -43,7 +45,9 @@ endif ()
 
 find_package(ZLIB)
 
-add_executable(slitherss ${SOURCE_FILES})
+add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 
-target_link_libraries (slitherss ${Boost_LIBRARIES})
-target_link_libraries (slitherss ${ZLIB_LIBRARIES})
+target_link_libraries (${PROJECT_NAME} ${Boost_LIBRARIES})
+target_link_libraries (${PROJECT_NAME} ${ZLIB_LIBRARIES})
+
+set_target_properties (${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin)

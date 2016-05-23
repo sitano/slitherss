@@ -36,4 +36,7 @@ CTestTestfile.cmake
 *.exe
 *.out
 *.app
-slitherss
+bin
+
+# Project
+.idea
