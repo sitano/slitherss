@@ -4,7 +4,28 @@ project(slither_server)
 
 message ("** " ${PROJECT_NAME})
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+# Detect clang. Not officially reported by cmake.
+execute_process(COMMAND "${CMAKE_CXX_COMPILER}" "-v" ERROR_VARIABLE CXX_VER_STDERR)
+if ("${CXX_VER_STDERR}" MATCHES ".*clang.*")
+    set (CMAKE_COMPILER_IS_CLANGXX 1)
+endif ()
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
+
+# Visual studio
+if (MSVC)
+    set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /GL /Gy /GF /Ox /Ob2 /Ot /Oi /MP /arch:SSE2 /fp:fast")
+    set (CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_SHARED_LINKER_FLAGS_RELEASE} /LTCG /INCREMENTAL:NO /OPT:REF /OPT:ICF")
+    add_definitions (/W4 /W44640 /wd4996 /wd4995 /wd4355)
+    add_definitions (-DUNICODE -D_UNICODE)
+    add_definitions (-D_CRT_SECURE_NO_WARNINGS -D_SCL_SECURE_NO_WARNINGS)
+    add_definitions (-DNOMINMAX)
+endif ()
+
+# clang or gcc
+if (CMAKE_COMPILER_IS_CLANGXX OR CMAKE_COMPILER_IS_GNUCXX)
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wshadow -Wnon-virtual-dtor -pedantic")
+endif ()
 
 file (GLOB_RECURSE SOURCE_FILES src/*.cpp)
 file (GLOB_RECURSE HEADER_FILES src/*.hpp)
