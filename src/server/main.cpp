@@ -54,7 +54,7 @@ public:
         m_connections.insert(hdl);
 
         // Test
-        boost::asio::streambuf buf;
+        boost::asio::streambuf buf(26);
         std::ostream out(&buf);
 
         packet_init p;
@@ -65,6 +65,8 @@ public:
         m_endpoint.send(hdl, data, buf.size(), websocketpp::frame::opcode::binary, ec);
         if (ec) {
             m_endpoint.get_alog().write(websocketpp::log::alevel::app, "Write Error: " + ec.message());
+        } else {
+            m_endpoint.get_alog().write(websocketpp::log::alevel::app, std::string("Packet Length: ") + std::to_string(buf.size()));
         }
     }
 

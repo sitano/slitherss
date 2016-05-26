@@ -1,8 +1,7 @@
 #ifndef SLITHER_SERVER_BASE_HPP
 #define SLITHER_SERVER_BASE_HPP
 
-#include <cstdint>
-#include <ostream>
+#include "format.hpp"
 
 #define packet_t_none (packet_t)0
 
@@ -16,20 +15,6 @@ struct packet_base {
     packet_base(packet_t t) : packet_type(t) {}
     packet_base(packet_t t, uint16_t clock) : client_time(clock), packet_type(t) {}
 };
-
-/*
-std::ostream& operator<<(std::ostream & out, packet_f_ui8 d) {
-    return out.put(d);
-}
-
-std::ostream& operator<<(std::ostream & out, packet_f_ui16 d) {
-    return out.put((char)(d >> 8)).put((char)d);
-}
-*/
-
-std::ostream& operator<<(std::ostream & out, const packet_base & p) {
-    return out.put(p.client_time >> 8).put(p.client_time).put(p.packet_type);
-}
 
 enum packet_t : uint8_t {
     packet_t_init = 'a', // Initial setup
@@ -60,5 +45,9 @@ enum packet_t : uint8_t {
     packet_t_y = 'y', // Add/remove Prey
     packet_t_k = 'k', // Kill (unused in the game-code)
 };
+
+std::ostream& operator<<(std::ostream & out, const packet_base & p) {
+    return out << write_uint16(p.client_time) << write_uint8(p.packet_type);
+}
 
 #endif //SLITHER_SERVER_BASE_HPP

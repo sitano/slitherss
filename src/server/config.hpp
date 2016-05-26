@@ -13,6 +13,8 @@ struct slither_server_config : public websocketpp::config::asio {
     typedef core::request_type request_type;
     typedef core::response_type response_type;
     typedef core::message_type message_type;
+
+    // TODO: provide pool managers
     typedef core::con_msg_manager_type con_msg_manager_type;
     typedef core::endpoint_msg_manager_type endpoint_msg_manager_type;
 
