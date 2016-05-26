@@ -5,12 +5,12 @@
 #include <vector>
 #include <string>
 
-struct Body {
+struct body {
     uint32_t x;
     uint32_t y;
 };
 
-struct Snake {
+struct snake {
     uint16_t id;
 
     std::string name;
@@ -18,7 +18,7 @@ struct Snake {
     uint32_t x;
     uint32_t y;
 
-    std::vector<Body> parts;
+    std::vector<body> parts;
 };
 
 #endif //SLITHER_SERVER_SNAKE_HPP

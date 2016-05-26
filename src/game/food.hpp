@@ -3,7 +3,7 @@
 
 #include <cstdint>
 
-struct Food {
+struct food {
     uint16_t x;
     uint16_t y;
 

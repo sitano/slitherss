@@ -1,4 +1,5 @@
 #include "server/config.hpp"
+#include "packet/init.hpp"
 
 #include <fstream>
 #include <iostream>
@@ -51,6 +52,20 @@ public:
 
     void on_open(connection_hdl hdl) {
         m_connections.insert(hdl);
+
+        // Test
+        boost::asio::streambuf buf;
+        std::ostream out(&buf);
+
+        packet_init p;
+        out << p;
+
+        auto data = boost::asio::buffer_cast<void const *>(buf.data());
+        websocketpp::lib::error_code ec;
+        m_endpoint.send(hdl, data, buf.size(), websocketpp::frame::opcode::binary, ec);
+        if (ec) {
+            m_endpoint.get_alog().write(websocketpp::log::alevel::app, "Write Error: " + ec.message());
+        }
     }
 
     void on_close(connection_hdl hdl) {

@@ -6,11 +6,11 @@
 
 #include "food.hpp"
 
-struct Sector {
+struct sector {
     uint8_t x;
     uint8_t y;
 
-    std::vector<Food> food;
+    std::vector<food> food;
 };
 
 #endif //SLITHER_SERVER_SECTOR_HPP

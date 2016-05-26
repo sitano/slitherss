@@ -10,7 +10,7 @@ if ("${CXX_VER_STDERR}" MATCHES ".*clang.*")
     set (CMAKE_COMPILER_IS_CLANGXX 1)
 endif ()
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 # Visual studio
 if (MSVC)
