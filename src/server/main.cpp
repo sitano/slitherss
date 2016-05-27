@@ -1,4 +1,4 @@
-#include "server/config.hpp"
+#include "server.hpp"
 #include "packet/init.hpp"
 
 #include <fstream>
@@ -18,7 +18,6 @@ void on_socket_init(websocketpp::connection_hdl, boost::asio::ip::tcp::socket & 
 
 class slither_server {
 public:
-    typedef websocketpp::connection_hdl connection_hdl;
 
     slither_server() {
         // set up access channels to only log interesting things
@@ -53,21 +52,7 @@ public:
     void on_open(connection_hdl hdl) {
         m_connections.insert(hdl);
 
-        // Test
-        boost::asio::streambuf buf(26);
-        std::ostream out(&buf);
-
-        packet_init p;
-        out << p;
-
-        auto data = boost::asio::buffer_cast<void const *>(buf.data());
-        websocketpp::lib::error_code ec;
-        m_endpoint.send(hdl, data, buf.size(), websocketpp::frame::opcode::binary, ec);
-        if (ec) {
-            m_endpoint.get_alog().write(websocketpp::log::alevel::app, "Write Error: " + ec.message());
-        } else {
-            m_endpoint.get_alog().write(websocketpp::log::alevel::app, std::string("Packet Length: ") + std::to_string(buf.size()));
-        }
+        m_endpoint.send_binary(hdl, packet_init());
     }
 
     void on_close(connection_hdl hdl) {

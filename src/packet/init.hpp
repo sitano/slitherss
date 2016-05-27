@@ -6,6 +6,8 @@
 struct packet_init : public packet_base {
     packet_init() : packet_base(packet_t_init) {}
 
+    typedef packet_size<26> size;
+
     uint32_t game_radius = 21600; // 3-5, int24, Game Radius = 21600
     uint16_t max_snake_parts = 411; // 6-7, int16, mscps (maximum snake length in body parts units) = 411
     uint16_t sector_size = 300; // 8-9, int16, sector_size = 480
