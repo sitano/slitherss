@@ -22,11 +22,11 @@ struct packet_base {
 
 enum packet_t : uint8_t {
     packet_t_init = 'a', // Initial setup
-    packet_t_e = 'e', // Snake rotation (?dir ang ?wang ?sp)
-    packet_t_E = 'E', // Snake rotation counterclockwise (dir wang ?sp)
-    packet_t_3 = '3', // Snake rotation counterclockwise (dir ang wang | sp)
-    packet_t_4 = '4', // Snake rotation clockwise (dir wang ?sp)
-    packet_t_5 = '5', // Snake rotation clockwise (dir ang wang)
+    packet_t_rot = 'e', // Snake rotation (?dir ang ?wang ?sp)
+    packet_t_rot1_ccw = 'E', // Snake rotation counterclockwise (dir wang ?sp)
+    packet_t_rot2_ccw = '3', // Snake rotation counterclockwise (dir ang wang | sp)
+    packet_t_rot1_cw  = '4', // Snake rotation clockwise        (dir wang ?sp)
+    packet_t_rot2_cw  = '5', // Snake rotation clockwise        (dir ang wang)
     packet_t_h = 'h', // Update snake last body part fullness (fam)
     packet_t_r = 'r', // Remove snake part
     packet_t_g = 'g', // Move snake
