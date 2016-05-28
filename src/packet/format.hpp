@@ -4,7 +4,7 @@
 #include <ostream>
 #include <cstdint>
 
-# define M_2PI (2.0 * 3.14159265358979323846) /* 2 * pi */
+#define M_2PI (2.0 * 3.14159265358979323846) /* 2 * pi */
 
 typedef uint32_t uint24_t;
 typedef float fixed_point_t;
@@ -53,6 +53,10 @@ template <> ostream_write_value<uint16_t> write_fp16<3>(fixed_point_t v) {
 
 inline ostream_write_value<uint8_t> write_ang8(fixed_point_t v) {
     return { (uint8_t)(v * M_2PI / 256) };
+}
+
+ostream_write_value<uint24_t> write_fp24(fixed_point_t v) {
+    return { (uint24_t)(v * 0xFFFFFF /* + 0.5f */) };
 }
 
 #endif //SLITHER_SERVER_FORMAT_H

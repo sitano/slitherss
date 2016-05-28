@@ -2,10 +2,9 @@
 #define SLITHER_SERVER_ROTATION_HPP
 
 #include "base.hpp"
-#include "cmath"
 
 struct packet_rotation : public packet_base {
-    packet_rotation() : packet_base(packet_t_rot) {}
+    packet_rotation() = default;
     packet_rotation(packet_t t) : packet_base(t) {}
 
     typedef packet_size<8> size;
@@ -14,23 +13,62 @@ struct packet_rotation : public packet_base {
     float ang = 0.0f; // 5, int8, ang * pi2 / 256 (current snake angle in radians, clockwise from (1, 0))
     float wang = 0.0f; // 6, int8, wang * pi2 / 256 (target rotation angle snake is heading to)
     float snakeSpeed = 0.0f; // 7, int8, sp / 18 (snake speed?)
+
+    packet_t get_rot_type() {
+        if (wang == 0.0f) {
+            if (snakeSpeed == 0.0f) {
+                return packet_t_rot_ccw_ang;
+            } else if (ang == 0.0f) {
+                return packet_t_rot_ccw_sp;
+            } else {
+                return packet_t_rot_ccw_ang_sp;
+            }
+        } else {
+            if (ang == 0.0f) {
+                // TODO: could use last snake direction???
+                if (sp == 0.0f) {
+                    return packet_t_rot_ccw_wang;
+                } else {
+                    return packet_t_rot_ccw_wang_sp;
+                }
+            } else {
+                if (sp == 0.0f) {
+                    if (ang >= wang) {
+                        return packet_t_rot_ccw_ang_wang;
+                    } else {
+                        return packet_t_rot_cw_ang_wang;
+                    }
+                } else {
+                    if (ang >= wang) {
+                        return packet_t_rot_ccw_ang_wang_sp;
+                    } else {
+                        return packet_t_rot_cw_ang_wang_sp;
+                    }
+                }
+            }
+        }
+    }
 };
 
 std::ostream& operator<<(std::ostream & out, const packet_rotation & p) {
+    p.packet_type = p.get_rot_type();
+
     out << static_cast<packet_base>(p);
     out << write_uint16(p.snakeId);
 
-    if (p.snakeSpeed == 0.0f) {
-        out << write_ang8(p.ang);
-    } else if (p.wang == 0.0f) {
-        out << write_ang8(p.ang);
-        out << write_uint8(p.snakeSpeed * 18);
-    } else {
-        // snake dir = counterclockwise from (1, 0)
-        out << write_ang8(p.ang);
+    if (p.ang != 0.0f) {
         out << write_ang8(p.wang);
+    }
+
+    if (p.wang != 0.0f) {
+        out << write_ang8(p.wang);
+    }
+
+    if (p.snakeSpeed != 0.0f) {
         out << write_uint8(p.snakeSpeed * 18);
     }
+
+    return out;
 }
 
 #endif //SLITHER_SERVER_ROTATION_HPP

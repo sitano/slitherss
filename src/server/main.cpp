@@ -1,5 +1,10 @@
 #include "server.hpp"
+#include "packet/fullness.hpp"
+#include "packet/inc.hpp"
 #include "packet/init.hpp"
+#include "packet/move.hpp"
+#include "packet/remove_part.hpp"
+#include "packet/rotation.hpp"
 
 #include <fstream>
 #include <iostream>
