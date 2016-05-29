@@ -6,8 +6,6 @@
 struct packet_init : public packet_base {
     packet_init() : packet_base(packet_t_init) {}
 
-    typedef packet_size<26> size;
-
     uint32_t game_radius = 21600; // 3-5, int24, Game Radius = 21600
     uint16_t max_snake_parts = 411; // 6-7, int16, mscps (maximum snake length in body parts units) = 411
     uint16_t sector_size = 300; // 8-9, int16, sector_size = 480
@@ -20,6 +18,8 @@ struct packet_init : public packet_base {
     float prey_ang_speed = 0.028f; // 21-22, int16, manu2 (value / 1E3) (angle in rad per 8ms at which prey can turn) = 0.028
     float snake_speed = 0.43f; // 23-24, int16, cst (value / 1E3) (snake tail speed ratio ) = 0.43
     uint8_t protocol_version = 8; // 25, int8, protocol_version = Unknown
+
+    size_t get_size() { return 26; }
 };
 
 std::ostream& operator<<(std::ostream & out, const packet_init & p) {

@@ -19,14 +19,14 @@ public:
         connection_ptr con = get_con_from_hdl(hdl, ec);
         if (ec) { return; }
 
-        boost::asio::streambuf buf(T::size::bytes);
+        std::size_t len = packet.get_size();
+        boost::asio::streambuf buf(len);
+        buf.prepare(len);
+
         std::ostream out(&buf);
         out << packet;
 
-        auto payload = boost::asio::buffer_cast<void const *>(buf.data());
-        auto len = buf.size();
-
-        ec = con->send(payload, len, op);
+        ec = con->send(boost::asio::buffer_cast<void const *>(buf.data()), len, op);
     }
 
     template <typename T>

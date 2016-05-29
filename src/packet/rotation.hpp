@@ -7,14 +7,14 @@ struct packet_rotation : public packet_base {
     packet_rotation() = default;
     packet_rotation(packet_t t) : packet_base(t) {}
 
-    typedef packet_size<8> size;
-
     uint16_t snakeId = 0; // 3-4, int16, Snake id
     float ang = 0.0f; // 5, int8, ang * pi2 / 256 (current snake angle in radians, clockwise from (1, 0))
     float wang = 0.0f; // 6, int8, wang * pi2 / 256 (target rotation angle snake is heading to)
     float snakeSpeed = 0.0f; // 7, int8, sp / 18 (snake speed?)
 
-    packet_t get_rot_type() {
+    size_t get_size() { return 8; }
+
+    packet_t get_rot_type() const {
         if (wang == 0.0f) {
             if (snakeSpeed == 0.0f) {
                 return packet_t_rot_ccw_ang;
@@ -26,13 +26,13 @@ struct packet_rotation : public packet_base {
         } else {
             if (ang == 0.0f) {
                 // TODO: could use last snake direction???
-                if (sp == 0.0f) {
+                if (snakeSpeed == 0.0f) {
                     return packet_t_rot_ccw_wang;
                 } else {
                     return packet_t_rot_ccw_wang_sp;
                 }
             } else {
-                if (sp == 0.0f) {
+                if (snakeSpeed == 0.0f) {
                     if (ang >= wang) {
                         return packet_t_rot_ccw_ang_wang;
                     } else {
@@ -51,9 +51,7 @@ struct packet_rotation : public packet_base {
 };
 
 std::ostream& operator<<(std::ostream & out, const packet_rotation & p) {
-    p.packet_type = p.get_rot_type();
-
-    out << static_cast<packet_base>(p);
+    out << packet_base(p.get_rot_type(), p.client_time);
     out << write_uint16(p.snakeId);
 
     if (p.ang != 0.0f) {

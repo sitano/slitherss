@@ -5,6 +5,7 @@
 #include "packet/move.hpp"
 #include "packet/remove_part.hpp"
 #include "packet/rotation.hpp"
+#include "packet/leaderboard.hpp"
 
 #include <fstream>
 #include <iostream>
