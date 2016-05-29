@@ -1,5 +1,5 @@
-#ifndef SLITHER_SERVER_FORMAT_H
-#define SLITHER_SERVER_FORMAT_H
+#ifndef SLITHER_PACKET_FORMAT_H
+#define SLITHER_PACKET_FORMAT_H
 
 #include <ostream>
 #include <cstdint>
@@ -23,6 +23,14 @@ std::ostream& operator<<(std::ostream& __os, ostream_write_value<uint16_t> __f) 
 
 std::ostream& operator<<(std::ostream& __os, ostream_write_value<uint24_t> __f) {
     return __os.put(__f.v >> 16).put(__f.v >> 8).put(__f.v);
+}
+
+std::ostream& operator<<(std::ostream& __os, ostream_write_value<const std::string &> __f) {
+    __os.put(__f.v.length());
+    for (const char c : __f.v) {
+        __os.put(c);
+    }
+    return __os;
 }
 
 inline ostream_write_value<uint8_t> write_uint8(uint8_t v) {
@@ -59,4 +67,8 @@ ostream_write_value<uint24_t> write_fp24(fixed_point_t v) {
     return { (uint24_t)(v * 0xFFFFFF /* + 0.5f */) };
 }
 
-#endif //SLITHER_SERVER_FORMAT_H
+ostream_write_value<const std::string &> write_string(const std::string &s) {
+    return { s };
+}
+
+#endif //SLITHER_PACKET_FORMAT_H

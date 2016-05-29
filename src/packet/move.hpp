@@ -1,5 +1,5 @@
-#ifndef SLITHER_SERVER_MOVE_HPP
-#define SLITHER_SERVER_MOVE_HPP
+#ifndef SLITHER_PACKET_MOVE_HPP
+#define SLITHER_PACKET_MOVE_HPP
 
 #include "base.hpp"
 
@@ -40,4 +40,4 @@ std::ostream& operator<<(std::ostream & out, const packet_move_rel & p) {
     return out;
 }
 
-#endif //SLITHER_SERVER_MOVE_HPP
+#endif //SLITHER_PACKET_MOVE_HPP

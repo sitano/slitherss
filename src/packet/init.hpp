@@ -1,5 +1,5 @@
-#ifndef SLITHER_SERVER_INIT_HPP
-#define SLITHER_SERVER_INIT_HPP
+#ifndef SLITHER_PACKET_INIT_HPP
+#define SLITHER_PACKET_INIT_HPP
 
 #include "base.hpp"
 
@@ -39,4 +39,4 @@ std::ostream& operator<<(std::ostream & out, const packet_init & p) {
             << write_uint8(p.protocol_version);
 }
 
-#endif //SLITHER_SERVER_INIT_HPP
+#endif //SLITHER_PACKET_INIT_HPP

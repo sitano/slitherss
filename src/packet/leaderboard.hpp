@@ -1,5 +1,5 @@
-#ifndef SLITHER_SERVER_LEADERBOARD_HPP
-#define SLITHER_SERVER_LEADERBOARD_HPP
+#ifndef SLITHER_PACKET_LEADERBOARD_HPP
+#define SLITHER_PACKET_LEADERBOARD_HPP
 
 #include "base.hpp"
 #include "game/snake.hpp"
@@ -47,12 +47,9 @@ std::ostream& operator<<(std::ostream & out, const packet_leaderboard & p) {
         out << write_uint16(ptr->parts.size());
         out << write_fp24(ptr->fullness);
         out << write_uint8(ptr->color);
-        out << write_uint8(ptr->name.length());
-        for (const char c : ptr->name) {
-            out << c;
-        }
+        out << write_string(ptr->name);
     }
     return out;
 }
 
-#endif //SLITHER_SERVER_LEADERBOARD_HPP
+#endif //SLITHER_PACKET_LEADERBOARD_HPP

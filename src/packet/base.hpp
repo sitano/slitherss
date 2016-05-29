@@ -1,5 +1,5 @@
-#ifndef SLITHER_SERVER_BASE_HPP
-#define SLITHER_SERVER_BASE_HPP
+#ifndef SLITHER_PACKET_BASE_HPP
+#define SLITHER_PACKET_BASE_HPP
 
 #include "format.hpp"
 
@@ -59,4 +59,4 @@ std::ostream& operator<<(std::ostream & out, const packet_base & p) {
     return out << write_uint16(p.client_time) << write_uint8(p.packet_type);
 }
 
-#endif //SLITHER_SERVER_BASE_HPP
+#endif //SLITHER_PACKET_BASE_HPP

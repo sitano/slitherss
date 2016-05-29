@@ -1,5 +1,5 @@
-#ifndef SLITHER_SERVER_REMOVE_PART_HPP
-#define SLITHER_SERVER_REMOVE_PART_HPP
+#ifndef SLITHER_PACKET_REMOVE_PART_HPP
+#define SLITHER_PACKET_REMOVE_PART_HPP
 
 #include "base.hpp"
 
@@ -21,4 +21,4 @@ std::ostream& operator<<(std::ostream & out, const packet_remove_part & p) {
     return out;
 }
 
-#endif //SLITHER_SERVER_REMOVE_PART_HPP
+#endif //SLITHER_PACKET_REMOVE_PART_HPP

@@ -1,5 +1,5 @@
-#ifndef SLITHER_SERVER_FULLNESS_HPP
-#define SLITHER_SERVER_FULLNESS_HPP
+#ifndef SLITHER_PACKET_FULLNESS_HPP
+#define SLITHER_PACKET_FULLNESS_HPP
 
 #include "base.hpp"
 
@@ -19,4 +19,4 @@ std::ostream& operator<<(std::ostream & out, const packet_fullness & p) {
     return out;
 }
 
-#endif //SLITHER_SERVER_FULLNESS_HPP
+#endif //SLITHER_PACKET_FULLNESS_HPP

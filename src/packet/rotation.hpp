@@ -1,5 +1,5 @@
-#ifndef SLITHER_SERVER_ROTATION_HPP
-#define SLITHER_SERVER_ROTATION_HPP
+#ifndef SLITHER_PACKET_ROTATION_HPP
+#define SLITHER_PACKET_ROTATION_HPP
 
 #include "base.hpp"
 
@@ -69,4 +69,4 @@ std::ostream& operator<<(std::ostream & out, const packet_rotation & p) {
     return out;
 }
 
-#endif //SLITHER_SERVER_ROTATION_HPP
+#endif //SLITHER_PACKET_ROTATION_HPP

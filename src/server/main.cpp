@@ -1,11 +1,5 @@
+#include "packet/all.hpp"
 #include "server.hpp"
-#include "packet/fullness.hpp"
-#include "packet/inc.hpp"
-#include "packet/init.hpp"
-#include "packet/move.hpp"
-#include "packet/remove_part.hpp"
-#include "packet/rotation.hpp"
-#include "packet/leaderboard.hpp"
 
 #include <fstream>
 #include <iostream>
@@ -43,6 +37,7 @@ public:
     void run(uint16_t port) {
         std::stringstream ss;
         ss << "Running slither server on port " << port;
+
         m_endpoint.get_alog().write(websocketpp::log::alevel::app, ss.str());
 
         m_endpoint.listen(port);

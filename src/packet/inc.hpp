@@ -1,5 +1,5 @@
-#ifndef SLITHER_SERVER_INCREMENT_HPP
-#define SLITHER_SERVER_INCREMENT_HPP
+#ifndef SLITHER_PACKET_INCREMENT_HPP
+#define SLITHER_PACKET_INCREMENT_HPP
 
 #include "base.hpp"
 
@@ -44,4 +44,4 @@ std::ostream& operator<<(std::ostream & out, const packet_inc_rel & p) {
     return out;
 }
 
-#endif //SLITHER_SERVER_INCREMENT_HPP
+#endif //SLITHER_PACKET_INCREMENT_HPP

@@ -19,6 +19,15 @@ struct snake {
     uint32_t x;
     uint32_t y;
 
+    float speed;
+
+    float angle;
+    float wangle;
+    float eangle;
+
+    float ehang;
+    float wehang;
+
     float fullness;
 
     std::vector<body> parts;
