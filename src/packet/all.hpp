@@ -13,5 +13,8 @@
 #include "highscore.hpp"
 #include "minimap.hpp"
 #include "snake.hpp"
+#include "food.hpp"
+#include "prey.hpp"
+#include "pong.hpp"
 
 #endif //SLITHER_PACKET_ALL_HPP

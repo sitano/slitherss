@@ -3,6 +3,7 @@
 
 #include "base.hpp"
 
+// Sent when player died (dead/disconnect packet)
 struct packet_end : public packet_base {
     packet_end() : packet_base(packet_t_end) {}
 
@@ -15,9 +16,27 @@ struct packet_end : public packet_base {
     static const uint8_t statuc_disconnect = 2;
 };
 
+// Sent when another snake dies by running into the player; not sent when the killer isn't the local player.
+// Note: this packet is (currently) unused in the original client, so I can only guess what the variables mean.
+struct packet_kill : public packet_base {
+    packet_kill() : packet_base(packet_t_kill) {}
+
+    uint16_t snakeId; // 3-4	int16	killer snake id
+    uint32_t kills; // 5-7	int24	total number of kills
+
+    size_t get_size() { return 8; }
+};
+
 std::ostream& operator<<(std::ostream & out, const packet_end & p) {
     out << static_cast<packet_base>(p);
     out << write_uint8(p.status);
+    return out;
+}
+
+std::ostream& operator<<(std::ostream & out, const packet_kill & p) {
+    out << static_cast<packet_base>(p);
+    out << write_uint16(p.snakeId);
+    out << write_uint24(p.kills);
     return out;
 }
 
