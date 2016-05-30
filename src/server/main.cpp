@@ -30,6 +30,8 @@ public:
         m_endpoint.set_reuse_addr(true);
 
         // Bind the handlers we are using
+        m_endpoint.set_socket_init_handler(bind(&on_socket_init, ::_1, ::_2));
+
         m_endpoint.set_open_handler(bind(&slither_server::on_open, this, _1));
         m_endpoint.set_close_handler(bind(&slither_server::on_close, this, _1));
     }
