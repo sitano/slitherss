@@ -1,3 +1,18 @@
 [submodule "third_party/websocketpp"]
 	path = third_party/websocketpp
 	url = git://github.com/zaphoyd/websocketpp
+[submodule "cmake/tooling-cmake-util"]
+	path = cmake/tooling-cmake-util
+	url = https://github.com/polysquare/tooling-cmake-util
+[submodule "cmake/cppcheck-target-cmake"]
+	path = cmake/cppcheck-target-cmake
+	url = https://github.com/polysquare/cppcheck-target-cmake
+[submodule "cmake/tooling-find-pkg-util"]
+	path = cmake/tooling-find-pkg-util
+	url = https://github.com/polysquare/tooling-find-pkg-util
+[submodule "cmake/cmake-include-guard"]
+	path = cmake/cmake-include-guard
+	url = https://github.com/polysquare/cmake-include-guard
+[submodule "cmake/cmake-header-language"]
+	path = cmake/cmake-header-language
+	url = https://github.com/polysquare/cmake-header-language
