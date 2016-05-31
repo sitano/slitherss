@@ -8,7 +8,6 @@
 typedef websocketpp::connection_hdl connection_hdl;
 
 class server : public websocketpp::server<slither_server_config> {
-
 public:
 
     template <typename T>

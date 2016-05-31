@@ -28,12 +28,6 @@ struct packet_minimap : public packet_base {
     }
 };
 
-std::ostream& operator<<(std::ostream & out, const packet_minimap & p) {
-    out << static_cast<packet_base>(p);
-    for (const uint8_t v: p.data) {
-        out.put(v);
-    }
-    return out;
-}
+std::ostream& operator<<(std::ostream & out, const packet_minimap & p);
 
 #endif //SLITHER_PACKET_MINIMAP_HPP

@@ -7,7 +7,7 @@
 struct packet_end : public packet_base {
     packet_end() : packet_base(packet_t_end) {}
 
-    uint8_t status; // 3, int8, 0-2; 0 is normal death, 1 is new highscore of the day, 2 is unknown (disconnect??)
+    uint8_t status = status_death; // 3, int8, 0-2; 0 is normal death, 1 is new highscore of the day, 2 is unknown (disconnect??)
 
     size_t get_size() { return 4; }
 
@@ -21,23 +21,13 @@ struct packet_end : public packet_base {
 struct packet_kill : public packet_base {
     packet_kill() : packet_base(packet_t_kill) {}
 
-    uint16_t snakeId; // 3-4	int16	killer snake id
-    uint32_t kills; // 5-7	int24	total number of kills
+    uint16_t snakeId = 0; // 3-4	int16	killer snake id
+    uint32_t kills = 0; // 5-7	int24	total number of kills
 
     size_t get_size() { return 8; }
 };
 
-std::ostream& operator<<(std::ostream & out, const packet_end & p) {
-    out << static_cast<packet_base>(p);
-    out << write_uint8(p.status);
-    return out;
-}
-
-std::ostream& operator<<(std::ostream & out, const packet_kill & p) {
-    out << static_cast<packet_base>(p);
-    out << write_uint16(p.snakeId);
-    out << write_uint24(p.kills);
-    return out;
-}
+std::ostream& operator<<(std::ostream & out, const packet_end & p);
+std::ostream& operator<<(std::ostream & out, const packet_kill & p);
 
 #endif //SLITHER_PACKET_END_HPP

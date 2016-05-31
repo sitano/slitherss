@@ -12,11 +12,6 @@ struct packet_fullness : public packet_base {
     size_t get_size() { return 8; }
 };
 
-std::ostream& operator<<(std::ostream & out, const packet_fullness & p) {
-    out << static_cast<packet_base>(p);
-    out << write_uint16(p.snakeId);
-    out << write_fp24(p.fullness);
-    return out;
-}
+std::ostream& operator<<(std::ostream & out, const packet_fullness & p);
 
 #endif //SLITHER_PACKET_FULLNESS_HPP

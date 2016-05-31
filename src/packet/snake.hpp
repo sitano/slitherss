@@ -32,48 +32,12 @@ struct packet_add_snake : public packet_base {
     }
 };
 
-std::ostream& operator<<(std::ostream & out, const packet_add_snake & p) {
-    out << static_cast<packet_base>(p);
-
-    const snake & s= p.s.operator*();
-
-    out << write_uint16(s.id)
-        << write_fp24(s.ehang)
-        << write_uint8(0) // unknown
-        << write_fp24(s.eangle)
-        << write_fp16<3>(s.speed)
-        << write_fp24(s.fullness)
-        << write_uint8(s.color)
-        << write_uint24(s.x * 5)
-        << write_uint24(s.y * 5)
-        << write_string(s.name);
-
-    if (!s.parts.empty()) {
-        const body &head = s.parts.front();
-        uint32_t hx = head.x;
-        uint32_t hy = head.y;
-        out << write_uint24(hx * 5) << write_uint24(hy * 5);
-        for (auto ptr = (++ s.parts.cbegin()); ptr != s.parts.cend(); ++ ptr) {
-            const int32_t bpx = ptr->x - hx;
-            const int32_t bpy = ptr->y - hy;
-
-            out << write_uint8((bpx + 127) * 2)
-                << write_uint8((bpy + 127) * 2);
-
-            hx += bpx;
-            hy += bpy;
-        }
-    }
-
-    return out;
-}
-
 // Sent when another snake leaves range (that is, close enough to be drawn on screen) or dies.
 struct packet_remove_snake : public packet_base {
     packet_remove_snake() : packet_base(packet_t_snake) {}
 
-    uint16_t snakeId; // 3-4, int16, Snake id
-    uint8_t status; // 5, int8, 0 (snake left range) or 1 (snake died)
+    uint16_t snakeId = 0; // 3-4, int16, Snake id
+    uint8_t status = status_snake_left; // 5, int8, 0 (snake left range) or 1 (snake died)
 
     size_t get_size() { return 6; }
 
@@ -81,11 +45,7 @@ struct packet_remove_snake : public packet_base {
     static const uint8_t status_snake_died = 1;
 };
 
-std::ostream& operator<<(std::ostream & out, const packet_remove_snake & p) {
-    out << static_cast<packet_base>(p);
-    out << write_uint16(p.snakeId);
-    out << write_uint8(p.status);
-    return out;
-}
+std::ostream& operator<<(std::ostream & out, const packet_add_snake & p);
+std::ostream& operator<<(std::ostream & out, const packet_remove_snake & p);
 
 #endif //SLITHER_PACKET_SNAKE_HPP
