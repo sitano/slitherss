@@ -39,11 +39,11 @@ void slither_server::on_socket_init(websocketpp::connection_hdl, boost::asio::ip
 }
 
 void slither_server::on_open(connection_hdl hdl) {
-    m_connections.insert(hdl);
+    m_players[hdl] = std::unique_ptr<snake>(new snake());
 
     m_endpoint.send_binary(hdl, packet_init());
 }
 
 void slither_server::on_close(connection_hdl hdl) {
-    m_connections.erase(hdl);
+    m_players.erase(hdl);
 }

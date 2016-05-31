@@ -5,11 +5,11 @@
 
 struct packet_move : public packet_base {
     packet_move() : packet_base(packet_t_mov) {}
-    packet_move(packet_t t) : packet_base(t) {}
+    explicit packet_move(packet_t t) : packet_base(t) {}
 
-    uint16_t snakeId; // 3-4, int16, Snake id
-    uint16_t x; // 5-6, int16, x
-    uint16_t y; // 7-8, int16, y
+    uint16_t snakeId = 0; // 3-4, int16, Snake id
+    uint16_t x = 0; // 5-6, int16, x
+    uint16_t y = 0; // 7-8, int16, y
 
     size_t get_size() { return 9; }
 };

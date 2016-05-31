@@ -5,7 +5,7 @@
 
 struct packet_rotation : public packet_base {
     packet_rotation() = default;
-    packet_rotation(packet_t t) : packet_base(t) {}
+    explicit packet_rotation(packet_t t) : packet_base(t) {}
 
     uint16_t snakeId = 0; // 3-4, int16, Snake id
     float ang = 0.0f; // 5, int8, ang * pi2 / 256 (current snake angle in radians, clockwise from (1, 0))
