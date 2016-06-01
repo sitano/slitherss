@@ -21,11 +21,18 @@ public:
     void on_open(connection_hdl hdl);
     void on_close(connection_hdl hdl);
 
+    std::shared_ptr<snake> create_snake();
+    void init_random();
+    int next_random();
+    template <typename T> T next_random(T base);
 private:
-    typedef std::map<connection_hdl, std::unique_ptr<snake>, std::owner_less<connection_hdl>> players;
+    typedef std::map<connection_hdl, std::shared_ptr<snake>, std::owner_less<connection_hdl>> sessions;
 
     server m_endpoint;
-    players m_players;
+    sessions m_players;
+    packet_init m_init;
+
+    uint16_t lastSnakeId = 0;
 };
 
 #endif //SLITHER_SERVER_GAME_HPP
