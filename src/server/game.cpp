@@ -26,8 +26,9 @@ void slither_server::run(uint16_t port) {
     m_endpoint.listen(port);
     m_endpoint.start_accept();
 
-    // game init
-    init_random();
+    m_world.init();
+    m_init = build_init_packet();
+    next_tick(get_now_tp());
 
     try {
         m_endpoint.run();
@@ -36,16 +37,45 @@ void slither_server::run(uint16_t port) {
     }
 }
 
+void slither_server::next_tick(time_point last) {
+    m_last_time_point = last;
+    auto diff = std::chrono::duration_cast<milliseconds>(std::chrono::steady_clock::now() - last);
+    auto diff2 = timer_interval_ms - diff;
+    m_timer = m_endpoint.set_timer(
+        std::max(0L, diff2.count()),
+        websocketpp::lib::bind(
+            &slither_server::on_timer,
+            this,
+            websocketpp::lib::placeholders::_1
+        )
+    );
+}
+
+void slither_server::on_timer(websocketpp::lib::error_code const & ec) {
+    time_point now = get_now_tp();
+    milliseconds interval = std::chrono::duration_cast<milliseconds>(now - m_last_time_point);
+
+    if (ec) {
+        m_endpoint.get_alog().write(websocketpp::log::alevel::app,
+                "Main game loop timer error: " + ec.message());
+        return;
+    }
+
+    m_world.tick(interval.count());
+
+    next_tick(now);
+}
+
 void slither_server::on_socket_init(websocketpp::connection_hdl, boost::asio::ip::tcp::socket & s) {
     boost::asio::ip::tcp::no_delay option(true);
     s.set_option(option);
 }
 
 void slither_server::on_open(connection_hdl hdl) {
-    auto snake = create_snake();
+    auto snake = m_world.create_snake();
     m_players[hdl] = snake;
 
-    m_endpoint.send_binary(hdl, packet_init());
+    m_endpoint.send_binary(hdl, m_init);
     // TODO: send sectors packets
     // TODO: send food packets
     // send snake
@@ -56,49 +86,25 @@ void slither_server::on_close(connection_hdl hdl) {
     m_players.erase(hdl);
 }
 
-std::shared_ptr<snake> slither_server::create_snake() {
-    lastSnakeId ++;
-
-    float angle = M_2PI * next_random(255) / 256.0;
-
-    auto s = new snake();
-    s->id = lastSnakeId;
-    s->name = "";
-    s->color = static_cast<uint8_t>(9 + next_random(21 - 9 + 1));
-    s->x = m_init.game_radius + next_random(1000) - 500;
-    s->y = m_init.game_radius + next_random(1000) - 500;
-    s->speed = 5.79f;
-    s->angle = angle;
-    s->wangle = angle;
-    s->eangle = angle;
-    s->ehang = angle;
-    s->wehang = angle;
-    s->fullness = 0.0f;
-    s->parts = {
-            {s->x, s->y},
-            {s->x, s->y}
-    };
-
-    return std::shared_ptr<snake>(s);
+packet_init slither_server::build_init_packet() {
+    packet_init init;
+    init.game_radius = m_world.game_radius;
+    init.max_snake_parts = m_world.max_snake_parts;
+    init.sector_size = m_world.sector_size;
+    init.sector_count_along_edge = m_world.sector_count_along_edge;
+    init.spangdv = m_world.spangdv;
+    init.nsp1 = m_world.nsp1;
+    init.nsp2 = m_world.nsp2;
+    init.nsp3 = m_world.nsp3;
+    init.snake_ang_speed = m_world.snake_ang_speed;
+    init.prey_ang_speed = m_world.prey_ang_speed;
+    init.snake_tail_k = m_world.snake_tail_k;
+    init.protocol_version = m_world.protocol_version;
+    return init;
 }
 
-void slither_server::init_random() {
-    std::srand(std::time(nullptr));
+slither_server::time_point slither_server::get_now_tp() {
+    return std::chrono::steady_clock::now();
 }
-
-int slither_server::next_random() {
-    return std::rand();
-}
-
-template<typename T>
-T slither_server::next_random(T base) {
-    return static_cast<T>(next_random() % base);
-}
-
-
-
-
-
-
 
 

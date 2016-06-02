@@ -7,27 +7,28 @@ std::ostream& operator<<(std::ostream & out, const packet_add_snake & p) {
     const snake & s= p.s.operator*();
 
     out << write_uint16(s.id)
-        << write_fp24(s.ehang)
+        << write_fp24(s.angle) // ehang
         << write_uint8(0) // unknown
-        << write_fp24(s.eangle)
+        << write_fp24(s.angle) // eangle
         << write_fp16<3>(s.speed)
         << write_fp24(s.fullness)
         << write_uint8(s.color)
-        << write_uint24(s.x * 5)
-        << write_uint24(s.y * 5)
+        << write_uint24(static_cast<uint24_t>(s.x * 5.0f))
+        << write_uint24(static_cast<uint24_t>(s.y * 5.0f))
         << write_string(s.name);
 
     if (!s.parts.empty()) {
         const body &head = s.parts.front();
-        uint32_t hx = head.x;
-        uint32_t hy = head.y;
-        out << write_uint24(hx * 5) << write_uint24(hy * 5);
+        float hx = head.x;
+        float hy = head.y;
+        out << write_uint24(static_cast<uint24_t>(hx * 5.0f))
+            << write_uint24(static_cast<uint24_t>(hy * 5.0f));
         for (auto ptr = (++ s.parts.cbegin()); ptr != s.parts.cend(); ++ ptr) {
-            const int32_t bpx = ptr->x - hx;
-            const int32_t bpy = ptr->y - hy;
+            const float bpx = ptr->x - hx;
+            const float bpy = ptr->y - hy;
 
-            out << write_uint8((bpx + 127) * 2)
-                << write_uint8((bpy + 127) * 2);
+            out << write_uint8(static_cast<uint8_t>((bpx + 127.0f) * 2.0f))
+                << write_uint8(static_cast<uint8_t>((bpy + 127.0f) * 2.0f));
 
             hx += bpx;
             hy += bpy;

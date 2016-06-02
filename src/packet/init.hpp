@@ -16,7 +16,7 @@ struct packet_init : public packet_base {
     float nsp3 = 14.0f; // 17-18, int16, nsp3 (value / 100) = 12
     float snake_ang_speed = 0.033f; // 19-20, int16, mamu (value / 1E3) (basic snake angular speed) = 0.033
     float prey_ang_speed = 0.028f; // 21-22, int16, manu2 (value / 1E3) (angle in rad per 8ms at which prey can turn) = 0.028
-    float snake_speed = 0.43f; // 23-24, int16, cst (value / 1E3) (snake tail speed ratio ) = 0.43
+    float snake_tail_k = 0.43f; // 23-24, int16, cst (value / 1E3) (snake tail speed ratio ) = 0.43
     uint8_t protocol_version = 8; // 25, int8, protocol_version = Unknown
 
     size_t get_size() { return 26; }

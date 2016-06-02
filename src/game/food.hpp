@@ -1,5 +1,5 @@
-#ifndef SLITHER_SERVER_FOOD_HPP
-#define SLITHER_SERVER_FOOD_HPP
+#ifndef SLITHER_GAME_FOOD_HPP
+#define SLITHER_GAME_FOOD_HPP
 
 #include <cstdint>
 
@@ -11,4 +11,4 @@ struct food {
     uint8_t color;
 };
 
-#endif //SLITHER_SERVER_FOOD_HPP
+#endif //SLITHER_GAME_FOOD_HPP

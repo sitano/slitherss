@@ -1,5 +1,5 @@
-#ifndef SLITHER_SERVER_SECTOR_HPP
-#define SLITHER_SERVER_SECTOR_HPP
+#ifndef SLITHER_GAME_SECTOR_HPP
+#define SLITHER_GAME_SECTOR_HPP
 
 #include <cstdint>
 #include <vector>
@@ -13,4 +13,4 @@ struct sector {
     std::vector<food> food;
 };
 
-#endif //SLITHER_SERVER_SECTOR_HPP
+#endif //SLITHER_GAME_SECTOR_HPP

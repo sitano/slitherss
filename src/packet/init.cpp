@@ -13,7 +13,7 @@ std::ostream& operator<<(std::ostream & out, const packet_init & p) {
             << write_fp16<2>(p.nsp3)
             << write_fp16<3>(p.snake_ang_speed)
             << write_fp16<3>(p.prey_ang_speed)
-            << write_fp16<3>(p.snake_speed)
+            << write_fp16<3>(p.snake_tail_k)
             << write_uint8(p.protocol_version);
 }
 
