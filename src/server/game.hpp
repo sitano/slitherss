@@ -3,7 +3,7 @@
 
 #include "server.hpp"
 #include "game/world.hpp"
-#include "packet/all.hpp"
+#include "packet/p_all.hpp"
 
 #include <map>
 #include <memory>

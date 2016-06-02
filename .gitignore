@@ -41,3 +41,4 @@ bin
 # Project
 .idea
 third_party/iiegor/
+third_party/slither_client/

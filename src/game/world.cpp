@@ -1,26 +1,34 @@
 #include "world.hpp"
 #include <ctime>
 #include <iostream>
+#include <cmath>
 
 std::shared_ptr<snake> world::create_snake() {
     m_lastSnakeId ++;
 
-    float angle = pi_mul_2 * next_random(255) / 256.0f;
+    uint32_t half_radius = game_radius / 2;
 
     auto s = new snake();
     s->id = m_lastSnakeId;
     s->name = "";
     s->color = static_cast<uint8_t>(9 + next_random(21 - 9 + 1));
-    s->x = game_radius + next_random(1000) - 500;
-    s->y = game_radius + next_random(1000) - 500;
-    s->speed = 5.79f;
-    s->angle = angle;
-    s->wangle = angle;
+    s->x = game_radius + next_random(game_radius) - half_radius;
+    s->y = game_radius + next_random(game_radius) - half_radius;
+    s->speed = snake::base_move_speed;
+
     s->fullness = 0.0f;
-    s->parts = {
-            {s->x, s->y},
-            {s->x, s->y}
-    };
+
+    const int len = 2 + next_random(10);
+    for (int i = 0; i < len; ++ i) {
+        s->parts.push_back(body { s->x, s->y });
+
+        float angle = world::pi / 8.0f - world::pi / 4.0f * next_random() / RAND_MAX;
+        s->angle = angle;
+        s->wangle = angle;
+
+        s->x += sinf(angle) * snake::move_step_distance / 2;
+        s->y += cosf(angle) * snake::move_step_distance / 2;
+    }
 
     return std::shared_ptr<snake>(s);
 }

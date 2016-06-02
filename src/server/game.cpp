@@ -88,18 +88,23 @@ void slither_server::on_close(connection_hdl hdl) {
 
 packet_init slither_server::build_init_packet() {
     packet_init init;
+
     init.game_radius = m_world.game_radius;
     init.max_snake_parts = m_world.max_snake_parts;
     init.sector_size = m_world.sector_size;
     init.sector_count_along_edge = m_world.sector_count_along_edge;
-    init.spangdv = m_world.spangdv;
-    init.nsp1 = m_world.nsp1;
-    init.nsp2 = m_world.nsp2;
-    init.nsp3 = m_world.nsp3;
-    init.snake_ang_speed = m_world.snake_ang_speed;
-    init.prey_ang_speed = m_world.prey_ang_speed;
-    init.snake_tail_k = m_world.snake_tail_k;
-    init.protocol_version = m_world.protocol_version;
+
+    init.spangdv = snake::spangdv;
+    init.nsp1 = snake::nsp1;
+    init.nsp2 = snake::nsp2;
+    init.nsp3 = snake::nsp3;
+
+    init.snake_ang_speed = snake::snake_ang_speed;
+    init.prey_ang_speed = snake::prey_ang_speed;
+    init.snake_tail_k = snake::snake_tail_k;
+
+    init.protocol_version = world::protocol_version;
+
     return init;
 }
 
