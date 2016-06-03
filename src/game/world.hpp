@@ -2,8 +2,10 @@
 #define SLITHER_GAME_WORLD_HPP
 
 #include "snake.hpp"
+#include "sector.hpp"
 #include <memory>
 #include <cstdint>
+#include <unordered_map>
 
 class world {
 public:
@@ -11,11 +13,18 @@ public:
     void init();
     void tick(long dt);
 
-    std::shared_ptr<snake> create_snake();
+    snake::ptr create_snake();
 
     void init_random();
     int next_random();
     template <typename T> T next_random(T base);
+
+    void add_snake(snake::ptr ptr);
+    void remove_snake(snake::snake_id_t id);
+    snake::ptr get_snake(snake::snake_id_t id);
+
+    void get_changes();
+    void flush_changes();
 
     // world
     const uint32_t game_radius = 21600;
@@ -31,10 +40,15 @@ public:
     static constexpr float pi = 3.14159265358979323846f;
     static constexpr float pi_mul_2 = 2.0f * 3.14159265358979323846f;
 
+private:
+
+    void tick_snakes(long dt);
 
 private:
-    // todo snakes
-    // todo sectors
+    std::unordered_map<snake::snake_id_t, std::shared_ptr<snake>> m_snakes;
+    std::vector<sector> m_sectors;
+    std::vector<snake *> m_changes;
+
     // todo fixed point arithmetic
     // todo pools
     // todo sorted checker

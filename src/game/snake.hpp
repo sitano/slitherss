@@ -5,6 +5,7 @@
 #include <vector>
 #include <string>
 #include <cmath>
+#include <memory>
 
 enum snake_changes : uint8_t {
     change_pos = 1,
@@ -22,11 +23,15 @@ struct body {
     }
 };
 
-struct snake {
-    uint16_t id;
+struct snake : std::enable_shared_from_this<snake> {
+    typedef uint16_t snake_id_t;
+    typedef std::shared_ptr<snake> ptr;
 
-    bool acceleration;
+    snake_id_t id;
+
     uint8_t color;
+    uint8_t update;
+    bool acceleration;
 
     std::string name;
 
@@ -42,7 +47,9 @@ struct snake {
 
     std::vector<body> parts;
 
-    uint8_t tick(long dt);
+    bool tick(long dt);
+    void flush();
+    std::shared_ptr<snake> getptr();
 
     static constexpr float spangdv = 4.8f;
     static constexpr float nsp1 = 5.39f;
@@ -63,13 +70,16 @@ struct snake {
     static const int parts_start_move_count = 4;
     static const int move_step_distance = 42;
 
+    static constexpr float f_pi = 3.14159265358979323846f;
+    static constexpr float f_2pi = 2.0f * f_pi;
+
 private:
 
     long ticks = 0;
 };
 
 inline float normalize_angle(float angle) {
-    return angle - (2.0f * M_PI) * floor( angle / (2.0f * M_PI) );
+    return angle - snake::f_2pi * floorf( angle / snake::f_2pi );
 }
 
 #endif //SLITHER_GAME_SNAKE_HPP

@@ -1,6 +1,7 @@
 #include "snake.hpp"
+#include <iostream>
 
-uint8_t snake::tick(long dt) {
+bool snake::tick(long dt) {
     uint8_t changes = 0;
 
     ticks += dt;
@@ -76,7 +77,18 @@ uint8_t snake::tick(long dt) {
         ticks = 0;
     }
 
-    return changes;
+    if (changes > 0 && changes != update) {
+        update |= changes;
+        return true;
+    }
+
+    return false;
 }
 
+std::shared_ptr<snake> snake::getptr() {
+    return shared_from_this();
+}
 
+void snake::flush() {
+    update = 0;
+}

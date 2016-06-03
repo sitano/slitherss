@@ -34,7 +34,7 @@ private:
     void on_timer(websocketpp::lib::error_code const & ec);
 
 private:
-    typedef std::map<connection_hdl, std::shared_ptr<snake>, std::owner_less<connection_hdl>> sessions;
+    typedef std::map<connection_hdl, snake::snake_id_t, std::owner_less<connection_hdl>> sessions;
 
     server m_endpoint;
     server::timer_ptr m_timer;

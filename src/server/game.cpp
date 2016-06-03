@@ -73,7 +73,8 @@ void slither_server::on_socket_init(websocketpp::connection_hdl, boost::asio::ip
 
 void slither_server::on_open(connection_hdl hdl) {
     auto snake = m_world.create_snake();
-    m_players[hdl] = snake;
+    m_world.add_snake(snake);
+    m_players[hdl] = snake->id;
 
     m_endpoint.send_binary(hdl, m_init);
     // TODO: send sectors packets
@@ -83,7 +84,9 @@ void slither_server::on_open(connection_hdl hdl) {
 }
 
 void slither_server::on_close(connection_hdl hdl) {
+    auto id = m_players[hdl];
     m_players.erase(hdl);
+    m_world.remove_snake(id);
 }
 
 packet_init slither_server::build_init_packet() {

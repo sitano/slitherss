@@ -3,12 +3,12 @@
 #include <iostream>
 #include <cmath>
 
-std::shared_ptr<snake> world::create_snake() {
+snake::ptr world::create_snake() {
     m_lastSnakeId ++;
 
     uint32_t half_radius = game_radius / 2;
 
-    auto s = new snake();
+    auto s = std::make_shared<snake>();
     s->id = m_lastSnakeId;
     s->name = "";
     s->color = static_cast<uint8_t>(9 + next_random(21 - 9 + 1));
@@ -17,6 +17,8 @@ std::shared_ptr<snake> world::create_snake() {
     s->speed = snake::base_move_speed;
 
     s->fullness = 0.0f;
+
+    // todo: reserve snake.parts at least for sizeof(snake) bytes
 
     const int len = 2 + next_random(10);
     for (int i = 0; i < len; ++ i) {
@@ -30,7 +32,7 @@ std::shared_ptr<snake> world::create_snake() {
         s->y += cosf(angle) * snake::move_step_distance / 2;
     }
 
-    return std::shared_ptr<snake>(s);
+    return s;
 }
 
 void world::init_random() {
@@ -52,9 +54,44 @@ void world::tick(long dt) {
     if (virtual_frames > 0) {
         m_ticks -= virtual_frames * virtual_frame_time_ms;
         m_virtual_frames += virtual_frames;
+
+        tick_snakes(dt);
+    }
+}
+
+void world::tick_snakes(long dt) {
+    for (auto pair: m_snakes) {
+        if (pair.second->tick(dt)) {
+            m_changes.push_back(pair.second.get());
+        }
     }
 }
 
 void world::init() {
     init_random();
+    // todo: init sectors
 }
+
+void world::add_snake(snake::ptr ptr) {
+    m_snakes.insert({ptr->id, ptr});
+}
+
+void world::remove_snake(snake::snake_id_t id) {
+    m_snakes.erase(id);
+}
+
+snake::ptr world::get_snake(snake::snake_id_t id) {
+    return m_snakes[id];
+}
+
+void world::get_changes() {
+
+}
+
+void world::flush_changes() {
+    m_changes.clear();
+}
+
+
+
+
