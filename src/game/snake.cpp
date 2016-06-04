@@ -36,7 +36,7 @@ bool snake::tick(long dt) {
         // move head
         body& head = parts[0];
         body prev = head;
-
+        // todo: check angles
         head.x += cos(angle) * move_dist;
         head.y += sin(angle) * move_dist;
         for (size_t i = 1; i < len && i < parts_skip_count; ++ i) {

@@ -77,8 +77,9 @@ void slither_server::broadcast_updates() {
 
             if (flags & change_pos) {
                 // todo: do we need float pos?
-                m_endpoint.send_binary(hdl, packet_move_rel {
-                        id, static_cast<uint16_t>(ptr->get_head_x()), static_cast<uint16_t>(ptr->get_head_y()) });
+                m_endpoint.send_binary(hdl, packet_move_rel { id,
+                        static_cast<int8_t>(ptr->get_head_dx()),
+                        static_cast<int8_t>(ptr->get_head_dy()) });
             }
 
             if (flags & (~change_pos)) {

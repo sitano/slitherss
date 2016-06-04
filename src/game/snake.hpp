@@ -56,6 +56,8 @@ struct snake : std::enable_shared_from_this<snake> {
 
     inline float get_head_x() const { return parts[0].x; }
     inline float get_head_y() const { return parts[0].y; }
+    inline float get_head_dx() const { return parts[0].x - parts[1].x; }
+    inline float get_head_dy() const { return parts[0].y - parts[1].y; }
 
     std::shared_ptr<snake> getptr();
 

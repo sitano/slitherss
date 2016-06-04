@@ -17,19 +17,22 @@ snake::ptr world::create_snake() {
     uint16_t x = game_radius + next_random(game_radius) - half_radius;
     uint16_t y = game_radius + next_random(game_radius) - half_radius;
     // todo: reserve snake.parts at least for sizeof(snake) bytes
-
+    // todo: fix angles
+    float angle = world::f_2pi * next_randomf();
     const int len = 2 + next_random(10);
     for (int i = 0; i < len; ++ i) {
         s->parts.push_back(body { 1.0f * x, 1.0f * y });
 
-        float angle = world::pi / 8.0f - world::pi / 4.0f * next_random() / RAND_MAX;
-        s->angle = angle;
-        s->wangle = angle;
+        x += cosf(angle) * snake::move_step_distance / 2;
+        y += sinf(angle) * snake::move_step_distance / 2;
 
-        x += sinf(angle) * snake::move_step_distance / 2;
-        y += cosf(angle) * snake::move_step_distance / 2;
+        std::cout << "x = " << x << " y = " << y << std::endl;
     }
 
+    s->angle = normalize_angle(angle + f_pi);
+    s->wangle = normalize_angle(angle + f_pi);
+    std::cout << "angle = " << angle << std::endl;
+    std::cout << "wangle = " << s->wangle << std::endl;
     return s;
 }
 
@@ -39,6 +42,10 @@ void world::init_random() {
 
 int world::next_random() {
     return std::rand();
+}
+
+float world::next_randomf() {
+    return 1.0f * std::rand() / RAND_MAX;
 }
 
 template<typename T>

@@ -17,6 +17,7 @@ public:
 
     void init_random();
     int next_random();
+    float next_randomf();
     template <typename T> T next_random(T base);
 
     typedef std::unordered_map<snake::snake_id_t, std::shared_ptr<snake>> snakes;
@@ -42,8 +43,8 @@ public:
 
     static const uint8_t protocol_version = 8;
 
-    static constexpr float pi = 3.14159265358979323846f;
-    static constexpr float pi_mul_2 = 2.0f * 3.14159265358979323846f;
+    static constexpr float f_pi = 3.14159265358979323846f;
+    static constexpr float f_2pi = 2.0f * f_pi;
 
 private:
 
