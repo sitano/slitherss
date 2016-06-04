@@ -6,11 +6,11 @@ bool snake::tick(long dt) {
 
     ticks += dt;
 
-    const long speed_step_time = static_cast<long>(speed / move_step_distance);
+    const long speed_step_time = static_cast<long>(1000.0 * move_step_distance / speed);
     if (ticks >= speed_step_time) {
         ticks -= speed_step_time;
 
-        float timef = ticks / 1000.0f;
+        const float timef = ticks / 1000.0f;
         if (angle != wangle) {
             float rotation = base_rotation_speed * timef;
             float dAngle = normalize_angle(wangle - angle);

@@ -6,9 +6,9 @@
 snake::ptr world::create_snake() {
     m_lastSnakeId ++;
 
-    uint32_t half_radius = game_radius / 2;
+    const uint32_t half_radius = game_radius / 2;
 
-    auto s = std::make_shared<snake>();
+    const auto s = std::make_shared<snake>();
     s->id = m_lastSnakeId;
     s->name = "";
     s->color = static_cast<uint8_t>(9 + next_random(21 - 9 + 1));
@@ -50,12 +50,13 @@ T world::next_random(T base) {
 
 void world::tick(long dt) {
     m_ticks += dt;
-    long virtual_frames = m_ticks / virtual_frame_time_ms;
+    const long virtual_frames = m_ticks / virtual_frame_time_ms;
     if (virtual_frames > 0) {
-        m_ticks -= virtual_frames * virtual_frame_time_ms;
-        m_virtual_frames += virtual_frames;
+        const long virtual_frames_time = virtual_frames * virtual_frame_time_ms;
+        tick_snakes(virtual_frames_time);
 
-        tick_snakes(dt);
+        m_ticks -= virtual_frames_time;
+        m_virtual_frames += virtual_frames;
     }
 }
 
@@ -77,20 +78,31 @@ void world::add_snake(snake::ptr ptr) {
 }
 
 void world::remove_snake(snake::snake_id_t id) {
+    flush_changes(id);
     m_snakes.erase(id);
 }
 
-snake::ptr world::get_snake(snake::snake_id_t id) {
-    return m_snakes[id];
+world::snakes::iterator world::get_snake(snake::snake_id_t id) {
+    return m_snakes.find(id);
 }
 
-void world::get_changes() {
-
+std::vector<snake *>& world::get_changes() {
+    return m_changes;
 }
 
 void world::flush_changes() {
     m_changes.clear();
 }
+
+void world::flush_changes(snake::snake_id_t id) {
+    for (auto ptr = m_changes.begin(); ptr != m_changes.end(); ++ ptr) {
+        if ((*ptr)->id == id) {
+            m_changes.erase(ptr);
+        }
+    }
+}
+
+
 
 
 

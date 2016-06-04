@@ -18,6 +18,7 @@ public:
         connection_ptr con = get_con_from_hdl(hdl, ec);
         if (ec) { return; }
 
+        // todo make sure buf allocation happens on a stack
         std::size_t len = packet.get_size();
         boost::asio::streambuf buf(len);
         buf.prepare(len);

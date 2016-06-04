@@ -37,23 +37,16 @@ void slither_server::run(uint16_t port) {
     }
 }
 
-void slither_server::next_tick(time_point last) {
+void slither_server::next_tick(long last) {
     m_last_time_point = last;
-    auto diff = std::chrono::duration_cast<milliseconds>(std::chrono::steady_clock::now() - last);
-    auto diff2 = timer_interval_ms - diff;
     m_timer = m_endpoint.set_timer(
-        std::max(0L, diff2.count()),
-        websocketpp::lib::bind(
-            &slither_server::on_timer,
-            this,
-            websocketpp::lib::placeholders::_1
-        )
-    );
+        std::max(0L, timer_interval_ms - (get_now_tp() - last)),
+        bind(&slither_server::on_timer, this, _1));
 }
 
 void slither_server::on_timer(websocketpp::lib::error_code const & ec) {
-    time_point now = get_now_tp();
-    milliseconds interval = std::chrono::duration_cast<milliseconds>(now - m_last_time_point);
+    const long now = get_now_tp();
+    const long dt = now - m_last_time_point;
 
     if (ec) {
         m_endpoint.get_alog().write(websocketpp::log::alevel::app,
@@ -61,9 +54,46 @@ void slither_server::on_timer(websocketpp::lib::error_code const & ec) {
         return;
     }
 
-    m_world.tick(interval.count());
+    m_world.tick(dt);
+    broadcast_updates();
 
     next_tick(now);
+}
+
+void slither_server::broadcast_updates() {
+    for (auto ptr: m_world.get_changes()) {
+        const snake::snake_id_t id = ptr->id;
+        const uint8_t flags = ptr->update;
+
+        if (flags) {
+            const auto hdl_i = m_snakes.find(id);
+            if (hdl_i == m_snakes.end()) {
+                m_endpoint.get_alog().write(websocketpp::log::alevel::app,
+                    "Failed to locate snake session " + std::to_string(id));
+                continue;
+            }
+
+            const connection_hdl hdl = hdl_i->second;
+
+            if (flags & change_pos) {
+                // todo: do we need float pos?
+                m_endpoint.send_binary(hdl, packet_move {
+                        id, static_cast<uint16_t>(ptr->x), static_cast<uint16_t>(ptr->y) });
+            }
+
+            if (flags & change_angle) {
+                // todo std::cout << "changed angle";
+            }
+
+            if (flags & change_speed) {
+                // todo std::cout << "changed speed";
+            }
+        }
+
+        ptr->flush();
+    }
+
+    m_world.flush_changes();
 }
 
 void slither_server::on_socket_init(websocketpp::connection_hdl, boost::asio::ip::tcp::socket & s) {
@@ -72,21 +102,26 @@ void slither_server::on_socket_init(websocketpp::connection_hdl, boost::asio::ip
 }
 
 void slither_server::on_open(connection_hdl hdl) {
-    auto snake = m_world.create_snake();
-    m_world.add_snake(snake);
-    m_players[hdl] = snake->id;
+    const auto ptr = m_world.create_snake();
+    m_world.add_snake(ptr);
+
+    m_sessions[hdl] = ptr->id;
+    m_snakes[ptr->id] = hdl;
 
     m_endpoint.send_binary(hdl, m_init);
     // TODO: send sectors packets
     // TODO: send food packets
     // send snake
-    m_endpoint.send_binary(hdl, packet_add_snake(snake));
+    m_endpoint.send_binary(hdl, packet_add_snake(ptr));
 }
 
 void slither_server::on_close(connection_hdl hdl) {
-    auto id = m_players[hdl];
-    m_players.erase(hdl);
-    m_world.remove_snake(id);
+    const auto ptr = m_sessions.find(hdl);
+    if (ptr != m_sessions.end()) {
+        m_sessions.erase(ptr->first);
+        m_snakes.erase(ptr->second);
+        m_world.remove_snake(ptr->second);
+    }
 }
 
 packet_init slither_server::build_init_packet() {
@@ -111,8 +146,11 @@ packet_init slither_server::build_init_packet() {
     return init;
 }
 
-slither_server::time_point slither_server::get_now_tp() {
-    return std::chrono::steady_clock::now();
+long slither_server::get_now_tp() {
+    using namespace std::chrono;
+    return duration_cast<milliseconds>(steady_clock::now().time_since_epoch()).count();
 }
+
+
 
 

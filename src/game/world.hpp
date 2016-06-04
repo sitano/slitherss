@@ -19,11 +19,16 @@ public:
     int next_random();
     template <typename T> T next_random(T base);
 
+    typedef std::unordered_map<snake::snake_id_t, std::shared_ptr<snake>> snakes;
     void add_snake(snake::ptr ptr);
     void remove_snake(snake::snake_id_t id);
-    snake::ptr get_snake(snake::snake_id_t id);
+    snakes::iterator get_snake(snake::snake_id_t id);
 
-    void get_changes();
+    std::vector<snake *>& get_changes();
+
+    // before calling this, snake must be flushed()
+    void flush_changes(snake::snake_id_t id);
+    // before calling this, all snakes must be flushed()
     void flush_changes();
 
     // world
@@ -45,7 +50,7 @@ private:
     void tick_snakes(long dt);
 
 private:
-    std::unordered_map<snake::snake_id_t, std::shared_ptr<snake>> m_snakes;
+    snakes m_snakes;
     std::vector<sector> m_sectors;
     std::vector<snake *> m_changes;
 
