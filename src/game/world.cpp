@@ -9,7 +9,7 @@ snake::ptr world::create_snake() {
     const auto s = std::make_shared<snake>();
     s->id = m_lastSnakeId;
     s->name = "";
-    s->color = static_cast<uint8_t>(9 + next_random(21 - 9 + 1));
+    s->skin = static_cast<uint8_t>(9 + next_random(21 - 9 + 1));
     s->speed = snake::base_move_speed;
     s->fullness = 0;
 

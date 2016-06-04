@@ -5,7 +5,7 @@
 
 struct packet_inc : public packet_base {
     packet_inc() : packet_base(packet_t_inc) {}
-    explicit packet_inc(packet_t t) : packet_base(t) {}
+    explicit packet_inc(out_packet_t t) : packet_base(t) {}
 
     uint16_t snakeId = 0; // 3-4, int16, Snake id
     uint16_t x = 0; // 5-6, int16, x

@@ -17,6 +17,7 @@ struct body {
     float x;
     float y;
 
+    // todo: maybe we could have it int and relative coords
     inline void from(const body& p) {
         x = p.x;
         y = p.y;
@@ -34,7 +35,7 @@ struct snake : std::enable_shared_from_this<snake> {
 
     snake_id_t id;
 
-    uint8_t color;
+    uint8_t skin;
     uint8_t update;
     bool acceleration;
 

@@ -6,15 +6,14 @@
 #include <websocketpp/server.hpp>
 
 typedef websocketpp::connection_hdl connection_hdl;
+typedef websocketpp::frame::opcode::value opcode;
+typedef websocketpp::lib::error_code error_code;
 
 class server : public websocketpp::server<slither_server_config> {
 public:
 
     template <typename T>
-    void send(connection_hdl hdl, T packet,
-              websocketpp::frame::opcode::value op,
-              websocketpp::lib::error_code & ec) {
-
+    void send(connection_hdl hdl, T packet, opcode op, error_code & ec) {
         connection_ptr con = get_con_from_hdl(hdl, ec);
         if (ec) { return; }
 
@@ -30,18 +29,16 @@ public:
     }
 
     template <typename T>
-    void send_binary(connection_hdl hdl, T packet,
-              websocketpp::lib::error_code & ec) {
-
-        send(hdl, packet, websocketpp::frame::opcode::binary, ec);
+    void send_binary(connection_hdl hdl, T packet, error_code & ec) {
+        send(hdl, packet, opcode::binary, ec);
     }
 
     template <typename T>
     void send_binary(connection_hdl hdl, T packet) {
-        websocketpp::lib::error_code ec;
+        error_code ec;
         send_binary(hdl, packet, ec);
         if (ec) {
-            get_alog().write(websocketpp::log::alevel::app, "Write Error: " + ec.message());
+            get_alog().write(alevel::app, "Write Error: " + ec.message());
         }
     }
 };

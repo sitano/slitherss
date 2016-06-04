@@ -4,6 +4,9 @@
 #include <websocketpp/config/asio_no_tls.hpp>
 #include <websocketpp/extensions/permessage_deflate/enabled.hpp>
 
+using websocketpp::log::alevel;
+using websocketpp::log::elevel;
+
 struct slither_server_config : public websocketpp::config::asio {
     // pull default settings from our core config
     typedef websocketpp::config::asio core;

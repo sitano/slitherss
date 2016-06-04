@@ -21,6 +21,7 @@ public:
     template <typename T> T next_random(T base);
 
     typedef std::unordered_map<snake::snake_id_t, std::shared_ptr<snake>> snakes;
+
     void add_snake(snake::ptr ptr);
     void remove_snake(snake::snake_id_t id);
     snakes::iterator get_snake(snake::snake_id_t id);
@@ -51,6 +52,7 @@ private:
     void tick_snakes(long dt);
 
 private:
+    // todo: reserve to collections
     snakes m_snakes;
     std::vector<sector> m_sectors;
     std::vector<snake *> m_changes;
@@ -59,6 +61,7 @@ private:
     // todo pools
     // todo sorted checker
 
+    // todo manage overflow, reuse old?
     uint16_t m_lastSnakeId = 0;
     long m_ticks = 0;
     uint32_t m_virtual_frames = 0;

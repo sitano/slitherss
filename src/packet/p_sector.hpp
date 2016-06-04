@@ -4,7 +4,7 @@
 #include "p_base.hpp"
 
 struct packet_sector : public packet_base {
-    explicit packet_sector(packet_t t) : packet_base(t) {}
+    explicit packet_sector(out_packet_t t) : packet_base(t) {}
 
     uint8_t x = 0;  // 3, int8, x-coordinate of the sector
     uint8_t y = 0; // 4, int8, y-coordinate of the sector

@@ -2,9 +2,9 @@
 
 slither_server::slither_server() {
     // set up access channels to only log interesting things
-    m_endpoint.clear_access_channels(websocketpp::log::alevel::all);
-    m_endpoint.set_access_channels(websocketpp::log::alevel::access_core);
-    m_endpoint.set_access_channels(websocketpp::log::alevel::app);
+    m_endpoint.clear_access_channels(alevel::all);
+    m_endpoint.set_access_channels(alevel::access_core);
+    m_endpoint.set_access_channels(alevel::app);
 
     // Initialize the Asio transport policy
     m_endpoint.init_asio();
@@ -14,6 +14,7 @@ slither_server::slither_server() {
     m_endpoint.set_socket_init_handler(bind(&slither_server::on_socket_init, this, ::_1, ::_2));
 
     m_endpoint.set_open_handler(bind(&slither_server::on_open, this, _1));
+    m_endpoint.set_message_handler(bind(&slither_server::on_message, this, _1, _2));
     m_endpoint.set_close_handler(bind(&slither_server::on_close, this, _1));
 }
 
@@ -44,7 +45,7 @@ void slither_server::next_tick(long last) {
         bind(&slither_server::on_timer, this, _1));
 }
 
-void slither_server::on_timer(websocketpp::lib::error_code const & ec) {
+void slither_server::on_timer(error_code const & ec) {
     const long now = get_now_tp();
     const long dt = now - m_last_time_point;
 
@@ -66,8 +67,8 @@ void slither_server::broadcast_updates() {
         const uint8_t flags = ptr->update;
 
         if (flags) {
-            const auto hdl_i = m_snakes.find(id);
-            if (hdl_i == m_snakes.end()) {
+            const auto hdl_i = m_connections.find(id);
+            if (hdl_i == m_connections.end()) {
                 m_endpoint.get_alog().write(websocketpp::log::alevel::app,
                     "Failed to locate snake session " + std::to_string(id));
                 continue;
@@ -79,7 +80,7 @@ void slither_server::broadcast_updates() {
                 // todo: do we need float pos?
                 m_endpoint.send_binary(hdl, packet_move_rel { id,
                         static_cast<int8_t>(ptr->get_head_dx()),
-                        static_cast<int8_t>(ptr->get_head_dy()) });
+                        static_cast<int8_t>(ptr->get_head_dy()) }); // todo: time
             }
 
             if (flags & (~change_pos)) {
@@ -94,7 +95,7 @@ void slither_server::broadcast_updates() {
                     rot.snakeSpeed = ptr->speed / 32.0f;
                 }
 
-                m_endpoint.send_binary(hdl, rot);
+                m_endpoint.send_binary(hdl, rot); // todo: time
             }
         }
 
@@ -113,24 +114,89 @@ void slither_server::on_open(connection_hdl hdl) {
     const auto ptr = m_world.create_snake();
     m_world.add_snake(ptr);
 
-    m_sessions[hdl] = ptr->id;
-    m_snakes[ptr->id] = hdl;
+    m_sessions[hdl] = session(ptr->id);
+    m_connections[ptr->id] = hdl;
 
     m_endpoint.send_binary(hdl, m_init);
     // TODO: send sectors packets
     // TODO: send food packets
     // send snake
-    m_endpoint.send_binary(hdl, packet_add_snake(ptr));
-    m_endpoint.send_binary(hdl, packet_move {
+    m_endpoint.send_binary(hdl, packet_add_snake(ptr)); // todo: time
+    m_endpoint.send_binary(hdl, packet_move { // todo: time
         ptr->id, static_cast<uint16_t>(ptr->get_head_x()), static_cast<uint16_t>(ptr->get_head_y()) });
+}
+
+void slither_server::on_message(connection_hdl hdl, message_ptr ptr) {
+    if (ptr->get_opcode() != opcode::binary) {
+        m_endpoint.get_alog().write(alevel::app,
+            "Unknown incoming message opcode " +
+                    std::to_string(ptr->get_opcode()));
+        return;
+    }
+
+    // reader
+    std::stringstream buf(ptr->get_payload(), std::ios_base::in);
+
+    uint8_t packet_type;
+    buf >> packet_type;
+
+    // len check
+    const size_t len = ptr->get_payload().size();
+    if (len > 255) {
+         m_endpoint.get_alog().write(alevel::app,
+            "Packet '" + std::to_string(packet_type) + "' too big " + std::to_string(len));
+        return;
+    }
+
+    // session obtain
+    const auto ses_i = m_sessions.find(hdl);
+    if (ses_i == m_sessions.end()) {
+        m_endpoint.get_alog().write(alevel::app,
+            "No session, skip packet");
+        return;
+    }
+
+    // last client time manage
+    session &ses = ses_i->second;
+    const long now = get_now_tp();
+    uint16_t interval = static_cast<uint16_t>(now - ses.last_packet_time);
+    ses.last_packet_time = now;
+
+    // parsing
+    if (packet_type == in_packet_t_ping) {
+        m_endpoint.send_binary(hdl, packet_pong(interval));
+        return;
+    } else if (packet_type == in_packet_t_username_skin) {
+        buf >> ses.protocol_version;
+        buf >> ses.skin;
+        buf.str(ses.name);
+
+        if (ses.snake_id > 0) {
+            const auto snake_i = m_world.get_snake(ses.snake_id);
+            if (snake_i->first == ses.snake_id) {
+                snake_i->second->name = ses.name;
+                snake_i->second->skin = ses.skin;
+            }
+        }
+
+        return;
+    } else if (packet_type == in_packet_t_victory_message) {
+        buf >> packet_type; // always 118
+        buf.str(ses.message);
+        return;
+    }
+
+    // todo update snake
+
+    std::cout << "packet " << ptr->get_payload() << " len " << ptr->get_payload().size() << std::endl;
 }
 
 void slither_server::on_close(connection_hdl hdl) {
     const auto ptr = m_sessions.find(hdl);
     if (ptr != m_sessions.end()) {
         m_sessions.erase(ptr->first);
-        m_snakes.erase(ptr->second);
-        m_world.remove_snake(ptr->second);
+        m_connections.erase(ptr->second.snake_id);
+        m_world.remove_snake(ptr->second.snake_id);
     }
 }
 
@@ -160,7 +226,3 @@ long slither_server::get_now_tp() {
     using namespace std::chrono;
     return duration_cast<milliseconds>(steady_clock::now().time_since_epoch()).count();
 }
-
-
-
-

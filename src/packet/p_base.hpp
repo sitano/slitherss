@@ -3,20 +3,27 @@
 
 #include "p_format.hpp"
 
-enum packet_t : uint8_t;
+enum out_packet_t : uint8_t;
 
 struct packet_base {
     uint16_t client_time = 0; // 2 bytes - time since last message from client
-    packet_t packet_type; // 1 byte - packet type
+    out_packet_t packet_type; // 1 byte - packet type
 
     packet_base() = default;
-    explicit packet_base(packet_t t) : packet_type(t) {}
-    packet_base(packet_t t, uint16_t clock) : client_time(clock), packet_type(t) {}
+    explicit packet_base(out_packet_t t) : packet_type(t) {}
+    packet_base(out_packet_t t, uint16_t clock) : client_time(clock), packet_type(t) {}
 
     size_t get_size() { return 3; }
 };
 
-enum packet_t : uint8_t {
+enum in_packet_t : uint8_t {
+    in_packet_t_angle = 0, // 0 - 250
+    in_packet_t_ping = 251,
+    in_packet_t_username_skin = 's',
+    in_packet_t_victory_message = 255
+};
+
+enum out_packet_t : uint8_t {
     packet_t_init = 'a', // Initial setup
     packet_t_rot_ccw_wang_sp = 'E', // Snake rotation counterclockwise (dir wang ?sp)
     packet_t_rot_ccw_wang = 'E', // Snake rotation counterclockwise (dir wang ?sp)
