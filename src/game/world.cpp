@@ -6,30 +6,28 @@
 snake::ptr world::create_snake() {
     m_lastSnakeId ++;
 
-    const uint32_t half_radius = game_radius / 2;
-
     const auto s = std::make_shared<snake>();
     s->id = m_lastSnakeId;
     s->name = "";
     s->color = static_cast<uint8_t>(9 + next_random(21 - 9 + 1));
-    s->x = game_radius + next_random(game_radius) - half_radius;
-    s->y = game_radius + next_random(game_radius) - half_radius;
     s->speed = snake::base_move_speed;
+    s->fullness = 0;
 
-    s->fullness = 0.0f;
-
+    const uint16_t half_radius = game_radius / 2;
+    uint16_t x = game_radius + next_random(game_radius) - half_radius;
+    uint16_t y = game_radius + next_random(game_radius) - half_radius;
     // todo: reserve snake.parts at least for sizeof(snake) bytes
 
     const int len = 2 + next_random(10);
     for (int i = 0; i < len; ++ i) {
-        s->parts.push_back(body { s->x, s->y });
+        s->parts.push_back(body { 1.0f * x, 1.0f * y });
 
         float angle = world::pi / 8.0f - world::pi / 4.0f * next_random() / RAND_MAX;
         s->angle = angle;
         s->wangle = angle;
 
-        s->x += sinf(angle) * snake::move_step_distance / 2;
-        s->y += cosf(angle) * snake::move_step_distance / 2;
+        x += sinf(angle) * snake::move_step_distance / 2;
+        y += cosf(angle) * snake::move_step_distance / 2;
     }
 
     return s;

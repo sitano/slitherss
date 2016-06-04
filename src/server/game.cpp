@@ -77,16 +77,23 @@ void slither_server::broadcast_updates() {
 
             if (flags & change_pos) {
                 // todo: do we need float pos?
-                m_endpoint.send_binary(hdl, packet_move {
-                        id, static_cast<uint16_t>(ptr->x), static_cast<uint16_t>(ptr->y) });
+                m_endpoint.send_binary(hdl, packet_move_rel {
+                        id, static_cast<uint16_t>(ptr->get_head_x()), static_cast<uint16_t>(ptr->get_head_y()) });
             }
 
-            if (flags & change_angle) {
-                // todo std::cout << "changed angle";
-            }
+            if (flags & (~change_pos)) {
+                packet_rotation rot = packet_rotation();
 
-            if (flags & change_speed) {
-                // todo std::cout << "changed speed";
+                if (flags & change_angle) {
+                    rot.ang = ptr->angle;
+                    rot.wang = ptr->wangle;
+                    // not sure but should be ok
+                    rot.snakeSpeed = ptr->speed / 32.0f;
+                } else if (flags & change_speed) {
+                    rot.snakeSpeed = ptr->speed / 32.0f;
+                }
+
+                m_endpoint.send_binary(hdl, rot);
             }
         }
 
@@ -113,6 +120,8 @@ void slither_server::on_open(connection_hdl hdl) {
     // TODO: send food packets
     // send snake
     m_endpoint.send_binary(hdl, packet_add_snake(ptr));
+    m_endpoint.send_binary(hdl, packet_move {
+        ptr->id, static_cast<uint16_t>(ptr->get_head_x()), static_cast<uint16_t>(ptr->get_head_y()) });
 }
 
 void slither_server::on_close(connection_hdl hdl) {

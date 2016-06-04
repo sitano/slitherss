@@ -17,6 +17,11 @@ struct body {
     float x;
     float y;
 
+    inline void from(const body& p) {
+        x = p.x;
+        y = p.y;
+    }
+
     inline void offset(float dx, float dy) {
         x += dx;
         y += dy;
@@ -35,20 +40,23 @@ struct snake : std::enable_shared_from_this<snake> {
 
     std::string name;
 
-    float x;
-    float y;
-
-    float speed;
+    // pixels / seconds, base ~185 [px/s]
+    uint16_t speed;
 
     float angle;
     float wangle;
 
-    float fullness;
+    // 0 - 100, 0 - hungry, 100 - full
+    uint8_t fullness;
 
     std::vector<body> parts;
 
     bool tick(long dt);
     void flush();
+
+    inline float get_head_x() const { return parts[0].x; }
+    inline float get_head_y() const { return parts[0].y; }
+
     std::shared_ptr<snake> getptr();
 
     static constexpr float spangdv = 4.8f;
@@ -60,9 +68,9 @@ struct snake : std::enable_shared_from_this<snake> {
     static constexpr float prey_ang_speed = 0.028f;
     static constexpr float snake_tail_k = 0.43f;
 
-    static const int base_move_speed = 185; // pixel in second (convert:  1000*sp/32)
-    static const int boost_speed = 448; // pixel in second (convert:  1000*sp/32)
-    static const int speed_acceleration = 1000; // pixel in second
+    static const uint16_t base_move_speed = 185; // pixel in second (convert:  1000*sp/32)
+    static const uint16_t boost_speed = 448; // pixel in second (convert:  1000*sp/32)
+    static const uint16_t speed_acceleration = 1000; // pixel in second
     static constexpr float base_rotation_speed = 4.125f; // radian in second (convert:  1000*MAMU/8)
     static constexpr float parts_move_coeff = 0.43f;
 

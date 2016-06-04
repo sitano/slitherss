@@ -20,6 +20,10 @@ struct packet_move_rel : public packet_move {
         packet_type = packet_t_mov_rel;
     }
 
+    packet_move_rel(uint16_t in_snakeId, uint16_t in_x, uint16_t in_y) : packet_move(in_snakeId, in_x, in_y) {
+        packet_type = packet_t_mov_rel;
+    }
+
     // 3-4	int16	Snake id
     // 5	int8	value - 128 + head.x -> x
     // 6	int8	value - 128 + head.y -> y

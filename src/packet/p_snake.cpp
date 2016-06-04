@@ -10,10 +10,10 @@ std::ostream& operator<<(std::ostream & out, const packet_add_snake & p) {
         << write_uint8(0) // unknown
         << write_fp24(s.angle) // eangle radians
         << write_fp16<3>(s.speed / 32.0f) // pixels / second -> pixels / 4 * vfr (8ms)
-        << write_fp24(s.fullness)
+        << write_fp24(s.fullness / 100.0f)
         << write_uint8(s.color)
-        << write_uint24(static_cast<uint24_t>(s.x * 5.0f))
-        << write_uint24(static_cast<uint24_t>(s.y * 5.0f))
+        << write_uint24(s.get_head_x() * 5.0f)
+        << write_uint24(s.get_head_y() * 5.0f)
         << write_string(s.name);
 
     if (!s.parts.empty()) {
