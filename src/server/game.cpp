@@ -90,6 +90,7 @@ void slither_server::broadcast_updates() {
 
             if (flags & (~change_pos)) {
                 packet_rotation rot = packet_rotation();
+                rot.snakeId = id;
 
                 if (flags & change_angle) {
                     rot.ang = ptr->angle;

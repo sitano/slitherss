@@ -40,7 +40,7 @@ template <> ostream_write_value<uint16_t> write_fp16<2>(fixed_point_t v);
 template <> ostream_write_value<uint16_t> write_fp16<3>(fixed_point_t v);
 
 inline ostream_write_value<uint8_t> write_ang8(fixed_point_t v) {
-    return { (uint8_t)(v * M_2PI / 256) };
+    return { (uint8_t)(256 * v / M_2PI) };
 }
 
 ostream_write_value<uint24_t> write_fp24(fixed_point_t v);
