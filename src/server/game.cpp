@@ -128,8 +128,8 @@ void slither_server::on_open(connection_hdl hdl) {
     // send snake
     const auto ses_i = m_sessions.find(hdl);
     send_binary(ses_i, m_init);
-    send_binary(ses_i, packet_add_snake(ptr)); // todo: time
-    send_binary(ses_i, packet_move { // todo: time
+    send_binary(ses_i, packet_add_snake(ptr));
+    send_binary(ses_i, packet_move {
         ptr->id, static_cast<uint16_t>(ptr->get_head_x()), static_cast<uint16_t>(ptr->get_head_y()) });
 }
 

@@ -1,4 +1,5 @@
 #include "p_snake.hpp"
+#include <iostream>
 
 std::ostream& operator<<(std::ostream & out, const packet_add_snake & p) {
     out << static_cast<packet_base>(p);
@@ -17,12 +18,16 @@ std::ostream& operator<<(std::ostream & out, const packet_add_snake & p) {
         << write_string(s.name);
 
     if (!s.parts.empty()) {
-        const body &head = s.parts.front();
-        float hx = head.x;
-        float hy = head.y;
+        // from tail to the head
+        const auto taili = s.parts.crbegin();
+        // last element is a snake position (skip it)
+        const auto headi = --s.parts.crend();
+
+        float hx = taili->x;
+        float hy = taili->y;
         out << write_uint24(static_cast<uint24_t>(hx * 5.0f))
             << write_uint24(static_cast<uint24_t>(hy * 5.0f));
-        for (auto ptr = (++ s.parts.cbegin()); ptr != s.parts.cend(); ++ ptr) {
+        for (auto ptr = taili + 1; ptr != headi; ++ ptr) {
             const float bpx = ptr->x - hx;
             const float bpy = ptr->y - hy;
 

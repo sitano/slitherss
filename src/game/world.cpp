@@ -19,12 +19,12 @@ snake::ptr world::create_snake() {
     // todo: reserve snake.parts at least for sizeof(snake) bytes
     // todo: fix angles
     float angle = world::f_2pi * next_randomf();
-    const int len = 2 + next_random(10);
+    const int len = 1 /* head */ + 2 /* body min = 2 */ + next_random(10);
     for (int i = 0; i < len; ++ i) {
         s->parts.push_back(body { 1.0f * x, 1.0f * y });
 
-        x += cosf(angle) * snake::move_step_distance / 2;
-        y += sinf(angle) * snake::move_step_distance / 2;
+        x += cosf(angle) * snake::move_step_distance;
+        y += sinf(angle) * snake::move_step_distance;
 
         std::cout << "x = " << x << " y = " << y << std::endl;
     }
