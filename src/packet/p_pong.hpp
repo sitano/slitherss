@@ -4,7 +4,8 @@
 #include "p_base.hpp"
 
 struct packet_pong : public packet_base {
-    packet_pong(uint16_t clock) : packet_base(packet_t_pong, clock) {}
+    packet_pong() : packet_base(packet_t_pong) {}
+    explicit packet_pong(uint16_t clock) : packet_base(packet_t_pong, clock) {}
 };
 
 #endif //SLITHER_PACKET_PONG_HPP

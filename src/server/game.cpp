@@ -123,11 +123,11 @@ void slither_server::on_open(connection_hdl hdl) {
     m_sessions[hdl] = session(ptr->id, get_now_tp());
     m_connections[ptr->id] = hdl;
 
+    m_endpoint.send_binary(hdl, m_init);
     // TODO: send sectors packets
     // TODO: send food packets
     // send snake
     const auto ses_i = m_sessions.find(hdl);
-    send_binary(ses_i, m_init);
     send_binary(ses_i, packet_add_snake(ptr));
     send_binary(ses_i, packet_move {
         ptr->id, static_cast<uint16_t>(ptr->get_head_x()), static_cast<uint16_t>(ptr->get_head_y()) });
@@ -163,60 +163,57 @@ void slither_server::on_message(connection_hdl hdl, message_ptr ptr) {
     }
 
     // last client time manage
-    session &ses = ses_i->second;
-    const long now = get_now_tp();
-    const uint16_t interval = static_cast<uint16_t>(now - ses.last_packet_time);
-    ses.last_packet_time = now;
+    session &ss = ses_i->second;
 
     // parsing
     if (packet_type <= 250 && len == 1) {
         // in_packet_t_angle, [0 - 250]
         const float angle = world::f_pi * packet_type / 125.0f;
-        do_snake(ses.snake_id, [=](snake *s){ s->wangle = angle; });
+        do_snake(ss.snake_id, [=](snake *s){ s->wangle = angle; });
         return;
     }
 
     switch (packet_type) {
         case in_packet_t_ping:
-            m_endpoint.send_binary(hdl, packet_pong(interval));
+            send_binary(ses_i, packet_pong());
             break;
 
         case in_packet_t_username_skin:
-            buf >> ses.protocol_version;
-            buf >> ses.skin;
-            buf.str(ses.name);
+            buf >> ss.protocol_version;
+            buf >> ss.skin;
+            buf.str(ss.name);
 
-            do_snake(ses.snake_id, [&ses](snake *s){
-                s->name = ses.name;
-                s->skin = ses.skin;
+            do_snake(ss.snake_id, [&ss](snake *s){
+                s->name = ss.name;
+                s->skin = ss.skin;
             });
             break;
 
         case in_packet_t_victory_message:
             buf >> packet_type; // always 118
-            buf.str(ses.message);
+            buf.str(ss.message);
             break;
 
         case in_packet_t_rot_left:
             buf >> packet_type; // vfrb (virtual frames count) [0 - 127] of turning into the right direction
             // snake.eang -= mamu * v * snake.scang * snake.spang)
              m_endpoint.get_alog().write(alevel::app,
-                "rotate ccw, snake " + std::to_string(ses.snake_id) + ", vfrb " + std::to_string(packet_type));
+                "rotate ccw, snake " + std::to_string(ss.snake_id) + ", vfrb " + std::to_string(packet_type));
             break;
 
         case in_packet_t_rot_right:
             buf >> packet_type; // vfrb (virtual frames count) [0 - 127] of turning into the right direction
             // snake.eang += mamu * v * snake.scang * snake.spang)
             m_endpoint.get_alog().write(alevel::app,
-                "rotate cw, snake " + std::to_string(ses.snake_id) + ", vfrb " + std::to_string(packet_type));
+                "rotate cw, snake " + std::to_string(ss.snake_id) + ", vfrb " + std::to_string(packet_type));
             break;
 
         case in_packet_t_start_acc:
-            do_snake(ses.snake_id, [](snake *s){ s->acceleration = true; });
+            do_snake(ss.snake_id, [](snake *s){ s->acceleration = true; });
             break;
 
         case in_packet_t_stop_acc:
-            do_snake(ses.snake_id, [](snake *s){ s->acceleration = false; });
+            do_snake(ss.snake_id, [](snake *s){ s->acceleration = false; });
             break;
 
         default:
