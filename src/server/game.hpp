@@ -47,6 +47,8 @@ private:
     long get_now_tp();
     void next_tick(long last);
 
+    void do_snake(snake::snake_id_t id, std::function<void(snake*)> f);
+
 private:
     typedef std::map<connection_hdl, session, std::owner_less<connection_hdl>> sessions;
     typedef std::unordered_map<snake::snake_id_t, connection_hdl> connections;

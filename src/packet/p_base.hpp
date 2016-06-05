@@ -17,10 +17,14 @@ struct packet_base {
 };
 
 enum in_packet_t : uint8_t {
-    in_packet_t_angle = 0, // 0 - 250
-    in_packet_t_ping = 251,
-    in_packet_t_username_skin = 's',
-    in_packet_t_victory_message = 255
+    in_packet_t_angle = 0, // 0 - 250 mouseMove: the input angle. Counter-clockwise, (0 and 250 point right, 62 points up)
+    in_packet_t_ping = 251, // Pings the server. Sent every 250ms, but not before a pong has been received after the last ping.
+    in_packet_t_rot_left = 108, // keyDown, keyUp (left-arrow or right-arrow): start/stop turning left or right
+    in_packet_t_rot_right = 114, // keyDown, keyUp (left-arrow or right-arrow): start/stop turning left or right
+    in_packet_t_start_acc = 253, // mouseDown, keyDown (space or up-arrow): the snake is entering speed mode
+    in_packet_t_stop_acc = 254, // mouseUp, keyUp (space or up-arrow): the snake is leaving speed mode
+    in_packet_t_username_skin = 's', // 115, Packet SetUsernameAndSkin
+    in_packet_t_victory_message = 255, // Packet SaveVictoryMessage
 };
 
 enum out_packet_t : uint8_t {

@@ -151,8 +151,7 @@ void slither_server::on_message(connection_hdl hdl, message_ptr ptr) {
     // session obtain
     const auto ses_i = m_sessions.find(hdl);
     if (ses_i == m_sessions.end()) {
-        m_endpoint.get_alog().write(alevel::app,
-            "No session, skip packet");
+        m_endpoint.get_alog().write(alevel::app, "No session, skip packet");
         return;
     }
 
@@ -163,32 +162,62 @@ void slither_server::on_message(connection_hdl hdl, message_ptr ptr) {
     ses.last_packet_time = now;
 
     // parsing
-    if (packet_type == in_packet_t_ping) {
-        m_endpoint.send_binary(hdl, packet_pong(interval));
-        return;
-    } else if (packet_type == in_packet_t_username_skin) {
-        buf >> ses.protocol_version;
-        buf >> ses.skin;
-        buf.str(ses.name);
-
-        if (ses.snake_id > 0) {
-            const auto snake_i = m_world.get_snake(ses.snake_id);
-            if (snake_i->first == ses.snake_id) {
-                snake_i->second->name = ses.name;
-                snake_i->second->skin = ses.skin;
-            }
-        }
-
-        return;
-    } else if (packet_type == in_packet_t_victory_message) {
-        buf >> packet_type; // always 118
-        buf.str(ses.message);
+    if (packet_type <= 250 && len == 1) {
+        // in_packet_t_angle, [0 - 250]
+        const float angle = world::f_pi * packet_type / 125.0f;
+        do_snake(ses.snake_id, [=](snake *s){ s->wangle = angle; });
         return;
     }
 
-    // todo update snake
+    switch (packet_type) {
+        case in_packet_t_ping:
+            m_endpoint.send_binary(hdl, packet_pong(interval));
+            break;
 
-    std::cout << "packet " << ptr->get_payload() << " len " << ptr->get_payload().size() << std::endl;
+        case in_packet_t_username_skin:
+            buf >> ses.protocol_version;
+            buf >> ses.skin;
+            buf.str(ses.name);
+
+            do_snake(ses.snake_id, [&ses](snake *s){
+                s->name = ses.name;
+                s->skin = ses.skin;
+            });
+            break;
+
+        case in_packet_t_victory_message:
+            buf >> packet_type; // always 118
+            buf.str(ses.message);
+            break;
+
+        case in_packet_t_rot_left:
+            buf >> packet_type; // vfrb (virtual frames count) [0 - 127] of turning into the right direction
+            // snake.eang -= mamu * v * snake.scang * snake.spang)
+             m_endpoint.get_alog().write(alevel::app,
+                "rotate ccw, snake " + std::to_string(ses.snake_id) + ", vfrb " + std::to_string(packet_type));
+            break;
+
+        case in_packet_t_rot_right:
+            buf >> packet_type; // vfrb (virtual frames count) [0 - 127] of turning into the right direction
+            // snake.eang += mamu * v * snake.scang * snake.spang)
+            m_endpoint.get_alog().write(alevel::app,
+                "rotate cw, snake " + std::to_string(ses.snake_id) + ", vfrb " + std::to_string(packet_type));
+            break;
+
+        case in_packet_t_start_acc:
+            do_snake(ses.snake_id, [](snake *s){ s->acceleration = true; });
+            break;
+
+        case in_packet_t_stop_acc:
+            do_snake(ses.snake_id, [](snake *s){ s->acceleration = false; });
+            break;
+
+        default:
+            m_endpoint.get_alog().write(alevel::app,
+                "Unknown packet type " + std::to_string(packet_type) +
+                ", len " + std::to_string(ptr->get_payload().size()));
+            break;
+    }
 }
 
 void slither_server::on_close(connection_hdl hdl) {
@@ -226,3 +255,13 @@ long slither_server::get_now_tp() {
     using namespace std::chrono;
     return duration_cast<milliseconds>(steady_clock::now().time_since_epoch()).count();
 }
+
+void slither_server::do_snake(snake::snake_id_t id, std::function<void(snake *)> f) {
+    if (id > 0) {
+        const auto snake_i = m_world.get_snake(id);
+        if (snake_i->first == id) {
+            f(snake_i->second.get());
+        }
+    }
+}
+
