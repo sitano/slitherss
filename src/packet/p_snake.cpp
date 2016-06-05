@@ -6,9 +6,9 @@ std::ostream& operator<<(std::ostream & out, const packet_add_snake & p) {
     const snake & s= p.s.operator*();
 
     out << write_uint16(s.id)
-        << write_fp24(s.angle) // ehang radians
+        << write_ang24(s.angle) // ehang radians
         << write_uint8(0) // unknown
-        << write_fp24(s.angle) // eangle radians
+        << write_ang24(s.angle) // eangle radians
         << write_fp16<3>(s.speed / 32.0f) // pixels / second -> pixels / 4 * vfr (8ms)
         << write_fp24(s.fullness / 100.0f)
         << write_uint8(s.skin)

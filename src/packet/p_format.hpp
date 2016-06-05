@@ -43,6 +43,10 @@ inline ostream_write_value<uint8_t> write_ang8(fixed_point_t v) {
     return { (uint8_t)(256 * v / M_2PI) };
 }
 
+inline ostream_write_value<uint24_t> write_ang24(fixed_point_t v) {
+    return { (uint24_t)(0xFFFFFF * v / M_2PI) };
+}
+
 ostream_write_value<uint24_t> write_fp24(fixed_point_t v);
 ostream_write_value<const std::string &> write_string(const std::string &s);
 
