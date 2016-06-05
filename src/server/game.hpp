@@ -55,7 +55,10 @@ private:
 
     template <typename T>
     void send_binary(sessions::iterator s, T packet) {
-        packet.client_time = static_cast<uint16_t>(get_now_tp() - s->second.last_packet_time);
+        const long now = get_now_tp();
+        const uint16_t interval = static_cast<uint16_t>(now - s->second.last_packet_time);
+        s->second.last_packet_time = now;
+        packet.client_time = interval;
         m_endpoint.send_binary(s->first, packet);
     }
 
