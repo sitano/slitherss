@@ -12,7 +12,7 @@ struct packet_move : public packet_base {
     uint16_t x = 0; // 5-6, int16, x
     uint16_t y = 0; // 7-8, int16, y
 
-    size_t get_size() { return 9; }
+    constexpr size_t get_size() const noexcept { return 9; }
 };
 
 struct packet_move_rel : public packet_base {
@@ -28,7 +28,7 @@ struct packet_move_rel : public packet_base {
     uint8_t dx = 0; // 5	int8	value - 128 + head.x -> x
     uint8_t dy = 0; // 6	int8	value - 128 + head.y -> y
 
-    size_t get_size() { return 7; }
+    constexpr size_t get_size() const noexcept { return 7; }
 };
 
 std::ostream& operator<<(std::ostream & out, const packet_move & p);

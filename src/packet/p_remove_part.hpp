@@ -9,7 +9,7 @@ struct packet_remove_part : public packet_base {
     uint16_t snakeId = 0; // 3-4, int16, Snake id
     float fullness = 0.0f; // 5-7, int24, value / 16777215 -> fam
 
-    size_t get_size() { return 8; }
+    constexpr size_t get_size() const noexcept { return 8; }
 };
 
 std::ostream& operator<<(std::ostream & out, const packet_remove_part & p);

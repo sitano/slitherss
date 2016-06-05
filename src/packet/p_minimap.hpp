@@ -23,7 +23,7 @@ struct packet_minimap : public packet_base {
 
     std::vector<uint8_t> data;
 
-    size_t get_size() {
+    constexpr size_t get_size() const noexcept {
         return 3 + data.size();
     }
 };

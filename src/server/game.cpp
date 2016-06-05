@@ -70,17 +70,22 @@ void slither_server::broadcast_updates() {
             const auto hdl_i = m_connections.find(id);
             if (hdl_i == m_connections.end()) {
                 m_endpoint.get_alog().write(websocketpp::log::alevel::app,
+                    "Failed to locate snake connection " + std::to_string(id));
+                continue;
+            }
+
+            const auto ses_i = m_sessions.find(hdl_i->second);
+            if (ses_i == m_sessions.end()) {
+                m_endpoint.get_alog().write(websocketpp::log::alevel::app,
                     "Failed to locate snake session " + std::to_string(id));
                 continue;
             }
 
-            const connection_hdl hdl = hdl_i->second;
-
             if (flags & change_pos) {
                 // todo: do we need float pos?
-                m_endpoint.send_binary(hdl, packet_move_rel { id,
+                send_binary(ses_i, packet_move_rel { id,
                         static_cast<int8_t>(ptr->get_head_dx()),
-                        static_cast<int8_t>(ptr->get_head_dy()) }); // todo: time
+                        static_cast<int8_t>(ptr->get_head_dy()) });
             }
 
             if (flags & (~change_pos)) {
@@ -95,7 +100,7 @@ void slither_server::broadcast_updates() {
                     rot.snakeSpeed = ptr->speed / 32.0f;
                 }
 
-                m_endpoint.send_binary(hdl, rot); // todo: time
+                send_binary(ses_i, rot);
             }
         }
 
@@ -114,15 +119,16 @@ void slither_server::on_open(connection_hdl hdl) {
     const auto ptr = m_world.create_snake();
     m_world.add_snake(ptr);
 
-    m_sessions[hdl] = session(ptr->id);
+    m_sessions[hdl] = session(ptr->id, get_now_tp());
     m_connections[ptr->id] = hdl;
 
-    m_endpoint.send_binary(hdl, m_init);
     // TODO: send sectors packets
     // TODO: send food packets
     // send snake
-    m_endpoint.send_binary(hdl, packet_add_snake(ptr)); // todo: time
-    m_endpoint.send_binary(hdl, packet_move { // todo: time
+    const auto ses_i = m_sessions.find(hdl);
+    send_binary(ses_i, m_init);
+    send_binary(ses_i, packet_add_snake(ptr)); // todo: time
+    send_binary(ses_i, packet_move { // todo: time
         ptr->id, static_cast<uint16_t>(ptr->get_head_x()), static_cast<uint16_t>(ptr->get_head_y()) });
 }
 
@@ -158,7 +164,7 @@ void slither_server::on_message(connection_hdl hdl, message_ptr ptr) {
     // last client time manage
     session &ses = ses_i->second;
     const long now = get_now_tp();
-    uint16_t interval = static_cast<uint16_t>(now - ses.last_packet_time);
+    const uint16_t interval = static_cast<uint16_t>(now - ses.last_packet_time);
     ses.last_packet_time = now;
 
     // parsing

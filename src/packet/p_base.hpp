@@ -13,7 +13,7 @@ struct packet_base {
     explicit packet_base(out_packet_t t) : packet_type(t) {}
     packet_base(out_packet_t t, uint16_t clock) : client_time(clock), packet_type(t) {}
 
-    size_t get_size() { return 3; }
+    constexpr size_t get_size() const noexcept { return 3; }
 };
 
 enum in_packet_t : uint8_t {

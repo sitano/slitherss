@@ -19,7 +19,7 @@ struct packet_set_food : public packet_base {
      */
     std::vector<food> m_food;
 
-    size_t get_size() { return 3 + m_food.size() * 6; }
+    constexpr size_t get_size() const noexcept { return 3 + m_food.size() * 6; }
 };
 
 // Sent when food is created while in range (because of turbo or the death of a snake).
@@ -35,7 +35,7 @@ struct packet_spawn_food : public packet_base {
      */
     food m_food;
 
-    size_t get_size() { return 3 + 6; }
+    constexpr size_t get_size() const noexcept { return 3 + 6; }
 };
 
 // Sent when natural food spawns while in range.
@@ -51,7 +51,7 @@ struct packet_add_food : public packet_base {
      */
     food m_food;
 
-    size_t get_size() { return 3 + 6; }
+    constexpr size_t get_size() const noexcept { return 3 + 6; }
 };
 
 struct packet_eat_food : public packet_base {
@@ -66,7 +66,7 @@ struct packet_eat_food : public packet_base {
     // 7-8	int16	Eater snake id
     uint16_t snakeId = 0;
 
-    size_t get_size() { return 3 + 6; }
+    constexpr size_t get_size() const noexcept { return 3 + 6; }
 };
 
 std::ostream& operator<<(std::ostream & out, const packet_set_food & p);

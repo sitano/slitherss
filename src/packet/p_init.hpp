@@ -19,7 +19,7 @@ struct packet_init : public packet_base {
     float snake_tail_k = 0.43f; // 23-24, int16, cst (value / 1E3) (snake tail speed ratio ) = 0.43
     uint8_t protocol_version = 8; // 25, int8, protocol_version = Unknown
 
-    size_t get_size() { return 26; }
+    constexpr size_t get_size() const noexcept { return 26; }
 };
 
 std::ostream& operator<<(std::ostream & out, const packet_init & p);

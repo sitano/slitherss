@@ -14,7 +14,7 @@ using websocketpp::lib::placeholders::_2;
 using websocketpp::lib::bind;
 
 struct session {
-    snake::snake_id_t snake_id;
+    snake::snake_id_t snake_id = 0;
     long last_packet_time = 0;
 
     std::string name;
@@ -24,7 +24,7 @@ struct session {
     uint8_t skin = 0; // 0 - 39
 
     session() = default;
-    explicit session(snake::snake_id_t id) : snake_id(id) {}
+    session(snake::snake_id_t id, long now) : snake_id(id), last_packet_time(now) {}
 };
 
 class slither_server {
@@ -52,6 +52,12 @@ private:
 private:
     typedef std::map<connection_hdl, session, std::owner_less<connection_hdl>> sessions;
     typedef std::unordered_map<snake::snake_id_t, connection_hdl> connections;
+
+    template <typename T>
+    void send_binary(sessions::iterator s, T packet) {
+        packet.client_time = static_cast<uint16_t>(get_now_tp() - s->second.last_packet_time);
+        m_endpoint.send_binary(s->first, packet);
+    }
 
     server m_endpoint;
 

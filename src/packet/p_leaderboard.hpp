@@ -27,7 +27,7 @@ struct packet_leaderboard : public packet_base {
     */
     std::vector<std::shared_ptr<snake>> top; // 2 + 3 + 1 + 1 string each
 
-    size_t get_size() {
+    size_t get_size() const noexcept {
         size_t size = 8;
 
         for (const auto &ptr : top) {
