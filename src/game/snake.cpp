@@ -22,7 +22,7 @@ bool snake::tick(long dt) {
             if (fabs(dAngle) < rotation) {
                 angle = wangle;
             } else {
-                angle += rotation * (dAngle > 0 ? 1 : -1);
+                angle += rotation * (dAngle > 0 ? 1.0f : -1.0f);
             }
 
             angle = normalize_angle(angle);
