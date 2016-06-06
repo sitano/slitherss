@@ -25,14 +25,11 @@ snake::ptr world::create_snake() {
 
         x += cosf(angle) * snake::move_step_distance;
         y += sinf(angle) * snake::move_step_distance;
-
-        std::cout << "x = " << x << " y = " << y << std::endl;
     }
 
     s->angle = normalize_angle(angle + f_pi);
     s->wangle = normalize_angle(angle + f_pi);
-    std::cout << "angle = " << angle << std::endl;
-    std::cout << "wangle = " << s->wangle << std::endl;
+
     return s;
 }
 
@@ -108,7 +105,26 @@ void world::flush_changes(snake::snake_id_t id) {
 }
 
 
-
-
-
-
+std::ostream &operator<<(std::ostream &out, const world &w) {
+    return out
+         << "\tgame_radius = " << w.game_radius
+         << "\n\tmax_snake_parts = " << w.max_snake_parts
+         << "\n\tsector_size = " << w.sector_size
+         << "\n\tsector_count_along_edge = " << w.sector_count_along_edge
+         << "\n\tvirtual_frame_time_ms = " << w.virtual_frame_time_ms
+         << "\n\tprotocol_version = " << static_cast<long>(w.protocol_version)
+         << "\n\tspangdv = " << snake::spangdv
+         << "\n\tnsp1 = " << snake::nsp1
+         << "\n\tnsp2 = " << snake::nsp2
+         << "\n\tnsp3 = " << snake::nsp3
+         << "\n\tbase_move_speed = " << snake::base_move_speed
+         << "\n\tboost_speed = " << snake::boost_speed
+         << "\n\tspeed_acceleration = " << snake::speed_acceleration
+         << "\n\tprey_angular_speed = " << snake::prey_angular_speed
+         << "\n\tsnake_angular_speed = " << snake::snake_angular_speed
+         << "\n\tsnake_tail_k = " << snake::snake_tail_k
+         << "\n\tparts_skip_count = " << snake::parts_skip_count
+         << "\n\tparts_start_move_count = " << snake::parts_start_move_count
+         << "\n\tmove_step_distance = " << snake::move_step_distance
+         << "\n\trot_step_angle = " << snake::rot_step_angle;
+}

@@ -48,6 +48,7 @@ private:
     void next_tick(long last);
 
     void do_snake(snake::snake_id_t id, std::function<void(snake*)> f);
+    void print_world_info();
 
 private:
     typedef std::map<connection_hdl, session, std::owner_less<connection_hdl>> sessions;

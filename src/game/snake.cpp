@@ -1,22 +1,17 @@
 #include "snake.hpp"
-#include <iostream>
 
 bool snake::tick(long dt) {
     uint8_t changes = 0;
 
-    ticks += dt;
-
-    const long speed_step_time = static_cast<long>(1000 * move_step_distance / speed);
-    if (ticks >= speed_step_time) {
-        const float timef = ticks / 1000.0f;
-        ticks -= speed_step_time;
-
-        if (angle != wangle) {
-            float rotation = base_rotation_speed * timef;
+    // rotation
+    if (angle != wangle) {
+        m_rot_ticks += dt;
+        if (m_rot_ticks >= rot_step_interval) {
+            const float rotation = snake_angular_speed * m_rot_ticks / 1000.0f;
             float dAngle = normalize_angle(wangle - angle);
 
-            if (dAngle > M_PI) {
-                dAngle -= 2.0f * M_PI;
+            if (dAngle > f_pi) {
+                dAngle -= f_2pi;
             }
 
             if (fabs(dAngle) < rotation) {
@@ -26,10 +21,17 @@ bool snake::tick(long dt) {
             }
 
             angle = normalize_angle(angle);
-            changes |= change_angle;
-        }
 
+            changes |= change_angle;
+            m_rot_ticks = 0;
+        }
+    }
+
+    // movement
+    m_mov_ticks += dt;
+    if (m_mov_ticks >= 1000 * move_step_distance / speed) {
         // update parts
+        const float timef = m_mov_ticks / 1000.0f;
         const float move_dist = speed * timef;
         const size_t len = parts.size();
 
@@ -52,7 +54,7 @@ bool snake::tick(long dt) {
             const body old = pt;
 
             pt.from(prev);
-            const float move_coeff = parts_move_coeff * (++ j) / parts_start_move_count;
+            const float move_coeff = snake_tail_k * (++ j) / parts_start_move_count;
             pt.offset(move_coeff * (last.x - pt.x), move_coeff * (last.y - pt.y));
 
             prev = old;
@@ -65,7 +67,7 @@ bool snake::tick(long dt) {
             const body old = pt;
 
             pt.from(prev);
-            pt.offset(parts_move_coeff * (last.x - pt.x), parts_move_coeff * (last.y - pt.y));
+            pt.offset(snake_tail_k * (last.x - pt.x), snake_tail_k * (last.y - pt.y));
 
             prev = old;
         }
@@ -85,7 +87,7 @@ bool snake::tick(long dt) {
             changes |= change_speed;
         }
 
-        ticks = 0;
+        m_mov_ticks = 0;
     }
 
     if (changes > 0 && changes != update) {

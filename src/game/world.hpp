@@ -67,4 +67,6 @@ private:
     uint32_t m_virtual_frames = 0;
 };
 
+std::ostream& operator<<(std::ostream & out, const world & w);
+
 #endif //SLITHER_GAME_WORLD_HPP

@@ -19,10 +19,8 @@ slither_server::slither_server() {
 }
 
 void slither_server::run(uint16_t port) {
-    std::stringstream ss;
-    ss << "Running slither server on port " << port;
-
-    m_endpoint.get_alog().write(websocketpp::log::alevel::app, ss.str());
+    m_endpoint.get_alog().write(websocketpp::log::alevel::app, "Running slither server on port " + std::to_string(port));
+    print_world_info();
 
     m_endpoint.listen(port);
     m_endpoint.start_accept();
@@ -36,6 +34,12 @@ void slither_server::run(uint16_t port) {
     } catch (websocketpp::exception const & e) {
         std::cout << e.what() << std::endl;
     }
+}
+
+void slither_server::print_world_info() {
+    std::stringstream s;
+    s << "World info = \n" << m_world;
+    m_endpoint.get_alog().write(websocketpp::log::alevel::app, s.str());
 }
 
 void slither_server::next_tick(long last) {
@@ -81,13 +85,6 @@ void slither_server::broadcast_updates() {
                 continue;
             }
 
-            if (flags & change_pos) {
-                // todo: do we need float pos?
-                send_binary(ses_i, packet_move_rel { id,
-                        static_cast<int8_t>(ptr->get_head_dx()),
-                        static_cast<int8_t>(ptr->get_head_dy()) });
-            }
-
             if (flags & (~change_pos)) {
                 packet_rotation rot = packet_rotation();
                 rot.snakeId = id;
@@ -102,6 +99,13 @@ void slither_server::broadcast_updates() {
                 }
 
                 send_binary(ses_i, rot);
+            }
+
+            if (flags & change_pos) {
+                // todo: do we need float pos?
+                send_binary(ses_i, packet_move_rel { id,
+                        static_cast<int8_t>(ptr->get_head_dx()),
+                        static_cast<int8_t>(ptr->get_head_dy()) });
             }
         }
 
@@ -246,8 +250,8 @@ packet_init slither_server::build_init_packet() {
     init.nsp2 = snake::nsp2;
     init.nsp3 = snake::nsp3;
 
-    init.snake_ang_speed = snake::snake_ang_speed;
-    init.prey_ang_speed = snake::prey_ang_speed;
+    init.snake_ang_speed = 8.0f * snake::snake_angular_speed / 1000.0f;
+    init.prey_ang_speed = 8.0f * snake::prey_angular_speed / 1000.0f;
     init.snake_tail_k = snake::snake_tail_k;
 
     init.protocol_version = world::protocol_version;
