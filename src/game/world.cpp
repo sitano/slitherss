@@ -27,8 +27,8 @@ snake::ptr world::create_snake() {
         y += sinf(angle) * snake::move_step_distance;
     }
 
-    s->angle = normalize_angle(angle + f_pi);
-    s->wangle = normalize_angle(angle + f_pi);
+    s->angle = snake::normalize_angle(angle + f_pi);
+    s->wangle = snake::normalize_angle(angle + f_pi);
 
     return s;
 }

@@ -2,6 +2,7 @@
 #define SLITHER_PACKET_ROTATION_HPP
 
 #include "p_base.hpp"
+#include <cmath>
 
 struct packet_rotation : public packet_base {
     packet_rotation() = default;
@@ -13,8 +14,16 @@ struct packet_rotation : public packet_base {
     float snakeSpeed = -1.0f; // 7, int8, sp / 18 (snake speed?)
 
     size_t get_size() const noexcept { return 8; }
+    bool is_clockwise() const noexcept;
 
     out_packet_t get_rot_type() const noexcept;
+
+    static constexpr float f_pi = 3.14159265358979323846f;
+    static constexpr float f_2pi = 2.0f * f_pi;
+
+    inline static float normalize_angle(float angle) {
+        return angle - f_2pi * floorf( angle / f_2pi );
+    }
 };
 
 std::ostream& operator<<(std::ostream & out, const packet_rotation & p);

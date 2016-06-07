@@ -19,20 +19,30 @@ out_packet_t packet_rotation::get_rot_type() const noexcept {
             }
         } else {
             if (snakeSpeed == -1.0f) {
-                if (ang >= wang) {
-                    return packet_t_rot_ccw_ang_wang;
-                } else {
+                if (is_clockwise()) {
                     return packet_t_rot_cw_ang_wang;
+                } else {
+                    return packet_t_rot_ccw_ang_wang;
                 }
             } else {
-                if (ang >= wang) {
-                    return packet_t_rot_ccw_ang_wang_sp;
-                } else {
+                if (is_clockwise()) {
                     return packet_t_rot_cw_ang_wang_sp;
+                } else {
+                    return packet_t_rot_ccw_ang_wang_sp;
                 }
             }
         }
     }
+}
+
+bool packet_rotation::is_clockwise() const noexcept {
+    float dAngle = packet_rotation::normalize_angle(wang - ang);
+
+    if (dAngle > f_pi) {
+        dAngle -= f_2pi;
+    }
+
+    return dAngle > 0;
 }
 
 std::ostream& operator<<(std::ostream & out, const packet_rotation & p) {
