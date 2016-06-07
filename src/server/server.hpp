@@ -14,18 +14,29 @@ public:
 
     template <typename T>
     void send(connection_hdl hdl, T packet, opcode op, error_code & ec) {
-        connection_ptr con = get_con_from_hdl(hdl, ec);
+        const connection_ptr con = get_con_from_hdl(hdl, ec);
         if (ec) { return; }
 
-        // todo make sure buf allocation happens on a stack
-        std::size_t len = packet.get_size();
-        boost::asio::streambuf buf(len);
-        buf.prepare(len);
+        const size_t max = packet.get_size();
+        if (max > 128) {
+            boost::asio::streambuf buf(max);
+            buf.prepare(max);
 
-        std::ostream out(&buf);
-        out << packet;
+            std::ostream out(&buf);
+            out << packet;
 
-        ec = con->send(boost::asio::buffer_cast<void const *>(buf.data()), len, op);
+            ec = con->send(boost::asio::buffer_cast<void const *>(buf.data()), buf.size(), op);
+        } else {
+            // todo use fixed streambuf to alloc on stack
+            boost::asio::streambuf buf(max);
+            buf.prepare(max);
+
+            std::ostream out(&buf);
+            out << packet;
+
+            ec = con->send(boost::asio::buffer_cast<void const *>(buf.data()), buf.size(), op);
+
+        }
     }
 
     template <typename T>

@@ -10,7 +10,8 @@
 enum snake_changes : uint8_t {
     change_pos = 1,
     change_angle = 2,
-    change_speed = 4
+    change_wangle = 4,
+    change_speed = 8,
 };
 
 struct body {
@@ -53,7 +54,6 @@ struct snake : std::enable_shared_from_this<snake> {
     std::vector<body> parts;
 
     bool tick(long dt);
-    void flush();
 
     inline float get_head_x() const { return parts[0].x; }
     inline float get_head_y() const { return parts[0].y; }

@@ -85,16 +85,22 @@ void slither_server::broadcast_updates() {
                 continue;
             }
 
-            if (flags & (~change_pos)) {
+            if (flags & (change_angle | change_speed)) {
                 packet_rotation rot = packet_rotation();
                 rot.snakeId = id;
 
                 if (flags & change_angle) {
+                    ptr->update ^= change_angle;
                     rot.ang = ptr->angle;
-                    rot.wang = ptr->wangle;
-                    // not sure but should be ok
-                    rot.snakeSpeed = ptr->speed / 32.0f;
-                } else if (flags & change_speed) {
+
+                    if (flags & change_wangle) {
+                        ptr->update ^= change_wangle;
+                        rot.wang = ptr->wangle;
+                    }
+                }
+
+                if (flags & change_speed) {
+                    ptr->update ^= change_speed;
                     rot.snakeSpeed = ptr->speed / 32.0f;
                 }
 
@@ -103,13 +109,12 @@ void slither_server::broadcast_updates() {
 
             if (flags & change_pos) {
                 // todo: do we need float pos?
+                ptr->update ^= change_pos;
                 send_binary(ses_i, packet_move_rel { id,
                         static_cast<int8_t>(ptr->get_head_dx()),
                         static_cast<int8_t>(ptr->get_head_dy()) });
             }
         }
-
-        ptr->flush();
     }
 
     m_world.flush_changes();
@@ -173,7 +178,10 @@ void slither_server::on_message(connection_hdl hdl, message_ptr ptr) {
     if (packet_type <= 250 && len == 1) {
         // in_packet_t_angle, [0 - 250]
         const float angle = world::f_pi * packet_type / 125.0f;
-        do_snake(ss.snake_id, [=](snake *s){ s->wangle = angle; });
+        do_snake(ss.snake_id, [=](snake *s){
+            s->wangle = angle;
+            s->update |= change_wangle;
+        });
         return;
     }
 

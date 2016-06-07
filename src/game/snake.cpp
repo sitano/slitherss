@@ -101,7 +101,3 @@ bool snake::tick(long dt) {
 std::shared_ptr<snake> snake::getptr() {
     return shared_from_this();
 }
-
-void snake::flush() {
-    update = 0;
-}
