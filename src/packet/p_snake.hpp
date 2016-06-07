@@ -28,7 +28,7 @@ struct packet_add_snake : public packet_base {
     // ?, int8, Body part position (y)
     std::shared_ptr<snake> s;
 
-    constexpr size_t get_size() const noexcept {
+    size_t get_size() const noexcept {
         return 25 + s->name.length() + 2 * 3 + (s->parts.size() - 1 /* head */) * 2;
     }
 };
@@ -40,7 +40,7 @@ struct packet_remove_snake : public packet_base {
     uint16_t snakeId = 0; // 3-4, int16, Snake id
     uint8_t status = status_snake_left; // 5, int8, 0 (snake left range) or 1 (snake died)
 
-    constexpr size_t get_size() const noexcept { return 6; }
+    size_t get_size() const noexcept { return 6; }
 
     static const uint8_t status_snake_left = 0;
     static const uint8_t status_snake_died = 1;

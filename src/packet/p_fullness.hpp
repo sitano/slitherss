@@ -9,7 +9,7 @@ struct packet_fullness : public packet_base {
     uint16_t snakeId = 0; // 3-4, int16, Snake id
     uint8_t fullness = 0; // 5-7, int24, value / 16777215 -> fam
 
-    constexpr size_t get_size() const noexcept { return 8; }
+    size_t get_size() const noexcept { return 8; }
 };
 
 std::ostream& operator<<(std::ostream & out, const packet_fullness & p);

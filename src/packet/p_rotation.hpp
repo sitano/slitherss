@@ -12,7 +12,7 @@ struct packet_rotation : public packet_base {
     float wang = -1.0f; // 6, int8, wang * pi2 / 256 (target rotation angle snake is heading to)
     float snakeSpeed = -1.0f; // 7, int8, sp / 18 (snake speed?)
 
-    constexpr size_t get_size() const noexcept { return 8; }
+    size_t get_size() const noexcept { return 8; }
 
     out_packet_t get_rot_type() const noexcept;
 };

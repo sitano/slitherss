@@ -10,7 +10,7 @@ struct sector {
     uint8_t x;
     uint8_t y;
 
-    std::vector<food> food;
+    std::vector<food> m_food;
 };
 
 #endif //SLITHER_GAME_SECTOR_HPP

@@ -18,7 +18,7 @@ struct packet_highscore : public packet_base {
     // ?-?	string	Winners message
     std::string message;
 
-    constexpr size_t get_size() const noexcept {
+    size_t get_size() const noexcept {
         return 9 + 1 + winner->name.length() + message.length();
     }
 };

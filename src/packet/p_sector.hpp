@@ -9,7 +9,7 @@ struct packet_sector : public packet_base {
     uint8_t x = 0;  // 3, int8, x-coordinate of the sector
     uint8_t y = 0; // 4, int8, y-coordinate of the sector
 
-    constexpr size_t get_size() const noexcept { return 5; }
+    size_t get_size() const noexcept { return 5; }
 };
 
 struct packet_add_sector : public packet_sector {

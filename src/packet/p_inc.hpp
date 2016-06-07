@@ -11,7 +11,7 @@ struct packet_inc : public packet_base {
     uint16_t y = 0; // 7-8, int16, y
     uint8_t fullness = 0; // 9-11, int24, value / 16777215 -> fam
 
-    constexpr size_t get_size() const noexcept { return 12; }
+    size_t get_size() const noexcept { return 12; }
 };
 
 struct packet_inc_rel : public packet_base {
@@ -22,7 +22,7 @@ struct packet_inc_rel : public packet_base {
     uint8_t dy = 0; // 6	int8	value - 128 + head.y -> y
     uint8_t fullness = 0; // 9-11, int24, value / 16777215 -> fam
 
-    constexpr size_t get_size() const noexcept { return 10; }
+    size_t get_size() const noexcept { return 10; }
 };
 
 std::ostream& operator<<(std::ostream & out, const packet_inc & p);

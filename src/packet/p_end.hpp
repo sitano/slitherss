@@ -9,7 +9,7 @@ struct packet_end : public packet_base {
 
     uint8_t status = status_death; // 3, int8, 0-2; 0 is normal death, 1 is new highscore of the day, 2 is unknown (disconnect??)
 
-    constexpr size_t get_size() const noexcept { return 4; }
+    size_t get_size() const noexcept { return 4; }
 
     static const uint8_t status_death = 0;
     static const uint8_t status_highscore_otd = 1;
@@ -24,7 +24,7 @@ struct packet_kill : public packet_base {
     uint16_t snakeId = 0; // 3-4	int16	killer snake id
     uint32_t kills = 0; // 5-7	int24	total number of kills
 
-    constexpr size_t get_size() const noexcept { return 8; }
+    size_t get_size() const noexcept { return 8; }
 };
 
 std::ostream& operator<<(std::ostream & out, const packet_end & p);

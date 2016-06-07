@@ -49,7 +49,7 @@ struct packet_update_prey : public packet_base {
     // 16	direction, current angle, wanted angle
     // 18	direction, current angle, wanted angle, speed
 
-    // TODO constexpr size_t get_size() const noexcept { return 3 + 6 + ...; }
+    // TODO size_t get_size() const noexcept { return 3 + 6 + ...; }
 };
 
 // Sent when a Prey enters range / spawns or leaves range / gets eaten. The exact event/format depends on the packet-length:
@@ -62,7 +62,7 @@ struct packet_remove_prey : public packet_base {
     // packet-length 7: eat Prey
     uint16_t snakeId; // 5-6	int16	Eater snake ID
 
-    // TODO constexpr size_t get_size() const noexcept { return ...; }
+    // TODO size_t get_size() const noexcept { return ...; }
 };
 
 #endif //SLITHER_PACKET_PREY_HPP
