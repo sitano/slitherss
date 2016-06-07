@@ -231,9 +231,10 @@ void slither_server::on_message(connection_hdl hdl, message_ptr ptr) {
 void slither_server::on_close(connection_hdl hdl) {
     const auto ptr = m_sessions.find(hdl);
     if (ptr != m_sessions.end()) {
+        const snake::snake_id_t snakeId = ptr->second.snake_id;
         m_sessions.erase(ptr->first);
-        m_connections.erase(ptr->second.snake_id);
-        m_world.remove_snake(ptr->second.snake_id);
+        m_connections.erase(snakeId);
+        m_world.remove_snake(snakeId);
     }
 }
 
