@@ -79,7 +79,7 @@ struct snake : std::enable_shared_from_this<snake> {
     static const int parts_start_move_count = 4;
     static const int move_step_distance = 42;
     static constexpr float rot_step_angle = 1.0f * move_step_distance / boost_speed * snake_angular_speed; // radians step per max acc resolution time
-    static const int rot_step_interval = 80; // 1000 * rot_step_angle / snake_angular_speed
+    static const long rot_step_interval = static_cast<long>(1000.0f * rot_step_angle / snake_angular_speed);
 
     static constexpr float f_pi = 3.14159265358979323846f;
     static constexpr float f_2pi = 2.0f * f_pi;

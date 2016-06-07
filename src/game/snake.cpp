@@ -7,7 +7,9 @@ bool snake::tick(long dt) {
     if (angle != wangle) {
         m_rot_ticks += dt;
         if (m_rot_ticks >= rot_step_interval) {
-            const float rotation = snake_angular_speed * m_rot_ticks / 1000.0f;
+            const long frames = m_rot_ticks / rot_step_interval;
+            const long frames_ticks = frames * rot_step_interval;
+            const float rotation = snake_angular_speed * frames_ticks / 1000.0f;
             float dAngle = normalize_angle(wangle - angle);
 
             if (dAngle > f_pi) {
@@ -23,16 +25,17 @@ bool snake::tick(long dt) {
             angle = normalize_angle(angle);
 
             changes |= change_angle;
-            m_rot_ticks = 0;
+            m_rot_ticks -= frames_ticks;
         }
     }
 
     // movement
     m_mov_ticks += dt;
-    if (m_mov_ticks >= 1000 * move_step_distance / speed) {
-        // update parts
-        const float timef = m_mov_ticks / 1000.0f;
-        const float move_dist = speed * timef;
+    const long mov_frame_interval = 1000 * move_step_distance / speed;
+    if (m_mov_ticks >= mov_frame_interval) {
+        const long frames = m_mov_ticks / mov_frame_interval;
+        const long frames_ticks = frames * mov_frame_interval;
+        const float move_dist = speed * frames_ticks / 1000.0f;
         const size_t len = parts.size();
 
         // move head
@@ -78,7 +81,7 @@ bool snake::tick(long dt) {
         const uint16_t wantedSpeed = acceleration ? boost_speed : base_move_speed;
         if (speed != wantedSpeed) {
             const float sgn = wantedSpeed > speed ? 1.0f : -1.0f;
-            const uint16_t acc = static_cast<uint16_t>(speed_acceleration * timef);
+            const uint16_t acc = static_cast<uint16_t>(speed_acceleration * frames_ticks / 1000.0f);
             if (abs(wantedSpeed - speed) <= acc) {
                 speed = wantedSpeed;
             } else {
@@ -87,7 +90,7 @@ bool snake::tick(long dt) {
             changes |= change_speed;
         }
 
-        m_mov_ticks = 0;
+        m_mov_ticks -= frames_ticks;
     }
 
     if (changes > 0 && changes != update) {
