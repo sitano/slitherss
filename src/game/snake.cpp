@@ -3,6 +3,10 @@
 bool snake::tick(long dt) {
     uint8_t changes = 0;
 
+    if (update & (change_dying | change_dead)) {
+        return false;
+    }
+
     // rotation
     if (angle != wangle) {
         m_rot_ticks += dt;

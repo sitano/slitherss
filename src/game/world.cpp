@@ -13,11 +13,11 @@ snake::ptr world::create_snake() {
     s->speed = snake::base_move_speed;
     s->fullness = 0;
 
-    uint16_t x = game_radius + next_random(1000) - 500;
-    uint16_t y = game_radius + next_random(1000) - 500;
-    // const uint16_t half_radius = game_radius / 2;
-    // uint16_t x = game_radius + next_random(game_radius) - half_radius;
-    // uint16_t y = game_radius + next_random(game_radius) - half_radius;
+    // uint16_t x = game_radius + next_random(1000) - 500;
+    // uint16_t y = game_radius + next_random(1000) - 500;
+    const uint16_t half_radius = game_radius / 2;
+    uint16_t x = game_radius + next_random(game_radius) - half_radius;
+    uint16_t y = game_radius + next_random(game_radius) - half_radius;
     // todo: reserve snake.parts at least for sizeof(snake) bytes
     // todo: fix angles
     float angle = world::f_2pi * next_randomf();
@@ -33,6 +33,12 @@ snake::ptr world::create_snake() {
     s->wangle = snake::normalize_angle(angle + f_pi);
 
     return s;
+}
+
+snake::ptr world::create_snake_bot() {
+    snake::ptr ptr = create_snake();
+    ptr->bot = true;
+    return ptr;
 }
 
 void world::init_random() {
@@ -67,8 +73,21 @@ void world::tick(long dt) {
 void world::tick_snakes(long dt) {
     for (auto pair: m_snakes) {
         if (pair.second->tick(dt)) {
-            m_changes.push_back(pair.second.get());
+            snake * const s = pair.second.get();
+
+            m_changes.push_back(s);
+
+            if (s->update & change_pos) {
+                check_snake_bounds(s);
+            }
         }
+    }
+}
+
+void world::check_snake_bounds(snake * const s) {
+    const body &head = s->get_head();
+    if (head.distance_squared(game_radius, game_radius) >= death_radius * death_radius) {
+        s->update |= change_dying;
     }
 }
 
@@ -112,7 +131,7 @@ void world::flush_changes(snake::snake_id_t id) {
 
 void world::spawn_snakes(const int snakes) {
     for (int i = 0; i < snakes; i++) {
-        add_snake(create_snake());
+        add_snake(create_snake_bot());
     }
 }
 

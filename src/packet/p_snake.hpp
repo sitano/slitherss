@@ -36,6 +36,7 @@ struct packet_add_snake : public packet_base {
 // Sent when another snake leaves range (that is, close enough to be drawn on screen) or dies.
 struct packet_remove_snake : public packet_base {
     packet_remove_snake() : packet_base(packet_t_snake) {}
+    packet_remove_snake(uint16_t id, uint8_t st) : packet_base(packet_t_snake), snakeId(id), status(st) {}
 
     uint16_t snakeId = 0; // 3-4, int16, Snake id
     uint8_t status = status_snake_left; // 5, int8, 0 (snake left range) or 1 (snake died)

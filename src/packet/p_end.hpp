@@ -6,6 +6,7 @@
 // Sent when player died (dead/disconnect packet)
 struct packet_end : public packet_base {
     packet_end() : packet_base(packet_t_end) {}
+    explicit packet_end(uint8_t death_type) : packet_base(packet_t_end), status(death_type) {}
 
     uint8_t status = status_death; // 3, int8, 0-2; 0 is normal death, 1 is new highscore of the day, 2 is unknown (disconnect??)
 

@@ -71,25 +71,35 @@ void slither_server::broadcast_updates() {
         const snake::snake_id_t id = ptr->id;
         const uint8_t flags = ptr->update;
 
+        if (flags & change_dead) {
+            continue;
+        }
+
+        if (flags & change_dying) {
+            if (!ptr->bot) {
+                const auto hdl_i = m_connections.find(id);
+                if (hdl_i == m_connections.end()) {
+                    m_endpoint.get_alog().write(websocketpp::log::alevel::app,
+                        "Failed to locate snake connection " + std::to_string(id));
+                } else {
+                    const auto ses_i = m_sessions.find(hdl_i->second);
+                    if (ses_i == m_sessions.end()) {
+                        m_endpoint.get_alog().write(websocketpp::log::alevel::app,
+                                                    "Failed to locate snake session " + std::to_string(id));
+                    } else {
+                        send_binary(ses_i, packet_end(packet_end::status_death));
+                    }
+                }
+            }
+
+            broadcast_binary(packet_remove_snake(ptr->id, packet_remove_snake::status_snake_died));
+
+            ptr->update |= change_dead;
+
+            continue;
+        }
+
         if (flags) {
-            /*
-            const auto hdl_i = m_connections.find(id);
-            if (hdl_i == m_connections.end()) {
-                m_endpoint.get_alog().write(websocketpp::log::alevel::app,
-                    "Failed to locate snake connection " + std::to_string(id));
-                continue;
-            }
-            */
-
-            /*
-            const auto ses_i = m_sessions.find(hdl_i->second);
-            if (ses_i == m_sessions.end()) {
-                m_endpoint.get_alog().write(websocketpp::log::alevel::app,
-                    "Failed to locate snake session " + std::to_string(id));
-                continue;
-            }
-             */
-
             if (flags & (change_angle | change_speed)) {
                 packet_rotation rot = packet_rotation();
                 rot.snakeId = id;

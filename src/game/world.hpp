@@ -14,7 +14,9 @@ public:
     void tick(long dt);
 
     snake::ptr create_snake();
+    snake::ptr create_snake_bot();
     void spawn_snakes(const int count);
+    void check_snake_bounds(snake *s);
 
     void init_random();
     int next_random();
@@ -40,6 +42,7 @@ public:
     const uint16_t max_snake_parts = 411;
     const uint16_t sector_size = 300;
     const uint16_t sector_count_along_edge = 144;
+    const uint16_t death_radius = game_radius - sector_size;
 
     // const
     static const long virtual_frame_time_ms = 8;

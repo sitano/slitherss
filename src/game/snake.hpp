@@ -9,9 +9,11 @@
 
 enum snake_changes : uint8_t {
     change_pos = 1,
-    change_angle = 2,
-    change_wangle = 4,
-    change_speed = 8,
+    change_angle = 1 << 1,
+    change_wangle = 1 << 2,
+    change_speed = 1 << 3,
+    change_dying = 1 << 4,
+    change_dead = 1 << 5
 };
 
 struct body {
@@ -28,6 +30,12 @@ struct body {
         x += dx;
         y += dy;
     }
+
+    inline float distance_squared(float dx, float dy) const {
+        const float a = x - dx;
+        const float b = y - dy;
+        return a * a + b * b;
+    }
 };
 
 struct snake : std::enable_shared_from_this<snake> {
@@ -39,6 +47,7 @@ struct snake : std::enable_shared_from_this<snake> {
     uint8_t skin;
     uint8_t update;
     bool acceleration;
+    bool bot;
 
     std::string name;
 
@@ -55,6 +64,7 @@ struct snake : std::enable_shared_from_this<snake> {
 
     bool tick(long dt);
 
+    inline const body& get_head() const { return parts[0]; }
     inline float get_head_x() const { return parts[0].x; }
     inline float get_head_y() const { return parts[0].y; }
     inline float get_head_dx() const { return parts[0].x - parts[1].x; }
