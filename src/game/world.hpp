@@ -14,6 +14,7 @@ public:
     void tick(long dt);
 
     snake::ptr create_snake();
+    void spawn_snakes(const int count);
 
     void init_random();
     int next_random();

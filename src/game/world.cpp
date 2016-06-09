@@ -110,6 +110,12 @@ void world::flush_changes(snake::snake_id_t id) {
     }
 }
 
+void world::spawn_snakes(const int snakes) {
+    for (int i = 0; i < snakes; i++) {
+        add_snake(create_snake());
+    }
+}
+
 std::ostream &operator<<(std::ostream &out, const world &w) {
     return out
          << "\tgame_radius = " << w.game_radius
