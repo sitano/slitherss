@@ -76,13 +76,13 @@ else ()
     message (FATAL_ERROR "Failed to find required dependency: boost")
 endif ()
 
-find_package(ZLIB)
+# find_package(ZLIB)
 
 # Build
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 
 target_link_libraries (${PROJECT_NAME} ${Boost_LIBRARIES})
-target_link_libraries (${PROJECT_NAME} ${ZLIB_LIBRARIES})
+# target_link_libraries (${PROJECT_NAME} ${ZLIB_LIBRARIES})
 
 set_target_properties (${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin)
 

@@ -2,6 +2,7 @@
 #define SLITHER_SERVER_SERVER_HPP
 
 #include "config.hpp"
+#include "streambuf_array.hpp"
 
 #include <websocketpp/server.hpp>
 
@@ -18,16 +19,12 @@ public:
         if (ec) { return; }
 
         const size_t max = packet.get_size();
-        if (max > 128) {
-            boost::asio::streambuf buf(max);
-            buf.prepare(max);
-
+        if (max <= 128) {
+            streambuf_array<128> buf;
             std::ostream out(&buf);
             out << packet;
-
             ec = con->send(boost::asio::buffer_cast<void const *>(buf.data()), buf.size(), op);
         } else {
-            // todo use fixed streambuf to alloc on stack
             boost::asio::streambuf buf(max);
             buf.prepare(max);
 

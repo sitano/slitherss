@@ -2,7 +2,7 @@
 #define SLITHER_SERVER_CONFIG_HPP_H
 
 #include <websocketpp/config/asio_no_tls.hpp>
-#include <websocketpp/extensions/permessage_deflate/enabled.hpp>
+// #include <websocketpp/extensions/permessage_deflate/enabled.hpp>
 
 using websocketpp::log::alevel;
 using websocketpp::log::elevel;
@@ -46,10 +46,10 @@ struct slither_server_config : public websocketpp::config::asio {
     ///    websocketpp::log::alevel::none;
 
     /// permessage_compress extension
-    struct permessage_deflate_config {};
+    // struct permessage_deflate_config {};
 
-    typedef websocketpp::extensions::permessage_deflate::enabled
-        <permessage_deflate_config> permessage_deflate_type;
+    // typedef websocketpp::extensions::permessage_deflate::enabled
+    //    <permessage_deflate_config> permessage_deflate_type;
 };
 
 #endif
