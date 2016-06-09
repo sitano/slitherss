@@ -40,9 +40,11 @@ private:
     void on_open(connection_hdl hdl);
     void on_message(connection_hdl hdl, message_ptr ptr);
     void on_close(connection_hdl hdl);
+    void remove_snake(snake::snake_id_t id);
 
     void on_timer(error_code const & ec);
     void broadcast_updates();
+    void cleanup_dead();
 
     long get_now_tp();
     void next_tick(long last);

@@ -24,11 +24,13 @@ public:
     template <typename T> T next_random(T base);
 
     typedef std::unordered_map<snake::snake_id_t, std::shared_ptr<snake>> snakes;
+    typedef std::vector<snake::snake_id_t> v_ids;
 
     void add_snake(snake::ptr ptr);
     void remove_snake(snake::snake_id_t id);
     snakes::iterator get_snake(snake::snake_id_t id);
     snakes& get_snakes();
+    v_ids& get_dead();
 
     std::vector<snake *>& get_changes();
 
@@ -55,10 +57,12 @@ public:
 private:
 
     void tick_snakes(long dt);
+    void tick_bot(snake *s);
 
 private:
     // todo: reserve to collections
     snakes m_snakes;
+    v_ids m_dead;
     std::vector<sector> m_sectors;
     std::vector<snake *> m_changes;
 
@@ -73,5 +77,20 @@ private:
 };
 
 std::ostream& operator<<(std::ostream & out, const world & w);
+
+/**
+ * http://stackoverflow.com/questions/563198/how-do-you-detect-where-two-line-segments-intersect
+ *
+ * FWIW, the following function (in C) both detects line intersections and determines the intersection point.
+ * It is based on an algorithm in Andre LeMothe's "Tricks of the Windows Game Programming Gurus".
+ * It's not dissimilar to some of the algorithm's in other answers (e.g. Gareth's).
+ * LeMothe then uses Cramer's Rule (don't ask me) to solve the equations themselves.
+ *
+ * I can attest that it works in my feeble asteroids clone, and seems to deal correctly with the edge cases
+ * described in other answers by Elemental, Dan and Wodzu. It's also probably faster than the code posted by
+ * KingNestor because it's all multiplication and division, no square roots!
+ */
+bool intersect(float p0_x, float p0_y, float p1_x, float p1_y,
+               float p2_x, float p2_y, float p3_x, float p3_y);
 
 #endif //SLITHER_GAME_WORLD_HPP

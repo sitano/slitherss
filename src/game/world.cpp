@@ -13,14 +13,16 @@ snake::ptr world::create_snake() {
     s->speed = snake::base_move_speed;
     s->fullness = 0;
 
-    // uint16_t x = game_radius + next_random(1000) - 500;
-    // uint16_t y = game_radius + next_random(1000) - 500;
-    const uint16_t half_radius = game_radius / 2;
-    uint16_t x = game_radius + next_random(game_radius) - half_radius;
-    uint16_t y = game_radius + next_random(game_radius) - half_radius;
+    float angle = world::f_2pi * next_randomf();
+    float dist = 1000.0f + next_random(5000);
+    uint16_t x = game_radius + dist * cos(angle);
+    uint16_t y = game_radius + dist * sin(angle);
+    angle = snake::normalize_angle(angle + f_pi);
+    // const uint16_t half_radius = game_radius / 2;
+    // uint16_t x = game_radius + next_random(game_radius) - half_radius;
+    // uint16_t y = game_radius + next_random(game_radius) - half_radius;
     // todo: reserve snake.parts at least for sizeof(snake) bytes
     // todo: fix angles
-    float angle = world::f_2pi * next_randomf();
     const int len = 1 /* head */ + 2 /* body min = 2 */ + next_random(10);
     for (int i = 0; i < len; ++ i) {
         s->parts.push_back(body { 1.0f * x, 1.0f * y });
@@ -72,9 +74,9 @@ void world::tick(long dt) {
 
 void world::tick_snakes(long dt) {
     for (auto pair: m_snakes) {
-        if (pair.second->tick(dt)) {
-            snake * const s = pair.second.get();
+        snake * const s = pair.second.get();
 
+        if (s->tick(dt)) {
             m_changes.push_back(s);
 
             if (s->update & change_pos) {
@@ -85,9 +87,31 @@ void world::tick_snakes(long dt) {
 }
 
 void world::check_snake_bounds(snake * const s) {
+    // world bounds
     const body &head = s->get_head();
     if (head.distance_squared(game_radius, game_radius) >= death_radius * death_radius) {
         s->update |= change_dying;
+    }
+
+    // todo fix naive snakes bounds
+    auto h1 = s->parts[0];
+    auto h2 = s->parts[2];
+    for (auto ptr: m_snakes) {
+        snake *s2 = ptr.second.get();
+        if (s == s2) {
+            continue;
+        }
+
+        body prev = s2->parts.front();
+        auto end = s2->parts.end();
+        for (auto i = s2->parts.begin() + 1; i != end; i ++) {
+            if (intersect(h1.x, h1.y, h2.x, h2.y, prev.x, prev.y, i->x, i->y)) {
+                // hit
+                s->update |= change_dying;
+                return;
+            }
+            prev = *i;
+        }
     }
 }
 
@@ -111,6 +135,10 @@ world::snakes::iterator world::get_snake(snake::snake_id_t id) {
 
 world::snakes &world::get_snakes() {
     return m_snakes;
+}
+
+world::v_ids &world::get_dead() {
+    return m_dead;
 }
 
 std::vector<snake *>& world::get_changes() {
@@ -157,4 +185,29 @@ std::ostream &operator<<(std::ostream &out, const world &w) {
          << "\n\tparts_start_move_count = " << snake::parts_start_move_count
          << "\n\tmove_step_distance = " << snake::move_step_distance
          << "\n\trot_step_angle = " << snake::rot_step_angle;
+}
+
+bool intersect(float p0_x, float p0_y, float p1_x, float p1_y,
+               float p2_x, float p2_y, float p3_x, float p3_y) {
+    float s1_x, s1_y, s2_x, s2_y;
+    s1_x = p1_x - p0_x;     s1_y = p1_y - p0_y;
+    s2_x = p3_x - p2_x;     s2_y = p3_y - p2_y;
+
+    const float d = (-s2_x * s1_y + s1_x * s2_y);
+    static const float epsilon = 0.0001f;
+    if (d <= epsilon && d >= -epsilon) {
+        return false;
+    }
+
+    const float s = (-s1_y * (p0_x - p2_x) + s1_x * (p0_y - p2_y));
+    if (s < 0 || s > d) {
+        return false;
+    }
+
+    const float t = ( s2_x * (p0_y - p2_y) - s2_y * (p0_x - p2_x));
+    if (t < 0 || t > d) {
+        return false;
+    }
+
+    return true;
 }

@@ -7,6 +7,16 @@ bool snake::tick(long dt) {
         return false;
     }
 
+    m_ai_ticks += dt;
+    if (m_ai_ticks > ai_step_interval) {
+        const long frames = m_ai_ticks / ai_step_interval;
+        const long frames_ticks = frames * ai_step_interval;
+
+        tick_ai(frames);
+
+        m_ai_ticks -= frames_ticks;
+    }
+
     // rotation
     if (angle != wangle) {
         m_rot_ticks += dt;
@@ -107,4 +117,20 @@ bool snake::tick(long dt) {
 
 std::shared_ptr<snake> snake::getptr() {
     return shared_from_this();
+}
+
+void snake::tick_ai(long frames) {
+    const uint16_t game_radius = 21600; // todo actually from world instance
+
+    for (auto i = 0; i < frames; i ++) {
+        // 1. calc angle of radius vector
+        float ai_angle = atan2f(get_head_y() - game_radius, get_head_x() - game_radius);
+        // 2. add pi_2
+        ai_angle = normalize_angle(ai_angle + f_pi / 2.0f);
+        // 3. set
+        if (fabsf(wangle - ai_angle) > 0.01f) {
+            wangle = ai_angle;
+            update |= change_wangle;
+        }
+    }
 }

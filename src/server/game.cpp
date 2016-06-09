@@ -62,6 +62,13 @@ void slither_server::on_timer(error_code const & ec) {
 
     m_world.tick(dt);
     broadcast_updates();
+    cleanup_dead();
+
+    const long step_time = get_now_tp() - now;
+    if (step_time > 10) {
+        m_endpoint.get_alog().write(websocketpp::log::alevel::app,
+                "Load is too high, step took " + std::to_string(step_time) + "ms");
+    }
 
     next_tick(now);
 }
@@ -76,6 +83,9 @@ void slither_server::broadcast_updates() {
         }
 
         if (flags & change_dying) {
+            m_endpoint.get_alog().write(websocketpp::log::alevel::app,
+                "Found dying snake " + std::to_string(id));
+
             if (!ptr->bot) {
                 const auto hdl_i = m_connections.find(id);
                 if (hdl_i == m_connections.end()) {
@@ -93,8 +103,13 @@ void slither_server::broadcast_updates() {
             }
 
             broadcast_binary(packet_remove_snake(ptr->id, packet_remove_snake::status_snake_died));
+            broadcast_binary(packet_remove_snake(ptr->id, packet_remove_snake::status_snake_left));
 
             ptr->update |= change_dead;
+
+            if (ptr->bot) {
+                m_world.get_dead().push_back(ptr->id);
+            }
 
             continue;
         }
@@ -133,6 +148,14 @@ void slither_server::broadcast_updates() {
     }
 
     m_world.flush_changes();
+}
+
+void slither_server::cleanup_dead() {
+    for (auto id: m_world.get_dead()) {
+        remove_snake(id);
+    }
+
+    m_world.get_dead().clear();
 }
 
 void slither_server::on_socket_init(websocketpp::connection_hdl, boost::asio::ip::tcp::socket & s) {
@@ -266,9 +289,13 @@ void slither_server::on_close(connection_hdl hdl) {
     if (ptr != m_sessions.end()) {
         const snake::snake_id_t snakeId = ptr->second.snake_id;
         m_sessions.erase(ptr->first);
-        m_connections.erase(snakeId);
-        m_world.remove_snake(snakeId);
+        remove_snake(snakeId);
     }
+}
+
+void slither_server::remove_snake(snake::snake_id_t id) {
+        m_connections.erase(id);
+        m_world.remove_snake(id);
 }
 
 packet_init slither_server::build_init_packet() {
@@ -306,4 +333,5 @@ void slither_server::do_snake(snake::snake_id_t id, std::function<void(snake *)>
         }
     }
 }
+
 
