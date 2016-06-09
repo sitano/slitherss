@@ -25,6 +25,7 @@ public:
     void add_snake(snake::ptr ptr);
     void remove_snake(snake::snake_id_t id);
     snakes::iterator get_snake(snake::snake_id_t id);
+    snakes& get_snakes();
 
     std::vector<snake *>& get_changes();
 

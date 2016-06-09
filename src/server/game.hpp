@@ -63,6 +63,17 @@ private:
         m_endpoint.send_binary(s->first, packet);
     }
 
+    template <typename T>
+    void broadcast_binary(T packet) {
+        const long now = get_now_tp();
+        for (auto &s: m_sessions) {
+            const uint16_t interval = static_cast<uint16_t>(now - s.second.last_packet_time);
+            s.second.last_packet_time = now;
+            packet.client_time = interval;
+            m_endpoint.send_binary(s.first, packet);
+        }
+    }
+
     server m_endpoint;
 
     server::timer_ptr m_timer;

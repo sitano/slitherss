@@ -71,19 +71,23 @@ void slither_server::broadcast_updates() {
         const uint8_t flags = ptr->update;
 
         if (flags) {
+            /*
             const auto hdl_i = m_connections.find(id);
             if (hdl_i == m_connections.end()) {
                 m_endpoint.get_alog().write(websocketpp::log::alevel::app,
                     "Failed to locate snake connection " + std::to_string(id));
                 continue;
             }
+            */
 
+            /*
             const auto ses_i = m_sessions.find(hdl_i->second);
             if (ses_i == m_sessions.end()) {
                 m_endpoint.get_alog().write(websocketpp::log::alevel::app,
                     "Failed to locate snake session " + std::to_string(id));
                 continue;
             }
+             */
 
             if (flags & (change_angle | change_speed)) {
                 packet_rotation rot = packet_rotation();
@@ -104,13 +108,13 @@ void slither_server::broadcast_updates() {
                     rot.snakeSpeed = ptr->speed / 32.0f;
                 }
 
-                send_binary(ses_i, rot);
+                broadcast_binary(rot);
             }
 
             if (flags & change_pos) {
                 // todo: do we need float pos?
                 ptr->update ^= change_pos;
-                send_binary(ses_i, packet_move_rel { id,
+                broadcast_binary(packet_move_rel { id,
                         static_cast<int8_t>(ptr->get_head_dx()),
                         static_cast<int8_t>(ptr->get_head_dy()) });
             }
@@ -136,10 +140,20 @@ void slither_server::on_open(connection_hdl hdl) {
     // TODO: send sectors packets
     // TODO: send food packets
     // send snake
-    const auto ses_i = m_sessions.find(hdl);
-    send_binary(ses_i, packet_add_snake(ptr));
-    send_binary(ses_i, packet_move {
+    broadcast_binary(packet_add_snake(ptr));
+    broadcast_binary(packet_move {
         ptr->id, static_cast<uint16_t>(ptr->get_head_x()), static_cast<uint16_t>(ptr->get_head_y()) });
+
+    // todo introduce other snakes in sectors view
+    const auto ses_i = m_sessions.find(hdl);
+    for (auto snake : m_world.get_snakes()) {
+        if (snake.first != ptr->id) {
+            const std::shared_ptr<::snake> &ptr2 = snake.second;
+            send_binary(ses_i, packet_add_snake(snake.second));
+            send_binary(ses_i, packet_move {
+                ptr2->id, static_cast<uint16_t>(ptr2->get_head_x()), static_cast<uint16_t>(ptr2->get_head_y()) });
+        }
+    }
 }
 
 void slither_server::on_message(connection_hdl hdl, message_ptr ptr) {
@@ -153,7 +167,7 @@ void slither_server::on_message(connection_hdl hdl, message_ptr ptr) {
     // reader
     std::stringstream buf(ptr->get_payload(), std::ios_base::in);
 
-    uint8_t packet_type;
+    in_packet_t packet_type = in_packet_t_angle;
     buf >> packet_type;
 
     // len check

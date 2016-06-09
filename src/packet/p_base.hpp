@@ -2,6 +2,7 @@
 #define SLITHER_PACKET_BASE_HPP
 
 #include "p_format.hpp"
+#include <iostream>
 
 enum out_packet_t : uint8_t;
 
@@ -65,5 +66,6 @@ enum out_packet_t : uint8_t {
 };
 
 std::ostream& operator<<(std::ostream & out, const packet_base & p);
+std::istream& operator>>(std::istream & in, in_packet_t & p);
 
 #endif //SLITHER_PACKET_BASE_HPP

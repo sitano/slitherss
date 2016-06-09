@@ -1,4 +1,5 @@
 #include "p_format.hpp"
+#include "p_base.hpp"
 
 std::ostream& operator<<(std::ostream& __os, ostream_write_value<uint8_t> __f) {
     return __os.put(__f.v);

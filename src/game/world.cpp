@@ -13,9 +13,11 @@ snake::ptr world::create_snake() {
     s->speed = snake::base_move_speed;
     s->fullness = 0;
 
-    const uint16_t half_radius = game_radius / 2;
-    uint16_t x = game_radius + next_random(game_radius) - half_radius;
-    uint16_t y = game_radius + next_random(game_radius) - half_radius;
+    uint16_t x = game_radius + next_random(1000) - 500;
+    uint16_t y = game_radius + next_random(1000) - 500;
+    // const uint16_t half_radius = game_radius / 2;
+    // uint16_t x = game_radius + next_random(game_radius) - half_radius;
+    // uint16_t y = game_radius + next_random(game_radius) - half_radius;
     // todo: reserve snake.parts at least for sizeof(snake) bytes
     // todo: fix angles
     float angle = world::f_2pi * next_randomf();
@@ -88,6 +90,10 @@ world::snakes::iterator world::get_snake(snake::snake_id_t id) {
     return m_snakes.find(id);
 }
 
+world::snakes &world::get_snakes() {
+    return m_snakes;
+}
+
 std::vector<snake *>& world::get_changes() {
     return m_changes;
 }
@@ -103,7 +109,6 @@ void world::flush_changes(snake::snake_id_t id) {
         }
     }
 }
-
 
 std::ostream &operator<<(std::ostream &out, const world &w) {
     return out
