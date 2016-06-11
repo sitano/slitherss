@@ -7,14 +7,16 @@ bool snake::tick(long dt) {
         return false;
     }
 
-    m_ai_ticks += dt;
-    if (m_ai_ticks > ai_step_interval) {
-        const long frames = m_ai_ticks / ai_step_interval;
-        const long frames_ticks = frames * ai_step_interval;
+    if (bot) {
+        m_ai_ticks += dt;
+        if (m_ai_ticks > ai_step_interval) {
+            const long frames = m_ai_ticks / ai_step_interval;
+            const long frames_ticks = frames * ai_step_interval;
 
-        tick_ai(frames);
+            tick_ai(frames);
 
-        m_ai_ticks -= frames_ticks;
+            m_ai_ticks -= frames_ticks;
+        }
     }
 
     // rotation
@@ -30,7 +32,7 @@ bool snake::tick(long dt) {
                 dAngle -= f_2pi;
             }
 
-            if (fabs(dAngle) < rotation) {
+            if (fabsf(dAngle) < rotation) {
                 angle = wangle;
             } else {
                 angle += rotation * (dAngle > 0 ? 1.0f : -1.0f);
@@ -55,9 +57,9 @@ bool snake::tick(long dt) {
         // move head
         body& head = parts[0];
         body prev = head;
-        // todo: check angles
-        head.x += cos(angle) * move_dist;
-        head.y += sin(angle) * move_dist;
+        head.x += cosf(angle) * move_dist;
+        head.y += sinf(angle) * move_dist;
+
         for (size_t i = 1; i < len && i < parts_skip_count; ++ i) {
             const body old = parts[i];
             parts[i] = prev;
@@ -91,6 +93,9 @@ bool snake::tick(long dt) {
 
         changes |= change_pos;
 
+        // update box
+        box = get_new_box();
+
         // update speed
         const uint16_t wantedSpeed = acceleration ? boost_speed : base_move_speed;
         if (speed != wantedSpeed) {
@@ -115,8 +120,35 @@ bool snake::tick(long dt) {
     return false;
 }
 
-std::shared_ptr<snake> snake::getptr() {
+std::shared_ptr<snake> snake::get_ptr() {
     return shared_from_this();
+}
+
+snake_bb snake::get_new_box() const {
+    float x = 0.0f;
+    float y = 0.0f;
+
+    // calculate center mass
+    for (auto p : parts) {
+        x += p.x;
+        y += p.y;
+    }
+
+    x /= parts.size();
+    y /= parts.size();
+
+    float r = 0.0f;
+    // calculate radius^2
+    for (auto p : parts) {
+        const float r_x = x - p.x;
+        const float r_y = y - p.y;
+        const float r_tmp = r_x * r_x + r_y * r_y;
+        if (r_tmp > r) {
+            r = r_tmp;
+        }
+    }
+
+    return snake_bb{x, y, r, this};
 }
 
 void snake::tick_ai(long frames) {

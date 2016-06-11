@@ -1,6 +1,8 @@
 #ifndef SLITHER_GAME_SNAKE_HPP
 #define SLITHER_GAME_SNAKE_HPP
 
+#include "sector.hpp"
+
 #include <cstdint>
 #include <vector>
 #include <string>
@@ -60,6 +62,7 @@ struct snake : std::enable_shared_from_this<snake> {
     // 0 - 100, 0 - hungry, 100 - full
     uint8_t fullness;
 
+    snake_bb box;
     std::vector<body> parts;
 
     bool tick(long dt);
@@ -71,7 +74,8 @@ struct snake : std::enable_shared_from_this<snake> {
     inline float get_head_dx() const { return parts[0].x - parts[1].x; }
     inline float get_head_dy() const { return parts[0].y - parts[1].y; }
 
-    std::shared_ptr<snake> getptr();
+    std::shared_ptr<snake> get_ptr();
+    snake_bb get_new_box() const;
 
     static constexpr float spangdv = 4.8f;
     static constexpr float nsp1 = 5.39f;
@@ -95,6 +99,15 @@ struct snake : std::enable_shared_from_this<snake> {
 
     static constexpr float f_pi = 3.14159265358979323846f;
     static constexpr float f_2pi = 2.0f * f_pi;
+
+    inline bool intersect_snake_box(const snake *s) const {
+        const snake_bb &bb1 = box;
+        const snake_bb &bb2 = s->box;
+        const float x = bb1.x - bb2.x;
+        const float y = bb1.y - bb2.y;
+        const float r = bb1.r + bb2.r;
+        return x * x + y * y <= r + r + 2.0f * fmaxf(bb1.r, bb2.r);
+    }
 
     inline static float normalize_angle(float ang) {
         return ang - f_2pi * floorf( ang / f_2pi );

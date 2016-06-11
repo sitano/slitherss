@@ -15,8 +15,8 @@ snake::ptr world::create_snake() {
 
     float angle = world::f_2pi * next_randomf();
     float dist = 1000.0f + next_random(5000);
-    uint16_t x = game_radius + dist * cos(angle);
-    uint16_t y = game_radius + dist * sin(angle);
+    uint16_t x = game_radius + dist * cosf(angle);
+    uint16_t y = game_radius + dist * sinf(angle);
     angle = snake::normalize_angle(angle + f_pi);
     // const uint16_t half_radius = game_radius / 2;
     // uint16_t x = game_radius + next_random(game_radius) - half_radius;
@@ -33,6 +33,7 @@ snake::ptr world::create_snake() {
 
     s->angle = snake::normalize_angle(angle + f_pi);
     s->wangle = snake::normalize_angle(angle + f_pi);
+    s->box = s->get_new_box();
 
     return s;
 }
@@ -102,6 +103,10 @@ void world::check_snake_bounds(snake * const s) {
             continue;
         }
 
+        if (!s->intersect_snake_box(s2)) {
+            continue;
+        }
+
         body prev = s2->parts.front();
         auto end = s2->parts.end();
         for (auto i = s2->parts.begin() + 1; i != end; i ++) {
@@ -117,7 +122,38 @@ void world::check_snake_bounds(snake * const s) {
 
 void world::init() {
     init_random();
-    // todo: init sectors
+    init_sectors();
+    init_food();
+}
+
+void world::init_sectors() {
+    const size_t len = sector_count_along_edge * sector_count_along_edge;
+    m_sectors.reserve(len);
+    for (size_t i = 0; i < len; i ++) {
+        m_sectors.push_back(sector{
+                static_cast<uint8_t>(i % sector_count_along_edge),
+                static_cast<uint8_t>(i / sector_count_along_edge),
+                {}, {}
+        });
+    }
+}
+
+void world::init_food() {
+    for (auto s: m_sectors) {
+        const uint8_t cx = sector_count_along_edge / 2;
+        const uint8_t cy = cx;
+        const uint16_t dist = (s.x - cx) * (s.x - cx) + (s.y - cy) * (s.y - cy);
+        const float dp = 1.0f - 1.0f * dist / (sector_count_along_edge * sector_count_along_edge);
+        const size_t density = static_cast<size_t>(dp * 100);
+        for (size_t i = 0; i < density; i ++) {
+            s.m_food.push_back(food{
+                    static_cast<uint16_t>(s.x * sector_size + next_random<uint16_t>(sector_size)),
+                    static_cast<uint16_t>(s.y * sector_size + next_random<uint16_t>(sector_size)),
+                    next_random<uint8_t>(255),
+                    next_random<uint8_t>(255)
+            });
+        }
+    }
 }
 
 void world::add_snake(snake::ptr ptr) {
@@ -199,6 +235,7 @@ bool intersect(float p0_x, float p0_y, float p1_x, float p1_y,
         return false;
     }
 
+    // todo check is it better to have 2 more mul, then 1 branch
     const float s = (-s1_y * (p0_x - p2_x) + s1_x * (p0_y - p2_y));
     if (s < 0 || s > d) {
         return false;
