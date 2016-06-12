@@ -93,9 +93,6 @@ bool snake::tick(long dt) {
 
         changes |= change_pos;
 
-        // update box
-        box = get_new_box();
-
         // update speed
         const uint16_t wantedSpeed = acceleration ? boost_speed : base_move_speed;
         if (speed != wantedSpeed) {
@@ -124,7 +121,7 @@ std::shared_ptr<snake> snake::get_ptr() {
     return shared_from_this();
 }
 
-snake_bb snake::get_new_box() const {
+void snake::update_box() {
     float x = 0.0f;
     float y = 0.0f;
 
@@ -137,23 +134,68 @@ snake_bb snake::get_new_box() const {
     x /= parts.size();
     y /= parts.size();
 
-    float r = 0.0f;
+    box.x = x;
+    box.y = y;
+
     // calculate radius^2
+    float r2 = 0.0f;
     for (auto p : parts) {
-        const float r_x = x - p.x;
-        const float r_y = y - p.y;
-        const float r_tmp = r_x * r_x + r_y * r_y;
-        if (r_tmp > r) {
-            r = r_tmp;
+        const float r_tmp = p.distance_squared(x, y);
+        if (r_tmp > r2) {
+            r2 = r_tmp;
         }
     }
 
-    return snake_bb{x, y, r, this};
+    box.r2 = r2;
+}
+
+void snake::update_box_sectors(std::vector<sector> &sectors) {
+    // remove snake from sectors which passed by
+    auto sec_end = box.sectors.end();
+    for (auto sec_i = box.sectors.begin(); sec_i != sec_end; sec_i ++) {
+        sector *sec = *sec_i;
+        if (!sec->intersect(box, sector_size, sector_diag_size)) {
+            // clean up snake
+            auto sn_end = sec->m_snakes.end();
+            for (auto sn_i = sec->m_snakes.begin(); sn_i != sn_end; sn_i++) {
+                if (sn_i->id == id) {
+                    sec->m_snakes.erase(sn_i);
+                    break;
+                }
+            }
+            // pop sector
+            box.sectors.erase(sec_i);
+            sec_i --;
+            sec_end = box.sectors.end();
+        }
+    }
+
+    // register snake to new sectors
+    const int16_t width_2 = static_cast<int16_t>(box.r2 / sector_size / sector_size);
+    const int16_t sx = static_cast<int16_t>(box.x / sector_size);
+    const int16_t sy = static_cast<int16_t>(box.y / sector_size);
+
+    const int16_t map_width_sectors = static_cast<int16_t>(sector_count_along_edge);
+    for (int16_t j = sy - width_2; j <= sy + width_2; j ++) {
+        for (int16_t i = sx - width_2; i <= sx + width_2; i ++) {
+            if (i >= 0 && i <= map_width_sectors && j >= 0 && j <= map_width_sectors) {
+                // todo abstract index counting
+                const size_t sector_index = j * sector_count_along_edge + i;
+                sector *new_sector = &(sectors[sector_index]);
+                if (!box.find(new_sector) && new_sector->intersect(box, sector_size, sector_diag_size)) {
+                    new_sector->m_snakes.push_back(box);
+                    box.sectors.push_back(new_sector);
+                }
+            }
+        }
+    }
+}
+
+snake_bb snake::get_new_box() const {
+    return { { get_head_x(), get_head_y(), 0 }, id, this, {} };
 }
 
 void snake::tick_ai(long frames) {
-    const uint16_t game_radius = 21600; // todo actually from world instance
-
     for (auto i = 0; i < frames; i ++) {
         // 1. calc angle of radius vector
         float ai_angle = atan2f(get_head_y() - game_radius, get_head_x() - game_radius);
@@ -166,3 +208,4 @@ void snake::tick_ai(long frames) {
         }
     }
 }
+

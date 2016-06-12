@@ -81,6 +81,8 @@ void world::tick_snakes(long dt) {
             m_changes.push_back(s);
 
             if (s->update & change_pos) {
+                s->update_box();
+                s->update_box_sectors(m_sectors);
                 check_snake_bounds(s);
             }
         }
@@ -93,31 +95,33 @@ void world::check_snake_bounds(snake * const s) {
     if (head.distance_squared(game_radius, game_radius) >= death_radius * death_radius) {
         s->update |= change_dying;
     }
-
     // todo fix naive snakes bounds
     auto h1 = s->parts[0];
     auto h2 = s->parts[2];
-    for (auto ptr: m_snakes) {
-        snake *s2 = ptr.second.get();
-        if (s == s2) {
-            continue;
-        }
-
-        if (!s->intersect_snake_box(s2)) {
-            continue;
-        }
-
-        body prev = s2->parts.front();
-        auto end = s2->parts.end();
-        for (auto i = s2->parts.begin() + 1; i != end; i ++) {
-            if (intersect(h1.x, h1.y, h2.x, h2.y, prev.x, prev.y, i->x, i->y)) {
-                // hit
-                s->update |= change_dying;
-                return;
+    for (auto sec_ptr : s->box.sectors) {
+        for (auto bb_ptr: sec_ptr->m_snakes) {
+            const snake *s2 = bb_ptr.ptr;
+            if (s == s2) {
+                continue;
             }
-            prev = *i;
+
+            if (!s->box.intersect(s2->box)) {
+                continue;
+            }
+
+            body prev = s2->parts.front();
+            auto end = s2->parts.end();
+            for (auto i = s2->parts.begin() + 1; i != end; i++) {
+                if (intersect(h1.x, h1.y, h2.x, h2.y, prev.x, prev.y, i->x, i->y)) {
+                    // hit
+                    s->update |= change_dying;
+                    return;
+                }
+                prev = *i;
+            }
         }
     }
+    // std::cout << "intersects " << i << ", sectors " << s->box.get_sectors_count() << ", snakes/in/s " << s->box.get_snakes_in_sectors_count() << std::endl;
 }
 
 void world::init() {
