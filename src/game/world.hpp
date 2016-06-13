@@ -26,28 +26,21 @@ public:
     float next_randomf();
     template <typename T> T next_random(T base);
 
-    typedef std::unordered_map<snake::snake_id_t, std::shared_ptr<snake>> snakes;
-    typedef std::vector<snake::snake_id_t> v_ids;
+    typedef std::unordered_map<snake_id_t, std::shared_ptr<snake>> snakes;
+    typedef std::vector<snake_id_t> v_ids;
 
     void add_snake(snake::ptr ptr);
-    void remove_snake(snake::snake_id_t id);
-    snakes::iterator get_snake(snake::snake_id_t id);
+    void remove_snake(snake_id_t id);
+    snakes::iterator get_snake(snake_id_t id);
     snakes& get_snakes();
     v_ids& get_dead();
 
     std::vector<snake *>& get_changes();
 
     // before calling this, snake must be flushed()
-    void flush_changes(snake::snake_id_t id);
+    void flush_changes(snake_id_t id);
     // before calling this, all snakes must be flushed()
     void flush_changes();
-
-    // world
-    static const uint16_t game_radius = 21600;
-    static const uint16_t max_snake_parts = 411;
-    static const uint16_t sector_size = 300;
-    static const uint16_t sector_count_along_edge = 2 * game_radius / sector_size;
-    static const uint16_t death_radius = game_radius - sector_size;
 
     // const
     static const long virtual_frame_time_ms = 8;
@@ -65,7 +58,7 @@ private:
     // todo: reserve to collections
     snakes m_snakes;
     v_ids m_dead;
-    std::vector<sector> m_sectors;
+    sectors m_sectors;
     std::vector<snake *> m_changes;
 
     // todo fixed point arithmetic

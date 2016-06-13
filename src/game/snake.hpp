@@ -1,6 +1,7 @@
 #ifndef SLITHER_GAME_SNAKE_HPP
 #define SLITHER_GAME_SNAKE_HPP
 
+#include "config.hpp"
 #include "sector.hpp"
 
 #include <cstdint>
@@ -41,7 +42,6 @@ struct body {
 };
 
 struct snake : std::enable_shared_from_this<snake> {
-    typedef uint16_t snake_id_t;
     typedef std::shared_ptr<snake> ptr;
 
     snake_id_t id;
@@ -68,7 +68,7 @@ struct snake : std::enable_shared_from_this<snake> {
     bool tick(long dt);
     void tick_ai(long frames);
     void update_box();
-    void update_box_sectors(std::vector<sector> &sectors);
+    void update_box_sectors(sectors &ss);
 
     inline const body& get_head() const { return parts[0]; }
     inline float get_head_x() const { return parts[0].x; }
@@ -99,14 +99,8 @@ struct snake : std::enable_shared_from_this<snake> {
     static const long rot_step_interval = static_cast<long>(1000.0f * rot_step_angle / snake_angular_speed);
     static const long ai_step_interval = 1000;
 
-    const static uint16_t game_radius = 21600;
-    const static uint16_t sector_size = 300;
-    const static uint16_t sector_count_along_edge = 2 * game_radius / sector_size;
-    const static uint16_t sector_diag_size = 425; // static_cast<uint16_t>(1 + sqrtf(sector_size * sector_size * 2));
-
     static constexpr float f_pi = 3.14159265358979323846f;
     static constexpr float f_2pi = 2.0f * f_pi;
-
 
     inline static float normalize_angle(float ang) {
         return ang - f_2pi * floorf( ang / f_2pi );

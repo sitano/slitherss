@@ -75,7 +75,7 @@ void slither_server::on_timer(error_code const & ec) {
 
 void slither_server::broadcast_updates() {
     for (auto ptr: m_world.get_changes()) {
-        const snake::snake_id_t id = ptr->id;
+        const snake_id_t id = ptr->id;
         const uint8_t flags = ptr->update;
 
         if (flags & change_dead) {
@@ -287,13 +287,13 @@ void slither_server::on_message(connection_hdl hdl, message_ptr ptr) {
 void slither_server::on_close(connection_hdl hdl) {
     const auto ptr = m_sessions.find(hdl);
     if (ptr != m_sessions.end()) {
-        const snake::snake_id_t snakeId = ptr->second.snake_id;
+        const snake_id_t snakeId = ptr->second.snake_id;
         m_sessions.erase(ptr->first);
         remove_snake(snakeId);
     }
 }
 
-void slither_server::remove_snake(snake::snake_id_t id) {
+void slither_server::remove_snake(snake_id_t id) {
         m_connections.erase(id);
         m_world.remove_snake(id);
 }
@@ -301,10 +301,10 @@ void slither_server::remove_snake(snake::snake_id_t id) {
 packet_init slither_server::build_init_packet() {
     packet_init init;
 
-    init.game_radius = m_world.game_radius;
-    init.max_snake_parts = m_world.max_snake_parts;
-    init.sector_size = m_world.sector_size;
-    init.sector_count_along_edge = m_world.sector_count_along_edge;
+    init.game_radius = world_config::game_radius;
+    init.max_snake_parts = world_config::max_snake_parts;
+    init.sector_size = world_config::sector_size;
+    init.sector_count_along_edge = world_config::sector_count_along_edge;
 
     init.spangdv = snake::spangdv;
     init.nsp1 = snake::nsp1;
@@ -325,7 +325,7 @@ long slither_server::get_now_tp() {
     return duration_cast<milliseconds>(steady_clock::now().time_since_epoch()).count();
 }
 
-void slither_server::do_snake(snake::snake_id_t id, std::function<void(snake *)> f) {
+void slither_server::do_snake(snake_id_t id, std::function<void(snake *)> f) {
     if (id > 0) {
         const auto snake_i = m_world.get_snake(id);
         if (snake_i->first == id) {

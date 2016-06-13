@@ -15,8 +15,8 @@ snake::ptr world::create_snake() {
 
     float angle = world::f_2pi * next_randomf();
     float dist = 1000.0f + next_random(5000);
-    uint16_t x = game_radius + dist * cosf(angle);
-    uint16_t y = game_radius + dist * sinf(angle);
+    uint16_t x = world_config::game_radius + dist * cosf(angle);
+    uint16_t y = world_config::game_radius + dist * sinf(angle);
     angle = snake::normalize_angle(angle + f_pi);
     // const uint16_t half_radius = game_radius / 2;
     // uint16_t x = game_radius + next_random(game_radius) - half_radius;
@@ -92,7 +92,7 @@ void world::tick_snakes(long dt) {
 void world::check_snake_bounds(snake * const s) {
     // world bounds
     const body &head = s->get_head();
-    if (head.distance_squared(game_radius, game_radius) >= death_radius * death_radius) {
+    if (head.distance_squared(world_config::game_radius, world_config::game_radius) >= world_config::death_radius * world_config::death_radius) {
         s->update |= change_dying;
     }
     // todo fix naive snakes bounds
@@ -126,33 +126,21 @@ void world::check_snake_bounds(snake * const s) {
 
 void world::init() {
     init_random();
-    init_sectors();
+    m_sectors.init_sectors(world_config::sector_count_along_edge);
     init_food();
-}
-
-void world::init_sectors() {
-    const size_t len = sector_count_along_edge * sector_count_along_edge;
-    m_sectors.reserve(len);
-    for (size_t i = 0; i < len; i ++) {
-        m_sectors.push_back(sector{
-                static_cast<uint8_t>(i % sector_count_along_edge),
-                static_cast<uint8_t>(i / sector_count_along_edge),
-                {}, {}
-        });
-    }
 }
 
 void world::init_food() {
     for (auto s: m_sectors) {
-        const uint8_t cx = sector_count_along_edge / 2;
+        const uint8_t cx = world_config::sector_count_along_edge / 2;
         const uint8_t cy = cx;
         const uint16_t dist = (s.x - cx) * (s.x - cx) + (s.y - cy) * (s.y - cy);
-        const float dp = 1.0f - 1.0f * dist / (sector_count_along_edge * sector_count_along_edge);
+        const float dp = 1.0f - 1.0f * dist / (world_config::sector_count_along_edge *world_config::sector_count_along_edge);
         const size_t density = static_cast<size_t>(dp * 100);
         for (size_t i = 0; i < density; i ++) {
             s.m_food.push_back(food{
-                    static_cast<uint16_t>(s.x * sector_size + next_random<uint16_t>(sector_size)),
-                    static_cast<uint16_t>(s.y * sector_size + next_random<uint16_t>(sector_size)),
+                    static_cast<uint16_t>(s.x * world_config::sector_size + next_random<uint16_t>(world_config::sector_size)),
+                    static_cast<uint16_t>(s.y * world_config::sector_size + next_random<uint16_t>(world_config::sector_size)),
                     next_random<uint8_t>(255),
                     next_random<uint8_t>(255)
             });
@@ -164,12 +152,20 @@ void world::add_snake(snake::ptr ptr) {
     m_snakes.insert({ptr->id, ptr});
 }
 
-void world::remove_snake(snake::snake_id_t id) {
+void world::remove_snake(snake_id_t id) {
     flush_changes(id);
-    m_snakes.erase(id);
+
+    auto sn_i = get_snake(id);
+    if (sn_i != m_snakes.end()) {
+        for (auto sec_ptr : sn_i->second->box.sectors) {
+            sec_ptr->remove_snake(id);
+        }
+
+        m_snakes.erase(id);
+    }
 }
 
-world::snakes::iterator world::get_snake(snake::snake_id_t id) {
+world::snakes::iterator world::get_snake(snake_id_t id) {
     return m_snakes.find(id);
 }
 
@@ -189,7 +185,7 @@ void world::flush_changes() {
     m_changes.clear();
 }
 
-void world::flush_changes(snake::snake_id_t id) {
+void world::flush_changes(snake_id_t id) {
     for (auto ptr = m_changes.begin(); ptr != m_changes.end(); ++ ptr) {
         if ((*ptr)->id == id) {
             m_changes.erase(ptr);
@@ -205,10 +201,10 @@ void world::spawn_snakes(const int snakes) {
 
 std::ostream &operator<<(std::ostream &out, const world &w) {
     return out
-         << "\tgame_radius = " << w.game_radius
-         << "\n\tmax_snake_parts = " << w.max_snake_parts
-         << "\n\tsector_size = " << w.sector_size
-         << "\n\tsector_count_along_edge = " << w.sector_count_along_edge
+         << "\tgame_radius = " << world_config::game_radius
+         << "\n\tmax_snake_parts = " << world_config::max_snake_parts
+         << "\n\tsector_size = " << world_config::sector_size
+         << "\n\tsector_count_along_edge = " << world_config::sector_count_along_edge
          << "\n\tvirtual_frame_time_ms = " << w.virtual_frame_time_ms
          << "\n\tprotocol_version = " << static_cast<long>(w.protocol_version)
          << "\n\tspangdv = " << snake::spangdv

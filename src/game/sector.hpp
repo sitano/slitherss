@@ -2,6 +2,7 @@
 #define SLITHER_GAME_SECTOR_HPP
 
 #include "food.hpp"
+#include "config.hpp"
 
 #include <cstddef>
 #include <cstdint>
@@ -30,7 +31,7 @@ struct snake_bb_pos {
 };
 
 struct snake_bb : snake_bb_pos {
-    uint16_t id;
+    snake_id_t id;
     const snake * ptr;
     std::vector<sector *> sectors;
 
@@ -38,20 +39,8 @@ struct snake_bb : snake_bb_pos {
     snake_bb(snake_bb_pos in_pos, uint16_t in_id, const snake * in_ptr, std::vector<sector *> in_sectors) :
         snake_bb_pos(in_pos), id(in_id), ptr(in_ptr), sectors(in_sectors) {}
 
-    inline bool find(sector *s) {
-        for (auto &i : sectors) {
-            if (i == s) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    inline size_t get_sectors_count() {
-        return sectors.size();
-    }
-
+    bool find(sector *s);
+    size_t get_sectors_count();
     size_t get_snakes_in_sectors_count();
 };
 
@@ -69,6 +58,21 @@ struct sector {
                 1.0f * (sector_diag_size * sector_diag_size / 4) };
         return bb1.intersect(bb2);
     }
+
+    void remove_snake(snake_id_t id);
+};
+
+class sectors : public std::vector<sector> {
+public:
+    sectors() : std::vector<sector>() { }
+
+    void init_sectors(const uint16_t sector_count_along_edge);
+    size_t get_index(uint16_t x, uint16_t y);
+    sector *get_sector(uint16_t x, uint16_t y);
+
+private:
+
+    uint16_t width = 0;
 };
 
 #endif //SLITHER_GAME_SECTOR_HPP
