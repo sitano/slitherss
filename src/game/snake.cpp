@@ -159,6 +159,7 @@ void snake::update_box_sectors(sectors &ss) {
             sec->remove_snake(id);
             // pop sector
             box.sectors.erase(sec_i);
+            box.reg_old_sector_if_missing(sec);
             sec_i --;
             sec_end = box.sectors.end();
         }
@@ -177,6 +178,7 @@ void snake::update_box_sectors(sectors &ss) {
                 if (!box.find(new_sector) && new_sector->intersect(box, world_config::sector_size, world_config::sector_diag_size)) {
                     new_sector->m_snakes.push_back(box);
                     box.sectors.push_back(new_sector);
+                    box.reg_new_sector_if_missing(new_sector);
                 }
             }
         }

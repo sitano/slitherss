@@ -2,7 +2,7 @@
 
 std::ostream& operator<<(std::ostream & out, const packet_set_food & p) {
     out << static_cast<packet_base>(p);
-    for (const food &f : p.m_food) {
+    for (const food &f : *p.food_ptr) {
         out << write_uint8(f.color)
                 << write_uint16(f.x)
                 << write_uint16(f.y)

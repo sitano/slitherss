@@ -9,7 +9,7 @@
 // Sent when food that existed before enters range.
 // The food id is calculated with (y * GameRadius * 3) + x
 struct packet_set_food : public packet_base {
-    packet_set_food() : packet_base(packet_t_set_food) {}
+    explicit packet_set_food(std::vector<food> *ptr) : packet_base(packet_t_set_food), food_ptr(ptr) {}
 
     /**
      * 3	int8	Color?
@@ -17,9 +17,9 @@ struct packet_set_food : public packet_base {
      * 6-7	int16	Food Y
      * 8	int8	value / 5 -> Size
      */
-    std::vector<food> m_food;
+    std::vector<food> *food_ptr;
 
-    size_t get_size() const noexcept { return 3 + m_food.size() * 6; }
+    size_t get_size() const noexcept { return 3 + food_ptr->size() * 6; }
 };
 
 // Sent when food is created while in range (because of turbo or the death of a snake).

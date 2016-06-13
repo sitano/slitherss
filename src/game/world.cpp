@@ -6,7 +6,7 @@
 snake::ptr world::create_snake() {
     m_lastSnakeId ++;
 
-    const auto s = std::make_shared<snake>();
+    auto s = std::make_shared<snake>();
     s->id = m_lastSnakeId;
     s->name = "";
     s->skin = static_cast<uint8_t>(9 + next_random(21 - 9 + 1));
@@ -33,7 +33,10 @@ snake::ptr world::create_snake() {
 
     s->angle = snake::normalize_angle(angle + f_pi);
     s->wangle = snake::normalize_angle(angle + f_pi);
+
     s->box = s->get_new_box();
+    s->update_box();
+    s->update_box_sectors(m_sectors);
 
     return s;
 }

@@ -34,6 +34,8 @@ struct snake_bb : snake_bb_pos {
     snake_id_t id;
     const snake * ptr;
     std::vector<sector *> sectors;
+    std::vector<sector *> new_sectors;
+    std::vector<sector *> old_sectors;
 
     snake_bb() = default;
     snake_bb(snake_bb_pos in_pos, uint16_t in_id, const snake * in_ptr, std::vector<sector *> in_sectors) :
@@ -42,6 +44,8 @@ struct snake_bb : snake_bb_pos {
     bool find(sector *s);
     size_t get_sectors_count();
     size_t get_snakes_in_sectors_count();
+    void reg_new_sector_if_missing(sector *s);
+    void reg_old_sector_if_missing(sector *s);
 };
 
 struct sector {

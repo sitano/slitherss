@@ -87,18 +87,9 @@ void slither_server::broadcast_updates() {
                 "Found dying snake " + std::to_string(id));
 
             if (!ptr->bot) {
-                const auto hdl_i = m_connections.find(id);
-                if (hdl_i == m_connections.end()) {
-                    m_endpoint.get_alog().write(websocketpp::log::alevel::app,
-                        "Failed to locate snake connection " + std::to_string(id));
-                } else {
-                    const auto ses_i = m_sessions.find(hdl_i->second);
-                    if (ses_i == m_sessions.end()) {
-                        m_endpoint.get_alog().write(websocketpp::log::alevel::app,
-                                                    "Failed to locate snake session " + std::to_string(id));
-                    } else {
-                        send_binary(ses_i, packet_end(packet_end::status_death));
-                    }
+                const auto ses_i = load_session_i(id);
+                if (ses_i != m_sessions.end()) {
+                    send_binary(ses_i, packet_end(packet_end::status_death));
                 }
             }
 
@@ -138,16 +129,40 @@ void slither_server::broadcast_updates() {
             }
 
             if (flags & change_pos) {
-                // todo: do we need float pos?
                 ptr->update ^= change_pos;
+
                 broadcast_binary(packet_move_rel { id,
                         static_cast<int8_t>(ptr->get_head_dx()),
                         static_cast<int8_t>(ptr->get_head_dy()) });
+
+                if (!ptr->bot) {
+                    const auto ses_i = load_session_i(id);
+                    if (ses_i != m_sessions.end()) {
+                        send_pov_update_to(ses_i, ptr);
+                    }
+                }
             }
         }
     }
 
     m_world.flush_changes();
+}
+
+void slither_server::send_pov_update_to(sessions::iterator ses_i, snake *ptr) {
+    if (!ptr->box.new_sectors.empty()) {
+        for (const auto s_ptr : ptr->box.new_sectors) {
+            send_binary(ses_i, packet_add_sector(s_ptr->x, s_ptr->y));
+            send_binary(ses_i, packet_set_food(&s_ptr->m_food));
+        }
+        ptr->box.new_sectors.clear();
+    }
+
+    if (!ptr->box.old_sectors.empty()) {
+        for (const auto s_ptr : ptr->box.old_sectors) {
+            send_binary(ses_i, packet_remove_sector(s_ptr->x, s_ptr->y));
+        }
+        ptr->box.old_sectors.clear();
+    }
 }
 
 void slither_server::cleanup_dead() {
@@ -174,12 +189,13 @@ void slither_server::on_open(connection_hdl hdl) {
     // TODO: send sectors packets
     // TODO: send food packets
     // send snake
+    const auto ses_i = m_sessions.find(hdl);
     broadcast_binary(packet_add_snake(ptr));
     broadcast_binary(packet_move {
         ptr->id, static_cast<uint16_t>(ptr->get_head_x()), static_cast<uint16_t>(ptr->get_head_y()) });
+    send_pov_update_to(ses_i, ptr.get());
 
     // todo introduce other snakes in sectors view
-    const auto ses_i = m_sessions.find(hdl);
     for (auto snake : m_world.get_snakes()) {
         if (snake.first != ptr->id) {
             const std::shared_ptr<::snake> &ptr2 = snake.second;
@@ -333,5 +349,24 @@ void slither_server::do_snake(snake_id_t id, std::function<void(snake *)> f) {
         }
     }
 }
+
+slither_server::sessions::iterator slither_server::load_session_i(snake_id_t id) {
+    const auto hdl_i = m_connections.find(id);
+    if (hdl_i == m_connections.end()) {
+        m_endpoint.get_alog().write(websocketpp::log::alevel::app,
+            "Failed to locate snake connection " + std::to_string(id));
+        return m_sessions.end();
+    }
+
+    const auto ses_i = m_sessions.find(hdl_i->second);
+    if (ses_i == m_sessions.end()) {
+        m_endpoint.get_alog().write(websocketpp::log::alevel::app,
+            "Failed to locate snake session " + std::to_string(id));
+    }
+
+    return ses_i;
+}
+
+
 
 

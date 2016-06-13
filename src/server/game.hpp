@@ -35,6 +35,9 @@ public:
 
     packet_init build_init_packet();
 
+    typedef std::map<connection_hdl, session, std::owner_less<connection_hdl>> sessions;
+    typedef std::unordered_map<snake_id_t, connection_hdl> connections;
+
 private:
     void on_socket_init(connection_hdl, boost::asio::ip::tcp::socket & s);
     void on_open(connection_hdl hdl);
@@ -44,17 +47,17 @@ private:
 
     void on_timer(error_code const & ec);
     void broadcast_updates();
+    void send_pov_update_to(sessions::iterator ses_i, snake *ptr);
     void cleanup_dead();
 
     long get_now_tp();
     void next_tick(long last);
+    sessions::iterator load_session_i(snake_id_t id);
 
     void do_snake(snake_id_t id, std::function<void(snake*)> f);
     void print_world_info();
 
 private:
-    typedef std::map<connection_hdl, session, std::owner_less<connection_hdl>> sessions;
-    typedef std::unordered_map<snake_id_t, connection_hdl> connections;
 
     template <typename T>
     void send_binary(sessions::iterator s, T packet) {

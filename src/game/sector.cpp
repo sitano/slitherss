@@ -22,6 +22,26 @@ size_t snake_bb::get_snakes_in_sectors_count() {
     return i;
 }
 
+void snake_bb::reg_new_sector_if_missing(sector *s) {
+    for (auto &ptr : new_sectors) {
+        if (ptr == s) {
+            return;
+        }
+    }
+
+    new_sectors.push_back(s);
+}
+
+void snake_bb::reg_old_sector_if_missing(sector *s) {
+    for (auto &ptr : old_sectors) {
+        if (ptr == s) {
+            return;
+        }
+    }
+
+    old_sectors.push_back(s);
+}
+
 void sector::remove_snake(snake_id_t id) {
     const auto sn_end = m_snakes.end();
     for (auto sn_i = m_snakes.begin(); sn_i != sn_end; sn_i++) {

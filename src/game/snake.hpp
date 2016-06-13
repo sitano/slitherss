@@ -23,6 +23,7 @@ struct body {
     float x;
     float y;
 
+    // todo: do we need float pos?
     // todo: maybe we could have it int and relative coords
     inline void from(const body& p) {
         x = p.x;
