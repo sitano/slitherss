@@ -154,7 +154,7 @@ void snake::update_box_sectors(sectors &ss) {
     auto sec_end = box.sectors.end();
     for (auto sec_i = box.sectors.begin(); sec_i != sec_end; sec_i ++) {
         sector *sec = *sec_i;
-        if (!sec->intersect(box, world_config::sector_size, world_config::sector_diag_size)) {
+        if (!sec->intersect(box)) {
             // clean up snake
             sec->remove_snake(id);
             // pop sector
@@ -166,7 +166,7 @@ void snake::update_box_sectors(sectors &ss) {
     }
 
     // register snake to new sectors
-    const int16_t width_2 = static_cast<int16_t>(box.r2 / world_config::sector_size / world_config::sector_size);
+    const int16_t width_2 = static_cast<int16_t>(1 + linear_sqrt(box.r2 / world_config::sector_size / world_config::sector_size));
     const int16_t sx = static_cast<int16_t>(box.x / world_config::sector_size);
     const int16_t sy = static_cast<int16_t>(box.y / world_config::sector_size);
 
@@ -175,7 +175,7 @@ void snake::update_box_sectors(sectors &ss) {
         for (int16_t i = sx - width_2; i <= sx + width_2; i ++) {
             if (i >= 0 && i <= map_width_sectors && j >= 0 && j <= map_width_sectors) {
                 sector *new_sector = ss.get_sector(i, j);
-                if (!box.find(new_sector) && new_sector->intersect(box, world_config::sector_size, world_config::sector_diag_size)) {
+                if (!box.find(new_sector) && new_sector->intersect(box)) {
                     new_sector->m_snakes.push_back(box);
                     box.sectors.push_back(new_sector);
                     box.reg_new_sector_if_missing(new_sector);
@@ -203,3 +203,7 @@ void snake::tick_ai(long frames) {
     }
 }
 
+float linear_sqrt(float x) {
+    static constexpr float d = 1.0f / 6.0f;
+    return 3.0f + (x - 9.0f) * d;
+}

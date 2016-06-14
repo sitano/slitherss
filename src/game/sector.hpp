@@ -32,14 +32,14 @@ struct snake_bb_pos {
 
 struct snake_bb : snake_bb_pos {
     snake_id_t id;
-    const snake * ptr;
+    const snake * snake_ptr;
     std::vector<sector *> sectors;
     std::vector<sector *> new_sectors;
     std::vector<sector *> old_sectors;
 
     snake_bb() = default;
     snake_bb(snake_bb_pos in_pos, uint16_t in_id, const snake * in_ptr, std::vector<sector *> in_sectors) :
-        snake_bb_pos(in_pos), id(in_id), ptr(in_ptr), sectors(in_sectors) {}
+        snake_bb_pos(in_pos), id(in_id), snake_ptr(in_ptr), sectors(in_sectors) {}
 
     bool find(sector *s);
     size_t get_sectors_count();
@@ -55,11 +55,14 @@ struct sector {
     std::vector<snake_bb> m_snakes;
     std::vector<food> m_food;
 
-    inline bool intersect(const snake_bb_pos &bb2, const uint16_t sector_size, const uint16_t sector_diag_size) const {
+    inline bool intersect(const snake_bb_pos &bb2) const {
+        static const uint16_t half = world_config::sector_size / 2;
+        static constexpr float r_sqr = 1.0f * world_config::sector_diag_size * world_config::sector_diag_size;
+
         const snake_bb_pos bb1 = {
-                1.0f * (x * sector_size),
-                1.0f * (y * sector_size),
-                1.0f * (sector_diag_size * sector_diag_size / 4) };
+                1.0f * (world_config::sector_size * x + half),
+                1.0f * (world_config::sector_size * y + half),
+                r_sqr };
         return bb1.intersect(bb2);
     }
 

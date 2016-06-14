@@ -114,6 +114,6 @@ private:
     long m_ai_ticks = 0;
 };
 
-
+float linear_sqrt(float x);
 
 #endif //SLITHER_GAME_SNAKE_HPP
