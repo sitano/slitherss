@@ -31,8 +31,8 @@ std::ostream& operator<<(std::ostream & out, const packet_add_snake & p) {
             const float bpx = ptr->x - hx;
             const float bpy = ptr->y - hy;
 
-            out << write_uint8(static_cast<uint8_t>((bpx + 127.0f) * 2.0f))
-                << write_uint8(static_cast<uint8_t>((bpy + 127.0f) * 2.0f));
+            out << write_uint8(static_cast<uint8_t>(bpx * 2.0f + 127.0f))
+                << write_uint8(static_cast<uint8_t>(bpy * 2.0f + 127.0f));
 
             hx += bpx;
             hy += bpy;

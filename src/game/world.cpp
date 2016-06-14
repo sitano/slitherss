@@ -27,11 +27,17 @@ snake::ptr world::create_snake() {
     if (s->id > 100) {
         len = 100;
     }
-    for (int i = 0; i < len; ++ i) {
-        s->parts.push_back(body { 1.0f * x, 1.0f * y });
 
+    for (int i = 0; i < len && i < snake::parts_start_move_count; ++ i) {
+        s->parts.push_back(body { 1.0f * x, 1.0f * y });
         x += cosf(angle) * snake::move_step_distance;
         y += sinf(angle) * snake::move_step_distance;
+    }
+
+    for (int i = snake::parts_start_move_count; i < len; ++ i) {
+        s->parts.push_back(body { 1.0f * x, 1.0f * y });
+        x += cosf(angle) * 10;
+        y += sinf(angle) * 10;
     }
 
     s->angle = snake::normalize_angle(angle + f_pi);
@@ -89,8 +95,13 @@ void world::tick_snakes(long dt) {
             if (s->update & change_pos) {
                 s->update_box();
                 s->update_box_sectors(m_sectors);
-                check_snake_bounds(s);
             }
+        }
+    }
+
+    for (auto s: m_changes) {
+        if (s->update & change_pos) {
+            check_snake_bounds(s);
         }
     }
 }
@@ -101,9 +112,10 @@ void world::check_snake_bounds(snake * const s) {
     if (head.distance_squared(world_config::game_radius, world_config::game_radius) >= world_config::death_radius * world_config::death_radius) {
         s->update |= change_dying;
     }
-    // todo fix naive snakes bounds
+
+    // snake bounds
     auto h1 = s->parts[0];
-    auto h2 = s->parts[2];
+//    auto h2 = s->parts[2];
     for (auto sec_ptr : s->box.sectors) {
         for (auto bb_ptr: sec_ptr->m_snakes) {
             const snake *s2 = bb_ptr.snake_ptr;
@@ -115,15 +127,20 @@ void world::check_snake_bounds(snake * const s) {
                 continue;
             }
 
-            body prev = s2->parts.front();
+            // body prev = s2->parts.front();
             auto end = s2->parts.end();
             for (auto i = s2->parts.begin() + 1; i != end; i++) {
-                if (intersect(h1.x, h1.y, h2.x, h2.y, prev.x, prev.y, i->x, i->y)) {
+                if (intersect_circle(i->x, i->y, h1.x, h1.y, snake::move_step_distance * 2)) {
                     // hit
                     s->update |= change_dying;
-                    return;
                 }
-                prev = *i;
+
+                // if (intersect_segments(h1.x, h1.y, h2.x, h2.y, prev.x, prev.y, i->x, i->y)) {
+                    // hit
+                  //  s->update |= change_dying;
+                   // return;
+                //}
+                //prev = *i;
             }
         }
     }
@@ -229,28 +246,3 @@ std::ostream &operator<<(std::ostream &out, const world &w) {
          << "\n\trot_step_angle = " << snake::rot_step_angle;
 }
 
-bool intersect(float p0_x, float p0_y, float p1_x, float p1_y,
-               float p2_x, float p2_y, float p3_x, float p3_y) {
-    float s1_x, s1_y, s2_x, s2_y;
-    s1_x = p1_x - p0_x;     s1_y = p1_y - p0_y;
-    s2_x = p3_x - p2_x;     s2_y = p3_y - p2_y;
-
-    const float d = (-s2_x * s1_y + s1_x * s2_y);
-    static const float epsilon = 0.0001f;
-    if (d <= epsilon && d >= -epsilon) {
-        return false;
-    }
-
-    // todo check is it better to have 2 more mul, then 1 branch
-    const float s = (-s1_y * (p0_x - p2_x) + s1_x * (p0_y - p2_y));
-    if (s < 0 || s > d) {
-        return false;
-    }
-
-    const float t = ( s2_x * (p0_y - p2_y) - s2_y * (p0_x - p2_x));
-    if (t < 0 || t > d) {
-        return false;
-    }
-
-    return true;
-}

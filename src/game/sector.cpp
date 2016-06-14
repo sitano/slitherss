@@ -1,5 +1,37 @@
 #include "sector.hpp"
 
+bool intersect_segments(float p0_x, float p0_y, float p1_x, float p1_y,
+                        float p2_x, float p2_y, float p3_x, float p3_y) {
+    float s1_x, s1_y, s2_x, s2_y;
+    s1_x = p1_x - p0_x;     s1_y = p1_y - p0_y;
+    s2_x = p3_x - p2_x;     s2_y = p3_y - p2_y;
+
+    const float d = (-s2_x * s1_y + s1_x * s2_y);
+    static const float epsilon = 0.0001f;
+    if (d <= epsilon && d >= -epsilon) {
+        return false;
+    }
+
+    // todo check is it better to have 2 more mul, then 1 branch
+    const float s = (-s1_y * (p0_x - p2_x) + s1_x * (p0_y - p2_y));
+    if (s < 0 || s > d) {
+        return false;
+    }
+
+    const float t = ( s2_x * (p0_y - p2_y) - s2_y * (p0_x - p2_x));
+    if (t < 0 || t > d) {
+        return false;
+    }
+
+    return true;
+}
+
+bool intersect_circle(float p0_x, float p0_y, float p1_x, float p1_y, float r) {
+    const float dx = p0_x - p1_x;
+    const float dy = p0_y - p1_y;
+    return dx * dx + dy * dy <= r * r;
+}
+
 bool snake_bb::find(sector *s) {
     for (auto &i : sectors) {
         if (i == s) {
