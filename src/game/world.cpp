@@ -23,21 +23,15 @@ snake::ptr world::create_snake() {
     // uint16_t y = game_radius + next_random(game_radius) - half_radius;
     // todo: reserve snake.parts at least for sizeof(snake) bytes
     // todo: fix angles
-    int len = 1 /* head */ + 2 /* body min = 2 */ + next_random(10);
-    if (s->id > 100) {
-        len = 100;
-    }
+    int len = 100; // 1 /* head */ + 2 /* body min = 2 */ + next_random(10);
+    // if (s->id > 100) {
+    //    len = 100;
+    //}
 
-    for (int i = 0; i < len && i < snake::parts_start_move_count; ++ i) {
+    for (int i = 0; i < len ; ++ i) {
         s->parts.push_back(body { 1.0f * x, 1.0f * y });
         x += cosf(angle) * snake::move_step_distance;
         y += sinf(angle) * snake::move_step_distance;
-    }
-
-    for (int i = snake::parts_start_move_count; i < len; ++ i) {
-        s->parts.push_back(body { 1.0f * x, 1.0f * y });
-        x += cosf(angle) * 10;
-        y += sinf(angle) * 10;
     }
 
     s->angle = snake::normalize_angle(angle + f_pi);
@@ -116,8 +110,8 @@ void world::check_snake_bounds(snake * const s) {
     // snake bounds
     auto h1 = s->parts[0];
 //    auto h2 = s->parts[2];
-    for (auto sec_ptr : s->box.sectors) {
-        for (auto bb_ptr: sec_ptr->m_snakes) {
+    for (const sector *sec_ptr : s->box.sectors) {
+        for (const snake_bb &bb_ptr: sec_ptr->m_snakes) {
             const snake *s2 = bb_ptr.snake_ptr;
             if (s == s2) {
                 continue;
