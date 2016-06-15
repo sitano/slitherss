@@ -10,7 +10,7 @@
 class world {
 public:
 
-    void init();
+    void init(world_config config);
     void init_sectors();
     void init_food();
 
@@ -69,6 +69,8 @@ private:
     uint16_t m_lastSnakeId = 0;
     long m_ticks = 0;
     uint32_t m_virtual_frames = 0;
+
+    world_config m_config;
 };
 
 std::ostream& operator<<(std::ostream & out, const world & w);

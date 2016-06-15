@@ -1,11 +1,25 @@
 #ifndef SLITHER_SERVER_CONFIG_HPP_H
 #define SLITHER_SERVER_CONFIG_HPP_H
 
+#include "game/config.hpp"
+
 #include <websocketpp/config/asio_no_tls.hpp>
 // #include <websocketpp/extensions/permessage_deflate/enabled.hpp>
 
 using websocketpp::log::alevel;
 using websocketpp::log::elevel;
+
+struct game_config {
+    uint16_t port = 8080;
+
+    bool help = false;
+    bool version = false;
+    bool verbose = false;
+
+    world_config world;
+};
+
+game_config parse_command_line(const int argc, const char* const argv[]);
 
 struct slither_server_config : public websocketpp::config::asio {
     // pull default settings from our core config

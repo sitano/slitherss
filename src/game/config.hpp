@@ -6,6 +6,13 @@
 typedef uint16_t snake_id_t;
 
 struct world_config {
+    // generate bots on start count
+    uint16_t bots = 0;
+
+    // average snake length on init
+    uint16_t snake_average_length = 2;
+    uint16_t snake_min_length = 2;
+
     static const uint16_t game_radius = 21600;
     static const uint16_t max_snake_parts = 411;
     static const uint16_t sector_size = 300;

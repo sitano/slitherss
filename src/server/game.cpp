@@ -18,19 +18,19 @@ slither_server::slither_server() {
     m_endpoint.set_close_handler(bind(&slither_server::on_close, this, _1));
 }
 
-void slither_server::run(const uint16_t port, const uint16_t snakes) {
-    m_endpoint.get_alog().write(websocketpp::log::alevel::app, "Running slither server on port " + std::to_string(port));
+void slither_server::run(game_config config) {
+    m_endpoint.get_alog().write(websocketpp::log::alevel::app, "Running slither server on port " + std::to_string(config.port));
     print_world_info();
 
-    m_endpoint.listen(port);
+    m_endpoint.listen(config.port);
     m_endpoint.start_accept();
 
-    m_world.init();
-    m_world.spawn_snakes(snakes);
+    m_world.init(config.world);
     m_init = build_init_packet();
     next_tick(get_now_tp());
 
     try {
+        m_endpoint.get_alog().write(websocketpp::log::alevel::app, "Server started...");
         m_endpoint.run();
     } catch (websocketpp::exception const & e) {
         std::cout << e.what() << std::endl;

@@ -31,7 +31,7 @@ class slither_server {
 public:
     slither_server();
 
-    void run(const uint16_t port, const uint16_t snakes);
+    void run(game_config config);
 
     packet_init build_init_packet();
 

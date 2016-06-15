@@ -1,9 +1,6 @@
 TODO
 ====
 
-- configuration framework?
-- profile 100 snakes 100 length
-- fix segfault while 100 snake 100 length
 - fix food in sectors show
 - snakes intersection cache while scanning sectors
 - snakes intersection only from head sectors

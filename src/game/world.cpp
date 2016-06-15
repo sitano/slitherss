@@ -23,10 +23,8 @@ snake::ptr world::create_snake() {
     // uint16_t y = game_radius + next_random(game_radius) - half_radius;
     // todo: reserve snake.parts at least for sizeof(snake) bytes
     // todo: fix angles
-    int len = 100; // 1 /* head */ + 2 /* body min = 2 */ + next_random(10);
-    // if (s->id > 100) {
-    //    len = 100;
-    //}
+    const int len = 1 /* head */ + 2 /* body min = 2 */ +
+        std::max(m_config.snake_min_length, next_random(m_config.snake_average_length));
 
     for (int i = 0; i < len ; ++ i) {
         s->parts.push_back(body { 1.0f * x, 1.0f * y });
@@ -141,10 +139,12 @@ void world::check_snake_bounds(snake * const s) {
     // std::cout << "intersects " << i << ", sectors " << s->box.get_sectors_count() << ", snakes/in/s " << s->box.get_snakes_in_sectors_count() << std::endl;
 }
 
-void world::init() {
+void world::init(world_config config) {
+    m_config = config;
     init_random();
     m_sectors.init_sectors(world_config::sector_count_along_edge);
     init_food();
+    spawn_snakes(config.bots);
 }
 
 void world::init_food() {
