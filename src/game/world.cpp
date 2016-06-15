@@ -142,17 +142,21 @@ void world::check_snake_bounds(snake * const s) {
 void world::init(world_config config) {
     m_config = config;
     init_random();
-    m_sectors.init_sectors(world_config::sector_count_along_edge);
+    init_sectors();
     init_food();
     spawn_snakes(config.bots);
 }
 
+void world::init_sectors() {
+    m_sectors.init_sectors(world_config::sector_count_along_edge);
+}
+
 void world::init_food() {
-    for (auto s: m_sectors) {
+    for (sector &s: m_sectors) {
         const uint8_t cx = world_config::sector_count_along_edge / 2;
         const uint8_t cy = cx;
         const uint16_t dist = (s.x - cx) * (s.x - cx) + (s.y - cy) * (s.y - cy);
-        const float dp = 1.0f - 1.0f * dist / (world_config::sector_count_along_edge *world_config::sector_count_along_edge);
+        const float dp = 1.0f - 1.0f * dist / (world_config::sector_count_along_edge * world_config::sector_count_along_edge);
         const size_t density = static_cast<size_t>(dp * 100);
         for (size_t i = 0; i < density; i ++) {
             s.m_food.push_back(food{
