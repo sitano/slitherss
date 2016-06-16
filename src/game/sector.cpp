@@ -33,7 +33,7 @@ bool intersect_circle(float p0_x, float p0_y, float p1_x, float p1_y, float r) {
 }
 
 bool snake_bb::find(sector *s) {
-    for (auto &i : sectors) {
+    for (sector *i : sectors) {
         if (i == s) {
             return true;
         }

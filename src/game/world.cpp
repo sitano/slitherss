@@ -1,7 +1,7 @@
 #include "world.hpp"
 #include <ctime>
 #include <iostream>
-#include <cmath>
+#include <algorithm>
 
 snake::ptr world::create_snake() {
     m_lastSnakeId ++;
@@ -99,43 +99,73 @@ void world::tick_snakes(long dt) {
 }
 
 void world::check_snake_bounds(snake * const s) {
+    static std::vector<snake_id_t> cs_cache;
+    cs_cache.clear();
+
     // world bounds
     const body &head = s->get_head();
     if (head.distance_squared(world_config::game_radius, world_config::game_radius) >= world_config::death_radius * world_config::death_radius) {
         s->update |= change_dying;
     }
 
-    // snake bounds
-    auto h1 = s->parts[0];
-//    auto h2 = s->parts[2];
-    for (const sector *sec_ptr : s->box.sectors) {
-        for (const snake_bb &bb_ptr: sec_ptr->m_snakes) {
-            const snake *s2 = bb_ptr.snake_ptr;
-            if (s == s2) {
-                continue;
-            }
+    // because we check after move being made
+    auto check = s->parts[1];
 
-            if (!s->box.intersect(s2->box)) {
-                continue;
-            }
+    // check bound coverage
+    const int16_t sx = static_cast<int16_t>(check.x / world_config::sector_size);
+    const int16_t sy = static_cast<int16_t>(check.y / world_config::sector_size);
+    static const int16_t width = 1;
 
-            // body prev = s2->parts.front();
-            auto end = s2->parts.end();
-            for (auto i = s2->parts.begin() + 1; i != end; i++) {
-                if (intersect_circle(i->x, i->y, h1.x, h1.y, snake::move_step_distance * 2)) {
-                    // hit
-                    s->update |= change_dying;
+    // 3x3 check head coverage
+    const int16_t map_width_sectors = static_cast<int16_t>(world_config::sector_count_along_edge);
+    for (int16_t j = sy - width; j <= sy + width; j ++) {
+        for (int16_t i = sx - width; i <= sx + width; i++) {
+            if (i >= 0 && i <= map_width_sectors && j >= 0 && j <= map_width_sectors) {
+                sector *sec_ptr = m_sectors.get_sector(i, j);
+                // check sector intersects head
+                // todo radius from snake mass
+                if (sec_ptr->intersect({ check.x, check.y, snake::move_step_distance * snake::move_step_distance })) {
+                    // check sector snakes
+                    for (const snake_bb &bb_ptr: sec_ptr->m_snakes) {
+                        const snake *s2 = bb_ptr.snake_ptr;
+                        if (s == s2) {
+                            continue;
+                        }
+
+                        // check if snakes already checked
+                        if (std::find(cs_cache.begin(), cs_cache.end(), s2->id) != cs_cache.end()) {
+                            continue;
+                        } else {
+                            cs_cache.push_back(s2->id);
+                        }
+
+                        // check if snake intersects our bound box
+                        if (!s->box.intersect(s2->box)) {
+                            continue;
+                        }
+
+                        // body prev = s2->parts.front();
+                        auto bp_end = s2->parts.end();
+                        for (auto bp_i = s2->parts.begin() + 1; bp_i != bp_end; bp_i++) {
+                            // todo radius from snake mass
+                            if (intersect_circle(bp_i->x, bp_i->y, check.x, check.y, snake::move_step_distance * 2)) {
+                                // hit
+                                s->update |= change_dying;
+                            }
+
+                            // if (intersect_segments(h1.x, h1.y, h2.x, h2.y, prev.x, prev.y, i->x, i->y)) {
+                                // hit
+                              //  s->update |= change_dying;
+                               // return;
+                            //}
+                            //prev = *i;
+                        }
+                    }
                 }
-
-                // if (intersect_segments(h1.x, h1.y, h2.x, h2.y, prev.x, prev.y, i->x, i->y)) {
-                    // hit
-                  //  s->update |= change_dying;
-                   // return;
-                //}
-                //prev = *i;
             }
         }
     }
+
     // std::cout << "intersects " << i << ", sectors " << s->box.get_sectors_count() << ", snakes/in/s " << s->box.get_snakes_in_sectors_count() << std::endl;
 }
 
