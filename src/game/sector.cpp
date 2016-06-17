@@ -26,10 +26,31 @@ bool intersect_segments(float p0_x, float p0_y, float p1_x, float p1_y,
     return true;
 }
 
-bool intersect_circle(float p0_x, float p0_y, float p1_x, float p1_y, float r) {
+// center, point, radius
+bool intersect_circle(float c_x, float c_y, float p_x, float p_y, float r) {
+    return distance_squared(c_x, c_y, p_x, p_y) <= r * r;
+}
+
+// line vw, and point p
+// http://stackoverflow.com/questions/849211/shortest-distance-between-a-point-and-a-line-segment
+float distance_squared(float v_x, float v_y, float w_x, float w_y, float p_x, float p_y) {
+    // Return minimum distance between line segment vw and point p
+    const float l2 = distance_squared(v_x, v_y, w_x, w_y);  // i.e. |w-v|^2 -  avoid a sqrt
+    if (l2 == 0.0) return distance_squared(p_x, p_y, w_x, w_x);   // v == w case
+    // Consider the line extending the segment, parameterized as v + t (w - v).
+    // We find projection of point p onto the line.
+    // It falls where t = [(p-v) . (w-v)] / |w-v|^2
+    // We clamp t from [0,1] to handle points outside the segment vw.
+    float t = ((p_x - v_x) * (w_x - v_x) + (p_y - v_y) * (w_y - v_y)) / l2;
+    t = fmaxf(0, fminf(1, t));
+    return distance_squared(p_x, p_y, v_x + t * (w_x - v_x), v_y + t * (w_y - v_y) );
+}
+
+// points p0, p1
+float distance_squared(float p0_x, float p0_y, float p1_x, float p1_y) {
     const float dx = p0_x - p1_x;
     const float dy = p0_y - p1_y;
-    return dx * dx + dy * dy <= r * r;
+    return dx * dx + dy * dy;
 }
 
 bool snake_bb::find(sector *s) {

@@ -106,6 +106,7 @@ void world::check_snake_bounds(snake * const s) {
     const body &head = s->get_head();
     if (head.distance_squared(world_config::game_radius, world_config::game_radius) >= world_config::death_radius * world_config::death_radius) {
         s->update |= change_dying;
+        return;
     }
 
     // because we check after move being made
@@ -144,21 +145,26 @@ void world::check_snake_bounds(snake * const s) {
                             continue;
                         }
 
-                        // body prev = s2->parts.front();
+                        auto prev = s2->parts.begin();
                         auto bp_end = s2->parts.end();
                         for (auto bp_i = s2->parts.begin() + 1; bp_i != bp_end; bp_i++) {
                             // todo radius from snake mass
+                            // weak body part check
                             if (intersect_circle(bp_i->x, bp_i->y, check.x, check.y, snake::move_step_distance * 2)) {
-                                // hit
-                                s->update |= change_dying;
+                                // check actual snake body
+                                // todo radius from snake mass
+                                const float r1 = 15.0f; // moving snake body radius
+                                // todo radius from snake mass
+                                const float r2 = 15.0f; // checked snake body radius
+                                const float r = r1 + r2;
+                                const float r_sqr = r * r;
+                                if (distance_squared(bp_i->x, bp_i->y, prev->x, prev->y, check.x, check.y) <= r_sqr) {
+                                    s->update |= change_dying;
+                                    return;
+                                }
                             }
 
-                            // if (intersect_segments(h1.x, h1.y, h2.x, h2.y, prev.x, prev.y, i->x, i->y)) {
-                                // hit
-                              //  s->update |= change_dying;
-                               // return;
-                            //}
-                            //prev = *i;
+                            prev++;
                         }
                     }
                 }

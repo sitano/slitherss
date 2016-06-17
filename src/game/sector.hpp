@@ -27,7 +27,15 @@ struct sector;
 bool intersect_segments(float p0_x, float p0_y, float p1_x, float p1_y,
                         float p2_x, float p2_y, float p3_x, float p3_y);
 
-bool intersect_circle(float p0_x, float p0_y, float p1_x, float p1_y, float r);
+// center, point, radius
+bool intersect_circle(float c_x, float c_y, float p_x, float p_y, float r);
+
+// line vw, and point p
+// http://stackoverflow.com/questions/849211/shortest-distance-between-a-point-and-a-line-segment
+float distance_squared(float v_x, float v_y, float w_x, float w_y, float p_x, float p_y);
+
+// points p0, p1
+float distance_squared(float p0_x, float p0_y, float p1_x, float p1_y);
 
 struct snake_bb_pos {
     float x;
