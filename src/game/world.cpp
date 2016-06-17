@@ -153,12 +153,14 @@ void world::check_snake_bounds(snake * const s) {
                             if (intersect_circle(bp_i->x, bp_i->y, check.x, check.y, snake::move_step_distance * 2)) {
                                 // check actual snake body
                                 // todo radius from snake mass
-                                const float r1 = 15.0f; // moving snake body radius
+                                const float r1 = 23.0f; // moving snake body radius
                                 // todo radius from snake mass
-                                const float r2 = 15.0f; // checked snake body radius
+                                const float r2 = 23.0f; // checked snake body radius
                                 const float r = r1 + r2;
-                                const float r_sqr = r * r;
-                                if (distance_squared(bp_i->x, bp_i->y, prev->x, prev->y, check.x, check.y) <= r_sqr) {
+
+                                if (intersect_circle(bp_i->x, bp_i->y, check.x, check.y, r) ||
+                                        intersect_circle(prev->x, prev->y, check.x, check.y, r) ||
+                                        intersect_circle(bp_i->x + (prev->x - bp_i->x) / 2.0f, bp_i->y + (prev->y - bp_i->y) / 2.0f, check.x, check.y, r)) {
                                     s->update |= change_dying;
                                     return;
                                 }
