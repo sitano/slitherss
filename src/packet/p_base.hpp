@@ -63,6 +63,10 @@ enum out_packet_t : uint8_t {
     packet_t_add_prey = 'y', // Add/remove Prey
     packet_t_rem_prey = 'y', // Add/remove Prey
     packet_t_kill = 'k', // Kill (unused in the game-code)
+
+    // custom debug
+    packet_d_reset = '0', // reset debug render buffer
+    packet_d_draw = '!', // draw something
 };
 
 std::ostream& operator<<(std::ostream & out, const packet_base & p);

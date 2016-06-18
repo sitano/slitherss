@@ -81,7 +81,30 @@ void slither_server::broadcast_debug() {
         return;
     }
 
+    packet_debug_reset reset;
+    packet_debug_draw draw;
 
+    for (auto ptr: m_world.get_snakes()) {
+        const snake *s = ptr.second.get();
+        for (const body &b : s->parts) {
+            // body
+            draw.circles.push_back(d_draw_circle {
+                    static_cast<uint16_t>(b.x),
+                    static_cast<uint16_t>(b.y),
+                    snake::move_step_distance * snake::move_step_distance,
+                    102 });
+        }
+
+        // body
+        draw.circles.push_back(d_draw_circle {
+                static_cast<uint16_t>(s->box.x),
+                static_cast<uint16_t>(s->box.y),
+                static_cast<uint16_t>(s->box.r2),
+                255 });
+    }
+
+    broadcast_binary(reset);
+    broadcast_binary(draw);
 }
 
 void slither_server::broadcast_updates() {

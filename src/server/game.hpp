@@ -2,8 +2,11 @@
 #define SLITHER_SERVER_GAME_HPP
 
 #include "server.hpp"
+
 #include "game/world.hpp"
+
 #include "packet/p_all.hpp"
+#include "packet/d_all.hpp"
 
 #include <map>
 #include <memory>

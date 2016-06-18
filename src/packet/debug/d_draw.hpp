@@ -1,0 +1,48 @@
+#ifndef SLITHER_PACKET_DEBUG_DRAW_HPP
+#define SLITHER_PACKET_DEBUG_DRAW_HPP
+
+#include "packet/p_base.hpp"
+
+#include <vector>
+
+struct d_draw_dot {
+    uint16_t x;
+    uint16_t y;
+
+    static uint8_t get_header() { return '.'; }
+    static size_t get_size() { return 2 + 2; }
+};
+
+struct d_draw_segment {
+    d_draw_dot v, w;
+    uint8_t color;
+
+    static uint8_t get_header() { return '_'; }
+    static size_t get_size() { return d_draw_dot::get_size() * 2 + 1; }
+};
+
+struct d_draw_circle {
+    d_draw_dot v;
+    uint16_t r2; // squared
+    uint8_t color;
+
+    static uint8_t get_header() { return 'o'; }
+    static size_t get_size() { return d_draw_dot::get_size() + 2 + 1; }
+};
+
+struct packet_debug_draw : public packet_base {
+    packet_debug_draw() : packet_base(packet_d_draw) {}
+
+    std::vector<d_draw_dot> dots;
+    std::vector<d_draw_segment> segments;
+    std::vector<d_draw_circle> circles;
+
+    size_t get_size() const noexcept { return 3 +
+            dots.size() * d_draw_dot::get_size() +
+            segments.size() * d_draw_segment::get_size() +
+            circles.size() * d_draw_circle::get_size(); }
+};
+
+std::ostream& operator<<(std::ostream & out, const packet_debug_draw & p);
+
+#endif //SLITHER_PACKET_DEBUG_DRAW_HPP
