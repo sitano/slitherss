@@ -84,28 +84,75 @@ void slither_server::broadcast_debug() {
     packet_debug_draw draw;
 
     for (snake *s: m_world.get_changes()) {
-        uint16_t sis = static_cast<uint16_t>(s->id * 1000);
+        uint16_t sis = static_cast<uint16_t>(s->id * 200);
 
-        // body
+        // bound box
         draw.circles.push_back(d_draw_circle {
                 sis ++,
-                static_cast<uint16_t>(s->box.x),
-                static_cast<uint16_t>(s->box.y),
-                static_cast<uint16_t>(s->box.r2),
-                255 });
+                {
+                    static_cast<uint16_t>(s->box.x),
+                    static_cast<uint16_t>(s->box.y)
+                },
+                static_cast<uint24_t>(s->box.r2),
+                200 });
 
+        // body parts
         for (const body &b : s->parts) {
-            // body
             draw.circles.push_back(d_draw_circle {
                     sis ++,
-                    static_cast<uint16_t>(b.x),
-                    static_cast<uint16_t>(b.y),
-                    snake::move_step_distance * snake::move_step_distance,
+                    {
+                            static_cast<uint16_t>(b.x),
+                            static_cast<uint16_t>(b.y)
+                    },
+                    static_cast<uint24_t>(snake::move_step_distance * snake::move_step_distance),
                     102 });
         }
+
+        // body inner circles
+        const float r1 = 14.0f; // moving snake body radius
+
+        auto prev = s->parts.begin();
+        draw.circles.push_back(d_draw_circle {
+                    sis ++,
+                    {
+                            static_cast<uint16_t>(prev->x),
+                            static_cast<uint16_t>(prev->y)
+                    },
+                    static_cast<uint24_t>(r1 * r1),
+                    200 });
+
+        const body &sec = *(s->parts.begin() + 1);
+        draw.circles.push_back(d_draw_circle {
+                sis ++,
+                {
+                        static_cast<uint16_t>(sec.x),
+                        static_cast<uint16_t>(sec.y)
+                },
+                static_cast<uint24_t>(r1 * r1),
+                60 });
+
+        draw.circles.push_back(d_draw_circle {
+                sis ++,
+                {
+                        static_cast<uint16_t>(sec.x + (prev->x - sec.x) / 2.0f),
+                        static_cast<uint16_t>(sec.y + (prev->y - sec.y) / 2.0f)
+                },
+                static_cast<uint24_t>(r1 * r1),
+                100 });
+
+        draw.circles.push_back(d_draw_circle {
+                sis ++,
+                {
+                        static_cast<uint16_t>(s->parts.back().x),
+                        static_cast<uint16_t>(s->parts.back().y)
+                },
+                static_cast<uint24_t>(r1 * r1),
+                100 });
     }
 
-    broadcast_debug(draw);
+    if (!draw.empty()) {
+        broadcast_debug(draw);
+    }
 }
 
 void slither_server::broadcast_updates() {

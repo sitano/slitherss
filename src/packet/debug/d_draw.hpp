@@ -10,6 +10,10 @@ struct d_draw_dot {
     uint16_t x;
     uint16_t y;
 
+    d_draw_dot() = default;
+    d_draw_dot(uint16_t in_x, uint16_t in_y) : id(0), x(in_x), y(in_y) {}
+    d_draw_dot(uint16_t in_id, uint16_t in_x, uint16_t in_y) : id(in_id), x(in_x), y(in_y) {}
+
     static uint8_t get_header() { return '.'; }
     static size_t get_size() { return 2 + 2 + 2; }
 };
@@ -26,7 +30,7 @@ struct d_draw_segment {
 struct d_draw_circle {
     uint16_t id;
     d_draw_dot v;
-    uint16_t r2; // squared
+    uint24_t r2; // squared
     uint8_t color;
 
     static uint8_t get_header() { return 'o'; }
@@ -39,6 +43,10 @@ struct packet_debug_draw : public packet_base {
     std::vector<d_draw_dot> dots;
     std::vector<d_draw_segment> segments;
     std::vector<d_draw_circle> circles;
+
+    bool empty() {
+        return dots.empty() && segments.empty() && circles.empty();
+    }
 
     size_t get_size() const noexcept { return 3 +
             dots.size() * d_draw_dot::get_size() +

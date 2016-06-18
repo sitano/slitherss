@@ -25,7 +25,7 @@ std::ostream& operator<<(std::ostream & out, const packet_debug_draw & p) {
             << write_uint16(v.id)
             << write_uint16(v.v.x)
             << write_uint16(v.v.y)
-            << write_uint16(v.r2)
+            << write_uint24(v.r2)
             << write_uint8(v.color);
     }
 
