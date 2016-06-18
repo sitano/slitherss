@@ -72,13 +72,13 @@ size_t snake_bb::get_snakes_in_sectors_count() {
 }
 
 void snake_bb::reg_new_sector_if_missing(sector *s) {
-    if (std::find(new_sectors.begin(), new_sectors.end(), s) == sectors.end()) {
+    if (std::find(new_sectors.begin(), new_sectors.end(), s) == new_sectors.end()) {
         new_sectors.push_back(s);
     }
 }
 
 void snake_bb::reg_old_sector_if_missing(sector *s) {
-    if (std::find(old_sectors.begin(), old_sectors.end(), s) == sectors.end()) {
+    if (std::find(old_sectors.begin(), old_sectors.end(), s) == old_sectors.end()) {
         old_sectors.push_back(s);
     }
 }

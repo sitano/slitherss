@@ -6,28 +6,31 @@
 #include <vector>
 
 struct d_draw_dot {
+    uint16_t id;
     uint16_t x;
     uint16_t y;
 
     static uint8_t get_header() { return '.'; }
-    static size_t get_size() { return 2 + 2; }
+    static size_t get_size() { return 2 + 2 + 2; }
 };
 
 struct d_draw_segment {
+    uint16_t id;
     d_draw_dot v, w;
     uint8_t color;
 
     static uint8_t get_header() { return '_'; }
-    static size_t get_size() { return d_draw_dot::get_size() * 2 + 1; }
+    static size_t get_size() { return 2 + 4 + 4 + 1; }
 };
 
 struct d_draw_circle {
+    uint16_t id;
     d_draw_dot v;
     uint16_t r2; // squared
     uint8_t color;
 
     static uint8_t get_header() { return 'o'; }
-    static size_t get_size() { return d_draw_dot::get_size() + 2 + 1; }
+    static size_t get_size() { return 2 + 4 + 2 + 1; }
 };
 
 struct packet_debug_draw : public packet_base {
