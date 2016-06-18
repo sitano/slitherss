@@ -8,7 +8,7 @@ struct food {
     uint16_t y;
 
     uint8_t size;
-    uint8_t color;
+    uint8_t color; // at least 28 types of colors
 };
 
 #endif //SLITHER_GAME_FOOD_HPP
