@@ -105,7 +105,7 @@ void slither_server::broadcast_debug() {
         }
     }
 
-    broadcast_binary(draw);
+    broadcast_debug(draw);
 }
 
 void slither_server::broadcast_updates() {

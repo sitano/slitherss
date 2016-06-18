@@ -83,6 +83,13 @@ private:
         }
     }
 
+    template <typename T>
+    void broadcast_debug(T packet) {
+        for (auto &s: m_sessions) {
+            m_endpoint.send_binary(s.first, packet);
+        }
+    }
+
     server m_endpoint;
 
     server::timer_ptr m_timer;
