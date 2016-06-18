@@ -175,7 +175,7 @@ void snake::update_box_sectors(sectors &ss) {
         for (int16_t i = sx - width_2; i <= sx + width_2; i ++) {
             if (i >= 0 && i <= map_width_sectors && j >= 0 && j <= map_width_sectors) {
                 sector *new_sector = ss.get_sector(i, j);
-                if (!box.find(new_sector) && new_sector->intersect(box)) {
+                if (!box.any_of(new_sector) && new_sector->intersect(box)) {
                     new_sector->m_snakes.push_back(box);
                     box.sectors.push_back(new_sector);
                     box.reg_new_sector_if_missing(new_sector);

@@ -19,6 +19,7 @@ game_config parse_command_line(const int argc, const char *const argv[]) {
             ("verbose,v", po::bool_switch(&config.verbose), "set verbose output")
             ("version", po::bool_switch(&config.version), "show version information")
             ("port,p", po::value<uint16_t>(&config.port)->default_value(config.port), "bind port")
+            ("debug,d", po::bool_switch(&config.debug)->default_value(config.debug), "enable debug mode")
            ;
 
     po::options_description conf("Configuration");

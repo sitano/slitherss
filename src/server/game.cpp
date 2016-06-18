@@ -20,6 +20,8 @@ slither_server::slither_server() {
 
 void slither_server::run(game_config config) {
     m_endpoint.get_alog().write(websocketpp::log::alevel::app, "Running slither server on port " + std::to_string(config.port));
+
+    m_config = config;
     print_world_info();
 
     m_endpoint.listen(config.port);
@@ -61,6 +63,7 @@ void slither_server::on_timer(error_code const & ec) {
     }
 
     m_world.tick(dt);
+    broadcast_debug();
     broadcast_updates();
     cleanup_dead();
 
@@ -71,6 +74,14 @@ void slither_server::on_timer(error_code const & ec) {
     }
 
     next_tick(now);
+}
+
+void slither_server::broadcast_debug() {
+    if (!m_config.debug) {
+        return;
+    }
+
+
 }
 
 void slither_server::broadcast_updates() {

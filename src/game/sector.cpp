@@ -1,5 +1,7 @@
 #include "sector.hpp"
 
+#include <algorithm>
+
 bool intersect_segments(float p0_x, float p0_y, float p1_x, float p1_y,
                         float p2_x, float p2_y, float p3_x, float p3_y) {
     float s1_x, s1_y, s2_x, s2_y;
@@ -53,14 +55,8 @@ float distance_squared(float p0_x, float p0_y, float p1_x, float p1_y) {
     return dx * dx + dy * dy;
 }
 
-bool snake_bb::find(sector *s) {
-    for (sector *i : sectors) {
-        if (i == s) {
-            return true;
-        }
-    }
-
-    return false;
+bool snake_bb::any_of(sector *s) {
+    return std::find(sectors.begin(), sectors.end(), s) != sectors.end();
 }
 
 size_t snake_bb::get_sectors_count() {
@@ -69,40 +65,26 @@ size_t snake_bb::get_sectors_count() {
 
 size_t snake_bb::get_snakes_in_sectors_count() {
     size_t i = 0;
-    for (const auto s : sectors) {
+    for (sector *s : sectors) {
         i += s->m_snakes.size();
     }
     return i;
 }
 
 void snake_bb::reg_new_sector_if_missing(sector *s) {
-    for (auto &ptr : new_sectors) {
-        if (ptr == s) {
-            return;
-        }
+    if (std::find(new_sectors.begin(), new_sectors.end(), s) == sectors.end()) {
+        new_sectors.push_back(s);
     }
-
-    new_sectors.push_back(s);
 }
 
 void snake_bb::reg_old_sector_if_missing(sector *s) {
-    for (auto &ptr : old_sectors) {
-        if (ptr == s) {
-            return;
-        }
+    if (std::find(old_sectors.begin(), old_sectors.end(), s) == sectors.end()) {
+        old_sectors.push_back(s);
     }
-
-    old_sectors.push_back(s);
 }
 
 void sector::remove_snake(snake_id_t id) {
-    const auto sn_end = m_snakes.end();
-    for (auto sn_i = m_snakes.begin(); sn_i != sn_end; sn_i++) {
-        if (sn_i->id == id) {
-            m_snakes.erase(sn_i);
-            break;
-        }
-    }
+    m_snakes.erase(std::remove_if(m_snakes.begin(), m_snakes.end(), [id](const snake_bb &bb){ return bb.id == id; }));
 }
 
 void sectors::init_sectors(const uint16_t sector_count_along_edge) {

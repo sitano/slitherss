@@ -46,6 +46,7 @@ private:
     void remove_snake(snake_id_t id);
 
     void on_timer(error_code const & ec);
+    void broadcast_debug();
     void broadcast_updates();
     void send_pov_update_to(sessions::iterator ses_i, snake *ptr);
     void cleanup_dead();
@@ -87,6 +88,7 @@ private:
 
     world m_world;
     packet_init m_init;
+    game_config m_config;
 
     // todo: reserve to collections
     sessions m_sessions;

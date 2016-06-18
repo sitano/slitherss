@@ -15,6 +15,7 @@ struct game_config {
     bool help = false;
     bool version = false;
     bool verbose = false;
+    bool debug = false;
 
     world_config world;
 };
