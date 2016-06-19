@@ -173,7 +173,7 @@ void snake::update_box_sectors(sectors &ss) {
     const int16_t map_width_sectors = static_cast<int16_t>(world_config::sector_count_along_edge);
     for (int16_t j = sy - width_2; j <= sy + width_2; j ++) {
         for (int16_t i = sx - width_2; i <= sx + width_2; i ++) {
-            if (i >= 0 && i <= map_width_sectors && j >= 0 && j <= map_width_sectors) {
+            if (i >= 0 && i < map_width_sectors && j >= 0 && j < map_width_sectors) {
                 sector *new_sector = ss.get_sector(i, j);
                 if (!box.any_of(new_sector) && new_sector->intersect(box)) {
                     new_sector->m_snakes.push_back(box);
