@@ -6,7 +6,7 @@
 #include <vector>
 
 struct d_draw_dot {
-    uint16_t id;
+    uint24_t id;
     uint16_t x;
     uint16_t y;
 
@@ -15,26 +15,26 @@ struct d_draw_dot {
     d_draw_dot(uint16_t in_id, uint16_t in_x, uint16_t in_y) : id(in_id), x(in_x), y(in_y) {}
 
     static uint8_t get_header() { return '.'; }
-    static size_t get_size() { return 2 + 2 + 2; }
+    static size_t get_size() { return 1 + 3 + 2 + 2; }
 };
 
 struct d_draw_segment {
-    uint16_t id;
+    uint24_t id;
     d_draw_dot v, w;
     uint8_t color;
 
     static uint8_t get_header() { return '_'; }
-    static size_t get_size() { return 2 + 4 + 4 + 1; }
+    static size_t get_size() { return 1 + 3 + 4 + 4 + 1; }
 };
 
 struct d_draw_circle {
-    uint16_t id;
+    uint24_t id;
     d_draw_dot v;
     uint24_t r2; // squared
     uint8_t color;
 
     static uint8_t get_header() { return 'o'; }
-    static size_t get_size() { return 2 + 4 + 2 + 1; }
+    static size_t get_size() { return 1 + 3 + 4 + 3 + 1; }
 };
 
 struct packet_debug_draw : public packet_base {

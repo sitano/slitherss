@@ -146,7 +146,7 @@ void snake::update_box() {
         }
     }
 
-    box.r2 = r2;
+    box.r2 = 100 * 100 /* minimal bb */ + r2;
 }
 
 void snake::update_box_sectors(sectors &ss) {

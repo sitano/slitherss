@@ -110,7 +110,7 @@ void world::check_snake_bounds(snake * const s) {
     }
 
     // because we check after move being made
-    auto check = s->parts[1];
+    auto check = s->parts[0];
 
     // check bound coverage
     const int16_t sx = static_cast<int16_t>(check.x / world_config::sector_size);
