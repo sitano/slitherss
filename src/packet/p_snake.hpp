@@ -4,12 +4,10 @@
 #include "p_base.hpp"
 #include "game/snake.hpp"
 
-#include <memory>
-
 // Sent when another snake enters range.
 struct packet_add_snake : public packet_base {
-    packet_add_snake() : packet_base(packet_t_snake) {}
-    explicit packet_add_snake(std::shared_ptr<snake> input) : packet_base(packet_t_snake), s(input)  {}
+    packet_add_snake() : packet_base(packet_t_snake), s(nullptr) {}
+    explicit packet_add_snake(const snake *input) : packet_base(packet_t_snake), s(input)  {}
 
     // 3-4, int16, Snake id
     // 5-7, int24, Snake stop? value * 2*Math.PI / 16777215
@@ -26,7 +24,7 @@ struct packet_add_snake : public packet_base {
     // ?, int24, Possibly head position (y)
     // ?, int8, Body part position (x)
     // ?, int8, Body part position (y)
-    std::shared_ptr<snake> s;
+    const snake *s;
 
     size_t get_size() const noexcept {
         return 25 + s->name.length() + 2 * 3 + (s->parts.size() - 1 /* head */) * 2;

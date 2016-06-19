@@ -213,9 +213,7 @@ void slither_server::broadcast_updates() {
             if (flags & change_pos) {
                 ptr->update ^= change_pos;
 
-                broadcast_binary(packet_move_rel { id,
-                        static_cast<int8_t>(ptr->get_head_dx()),
-                        static_cast<int8_t>(ptr->get_head_dy()) });
+                broadcast_binary(packet_move(ptr));
 
                 if (!ptr->bot) {
                     const auto ses_i = load_session_i(id);
@@ -261,29 +259,26 @@ void slither_server::on_socket_init(websocketpp::connection_hdl, boost::asio::ip
 }
 
 void slither_server::on_open(connection_hdl hdl) {
-    const auto ptr = m_world.create_snake();
-    m_world.add_snake(ptr);
+    const auto new_snake_ptr = m_world.create_snake();
+    m_world.add_snake(new_snake_ptr);
 
-    m_sessions[hdl] = session(ptr->id, get_now_tp());
-    m_connections[ptr->id] = hdl;
+    m_sessions[hdl] = session(new_snake_ptr->id, get_now_tp());
+    m_connections[new_snake_ptr->id] = hdl;
 
     m_endpoint.send_binary(hdl, m_init);
-    // TODO: send sectors packets
-    // TODO: send food packets
+
     // send snake
     const auto ses_i = m_sessions.find(hdl);
-    broadcast_binary(packet_add_snake(ptr));
-    broadcast_binary(packet_move {
-        ptr->id, static_cast<uint16_t>(ptr->get_head_x()), static_cast<uint16_t>(ptr->get_head_y()) });
-    send_pov_update_to(ses_i, ptr.get());
+    broadcast_binary(packet_add_snake(new_snake_ptr.get()));
+    broadcast_binary(packet_move(new_snake_ptr.get()));
+    send_pov_update_to(ses_i, new_snake_ptr.get());
 
-    // todo introduce other snakes in sectors view
-    for (auto snake : m_world.get_snakes()) {
-        if (snake.first != ptr->id) {
-            const std::shared_ptr<::snake> &ptr2 = snake.second;
-            send_binary(ses_i, packet_add_snake(snake.second));
-            send_binary(ses_i, packet_move {
-                ptr2->id, static_cast<uint16_t>(ptr2->get_head_x()), static_cast<uint16_t>(ptr2->get_head_y()) });
+    // introduce other snakes in sectors view
+    for (auto ptr : m_world.get_snakes()) {
+        if (ptr.first != new_snake_ptr->id) {
+            const snake *s = ptr.second.get();
+            send_binary(ses_i, packet_add_snake(s));
+            send_binary(ses_i, packet_move(s));
         }
     }
 }

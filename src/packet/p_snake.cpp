@@ -4,24 +4,24 @@
 std::ostream& operator<<(std::ostream & out, const packet_add_snake & p) {
     out << static_cast<packet_base>(p);
 
-    const snake & s= p.s.operator*();
+    const snake *s = p.s;
 
-    out << write_uint16(s.id)
-        << write_ang24(s.angle) // ehang radians
+    out << write_uint16(s->id)
+        << write_ang24(s->angle) // ehang radians
         << write_uint8(0) // unknown
-        << write_ang24(s.angle) // eangle radians
-        << write_fp16<3>(s.speed / 32.0f) // pixels / second -> pixels / 4 * vfr (8ms)
-        << write_fp24(s.fullness / 100.0f)
-        << write_uint8(s.skin)
-        << write_uint24(s.get_head_x() * 5.0f)
-        << write_uint24(s.get_head_y() * 5.0f)
-        << write_string(s.name);
+        << write_ang24(s->angle) // eangle radians
+        << write_fp16<3>(s->speed / 32.0f) // pixels / second -> pixels / 4 * vfr (8ms)
+        << write_fp24(s->fullness / 100.0f)
+        << write_uint8(s->skin)
+        << write_uint24(s->get_head_x() * 5.0f)
+        << write_uint24(s->get_head_y() * 5.0f)
+        << write_string(s->name);
 
-    if (!s.parts.empty()) {
+    if (!s->parts.empty()) {
         // from tail to the head
-        const auto taili = s.parts.crbegin();
+        const auto taili = s->parts.crbegin();
         // last element is a snake position (skip it)
-        const auto headi = --s.parts.crend();
+        const auto headi = s->parts.crend() - 1;
 
         float hx = taili->x;
         float hy = taili->y;
