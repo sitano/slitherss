@@ -6,6 +6,11 @@ TODO
 - impl head pov cache
 - snake radius of head?
 
+- food intersection
+- eating food
+- snake mass
+- snake radius
+
 OTHER
 =====
 

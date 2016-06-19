@@ -126,7 +126,7 @@ void snake::update_box() {
     float y = 0.0f;
 
     // calculate center mass
-    for (auto p : parts) {
+    for (const body &p : parts) {
         x += p.x;
         y += p.y;
     }
@@ -139,7 +139,7 @@ void snake::update_box() {
 
     // calculate radius^2
     float r2 = 0.0f;
-    for (auto p : parts) {
+    for (const body &p : parts) {
         const float r_tmp = p.distance_squared(x, y);
         if (r_tmp > r2) {
             r2 = r_tmp;
