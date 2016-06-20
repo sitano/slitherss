@@ -45,18 +45,17 @@ float fastsqrt(float val);
 struct snake_bb_pos {
     float x;
     float y;
-    float r2; // squared radius
+    float r; // squared radius
 
     snake_bb_pos() = default;
-    snake_bb_pos(const snake_bb_pos &p) : x(p.x), y(p.y), r2(p.r2) {}
-    snake_bb_pos(float in_x, float in_y, float in_r2) : x(in_x), y(in_y), r2(in_r2) {}
+    snake_bb_pos(const snake_bb_pos &p) : x(p.x), y(p.y), r(p.r) {}
+    snake_bb_pos(float in_x, float in_y, float in_r) : x(in_x), y(in_y), r(in_r) {}
 
     inline bool intersect(const snake_bb_pos &bb2) const {
         const float dx = x - bb2.x;
         const float dy = y - bb2.y;
-        // x^2 + y^2 <= r^2 = (r1 + r2) ^ 2 <= r1^2 + r2^2 + 2*r1*r2 <= r1^2 + r2^2 + 2*max(r1^2,r2^2)
-        const float rr = fmaxf(r2, bb2.r2);
-        return dx * dx + dy * dy <= r2 + bb2.r2 + 2.0f * rr;
+        const float r2 = r + bb2.r;
+        return dx * dx + dy * dy <= r2 * r2;
     }
 };
 

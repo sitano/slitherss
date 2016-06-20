@@ -30,11 +30,11 @@ struct d_draw_segment {
 struct d_draw_circle {
     uint24_t id;
     d_draw_dot v;
-    uint24_t r2; // squared
+    uint16_t r2; // squared
     uint8_t color;
 
     static uint8_t get_header() { return 'o'; }
-    static size_t get_size() { return 1 + 3 + 4 + 3 + 1; }
+    static size_t get_size() { return 1 + 3 + 4 + 2 + 1; }
 };
 
 struct packet_debug_draw : public packet_base {

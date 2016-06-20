@@ -93,7 +93,7 @@ void slither_server::broadcast_debug() {
                     static_cast<uint16_t>(s->box.x),
                     static_cast<uint16_t>(s->box.y)
                 },
-                static_cast<uint24_t>(s->box.r2),
+                static_cast<uint16_t>(s->box.r),
                 200 });
 
         // body inner circles
@@ -106,7 +106,7 @@ void slither_server::broadcast_debug() {
                             static_cast<uint16_t>(prev->x),
                             static_cast<uint16_t>(prev->y)
                     },
-                    static_cast<uint24_t>(r1 * r1),
+                    static_cast<uint16_t>(r1),
                     200 });
 
         const body &sec = *(s->parts.begin() + 1);
@@ -116,7 +116,7 @@ void slither_server::broadcast_debug() {
                         static_cast<uint16_t>(sec.x),
                         static_cast<uint16_t>(sec.y)
                 },
-                static_cast<uint24_t>(r1 * r1),
+                static_cast<uint16_t>(r1),
                 60 });
 
         draw.circles.push_back(d_draw_circle {
@@ -125,7 +125,7 @@ void slither_server::broadcast_debug() {
                         static_cast<uint16_t>(sec.x + (prev->x - sec.x) / 2.0f),
                         static_cast<uint16_t>(sec.y + (prev->y - sec.y) / 2.0f)
                 },
-                static_cast<uint24_t>(r1 * r1),
+                static_cast<uint16_t>(r1),
                 100 });
 
         draw.circles.push_back(d_draw_circle {
@@ -134,7 +134,7 @@ void slither_server::broadcast_debug() {
                         static_cast<uint16_t>(s->parts.back().x),
                         static_cast<uint16_t>(s->parts.back().y)
                 },
-                static_cast<uint24_t>(r1 * r1),
+                static_cast<uint16_t>(r1),
                 100 });
 
         // body parts

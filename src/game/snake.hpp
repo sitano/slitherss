@@ -99,6 +99,7 @@ struct snake : std::enable_shared_from_this<snake> {
     static const int parts_skip_count = 3;
     static const int parts_start_move_count = 4;
     static const int move_step_distance = 42;
+    static constexpr float tail_step_distance = 24.0f; // tail step eval for step dist = 42, k = 0.43
     static constexpr float rot_step_angle = 1.0f * move_step_distance / boost_speed * snake_angular_speed; // radians step per max acc resolution time
     static const long rot_step_interval = static_cast<long>(1000.0f * rot_step_angle / snake_angular_speed);
     static const long ai_step_interval = 1000;
@@ -116,7 +117,5 @@ private:
     long m_rot_ticks = 0;
     long m_ai_ticks = 0;
 };
-
-float linear_sqrt(float x);
 
 #endif //SLITHER_GAME_SNAKE_HPP

@@ -165,14 +165,14 @@ void snake::update_box_center() {
 }
 
 void snake::update_box_radius() {
-    // calculate bb radius^2, len eval for step dist 42
+    // calculate bb radius, len eval for step dist = 42, k = 0.43
     float d = 41.4f + 42.0f + 37.7f + 37.7f + 33.0f + 28.5f;
 
     if (parts.size() > 6) {
-        d += 24.0f * (parts.size() - 6);
+        d += tail_step_distance * (parts.size() - 6);
     }
 
-    box.r2 = d * d / 4.0f;
+    box.r = d / 2.0f;
 }
 
 void snake::init_box_new_sectors(sectors &ss) {
@@ -199,7 +199,6 @@ void snake::update_box_new_sectors(sectors &ss, float new_x, float new_y, float 
         return;
     }
 
-    const size_t prev_len = box.sectors.size();
     const int16_t map_width_sectors = static_cast<int16_t>(world_config::sector_count_along_edge);
     for (int16_t j = new_sy - 1; j <= new_sy + 1; j ++) {
         for (int16_t i = new_sx - 1; i <= new_sx + 1; i ++) {
@@ -208,14 +207,11 @@ void snake::update_box_new_sectors(sectors &ss, float new_x, float new_y, float 
                 if (!box.binary_search(new_sector) && new_sector->intersect(box)) {
                     new_sector->m_snakes.push_back(box);
                     box.sectors.push_back(new_sector);
+                    box.sort(); // todo use sorted insert instead of sort after
                     box.reg_new_sector_if_missing(new_sector);
                 }
             }
         }
-    }
-
-    if (prev_len != box.sectors.size()) {
-        box.sort();
     }
 }
 
@@ -263,9 +259,4 @@ void snake::tick_ai(long frames) {
             update |= change_wangle;
         }
     }
-}
-
-float linear_sqrt(float x) {
-    static constexpr float d = 1.0f / 6.0f;
-    return 3.0f + (x - 9.0f) * d;
 }

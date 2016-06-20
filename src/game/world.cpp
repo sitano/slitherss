@@ -22,14 +22,19 @@ snake::ptr world::create_snake() {
     // uint16_t x = game_radius + next_random(game_radius) - half_radius;
     // uint16_t y = game_radius + next_random(game_radius) - half_radius;
     // todo: reserve snake.parts at least for sizeof(snake) bytes
-    // todo: fix angles
     const int len = 1 /* head */ + 2 /* body min = 2 */ +
         std::max(m_config.snake_min_length, next_random(m_config.snake_average_length));
 
-    for (int i = 0; i < len ; ++ i) {
+    for (int i = 0; i < len && i < snake::parts_skip_count + snake::parts_start_move_count; ++ i) {
         s->parts.push_back(body { 1.0f * x, 1.0f * y });
         x += cosf(angle) * snake::move_step_distance;
         y += sinf(angle) * snake::move_step_distance;
+    }
+
+    for (int i = snake::parts_skip_count + snake::parts_start_move_count; i < len; ++ i) {
+        s->parts.push_back(body { 1.0f * x, 1.0f * y });
+        x += cosf(angle) * snake::tail_step_distance;
+        y += sinf(angle) * snake::tail_step_distance;
     }
 
     s->angle = snake::normalize_angle(angle + f_pi);
