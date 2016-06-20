@@ -145,7 +145,7 @@ void slither_server::broadcast_debug() {
                             static_cast<uint16_t>(b.x),
                             static_cast<uint16_t>(b.y)
                     },
-                    static_cast<uint24_t>(snake::move_step_distance * snake::move_step_distance),
+                    static_cast<uint16_t>(snake::move_step_distance),
                     102 });
         }
     }

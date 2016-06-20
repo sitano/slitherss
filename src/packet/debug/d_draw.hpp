@@ -30,7 +30,7 @@ struct d_draw_segment {
 struct d_draw_circle {
     uint24_t id;
     d_draw_dot v;
-    uint16_t r2; // squared
+    uint16_t r; // squared
     uint8_t color;
 
     static uint8_t get_header() { return 'o'; }
