@@ -36,8 +36,9 @@ snake::ptr world::create_snake() {
     s->wangle = snake::normalize_angle(angle + f_pi);
 
     s->box = s->get_new_box();
-    s->update_box();
-    s->update_box_sectors(m_sectors);
+    s->update_box_center();
+    s->update_box_radius();
+    s->init_box_new_sectors(m_sectors);
 
     return s;
 }
@@ -81,13 +82,8 @@ void world::tick_snakes(long dt) {
     for (auto pair: m_snakes) {
         snake * const s = pair.second.get();
 
-        if (s->tick(dt)) {
+        if (s->tick(dt, m_sectors)) {
             m_changes.push_back(s);
-
-            if (s->update & change_pos) {
-                s->update_box();
-                s->update_box_sectors(m_sectors);
-            }
         }
     }
 

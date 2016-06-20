@@ -55,8 +55,38 @@ float distance_squared(float p0_x, float p0_y, float p1_x, float p1_y) {
     return dx * dx + dy * dy;
 }
 
-bool snake_bb::any_of(sector *s) {
-    return std::find(sectors.begin(), sectors.end(), s) != sectors.end();
+// https://en.wikipedia.org/wiki/Methods_of_computing_square_roots
+float fastsqrt(float val)  {
+    union
+    {
+        int tmp;
+        float val;
+    } u;
+    u.val = val;
+    u.tmp -= 1<<23; /* Remove last bit so 1.0 gives 1.0 */
+    /* tmp is now an approximation to logbase2(val) */
+    u.tmp >>= 1; /* divide by 2 */
+    u.tmp += 1<<29; /* add 64 to exponent: (e+127)/2 =(e/2)+63, */
+    /* that represents (e/2)-64 but we want e/2 */
+    return u.val;
+}
+
+/*
+float fastinvsqrt(float x) {
+    float xhalf = 0.5f*x;
+    int i = *(int*)&x;
+    i = 0x5f3759df - (i>>1);
+    x = *(float*)&i;
+    return x*(1.5f - xhalf*x*x);
+}
+*/
+
+void snake_bb::sort() {
+    std::sort(sectors.begin(), sectors.end());
+}
+
+bool snake_bb::binary_search(sector *s) {
+    return std::binary_search(sectors.begin(), sectors.end(), s);
 }
 
 size_t snake_bb::get_sectors_count() {

@@ -1,6 +1,8 @@
 #include "snake.hpp"
 
-bool snake::tick(long dt) {
+#include <iostream>
+
+bool snake::tick(long dt, sectors &ss) {
     uint8_t changes = 0;
 
     if (update & (change_dying | change_dead)) {
@@ -60,9 +62,17 @@ bool snake::tick(long dt) {
         head.x += cosf(angle) * move_dist;
         head.y += sinf(angle) * move_dist;
 
+        update_box_new_sectors(ss, head.x, head.y, prev.x, prev.y);
+
+        // bound box
+        float bbx = head.x;
+        float bby = head.y;
+
         for (size_t i = 1; i < len && i < parts_skip_count; ++ i) {
             const body old = parts[i];
             parts[i] = prev;
+            bbx += prev.x;
+            bby += prev.y;
             prev = old;
         }
 
@@ -76,11 +86,13 @@ bool snake::tick(long dt) {
             const float move_coeff = snake_tail_k * (++ j) / parts_start_move_count;
             pt.offset(move_coeff * (last.x - pt.x), move_coeff * (last.y - pt.y));
 
+            bbx += pt.x;
+            bby += pt.y;
             prev = old;
         }
 
         // move tail
-        for (size_t i = parts_skip_count + parts_start_move_count; i < len; ++ i) {
+        for (size_t i = parts_skip_count + parts_start_move_count, j = 0; i < len; ++ i) {
             body &pt = parts[i];
             const body last = parts[i - 1];
             const body old = pt;
@@ -88,10 +100,24 @@ bool snake::tick(long dt) {
             pt.from(prev);
             pt.offset(snake_tail_k * (last.x - pt.x), snake_tail_k * (last.y - pt.y));
 
+            // as far as having step dist = 42, k = 0.43, sec. size = 300, this could be 2 * 300 / 24.0f - 1, not just 14
+            if (j + 14 >= i) {
+                update_box_new_sectors(ss, pt.x, pt.y, old.x, old.y);
+                j = i;
+            }
+
+            bbx += pt.x;
+            bby += pt.y;
             prev = old;
         }
 
         changes |= change_pos;
+
+        // update bb
+        box.x = bbx / parts.size();
+        box.y = bby / parts.size();
+        update_box_radius();
+        update_box_old_sectors();
 
         // update speed
         const uint16_t wantedSpeed = acceleration ? boost_speed : base_move_speed;
@@ -121,7 +147,7 @@ std::shared_ptr<snake> snake::get_ptr() {
     return shared_from_this();
 }
 
-void snake::update_box() {
+void snake::update_box_center() {
     float x = 0.0f;
     float y = 0.0f;
 
@@ -136,52 +162,88 @@ void snake::update_box() {
 
     box.x = x;
     box.y = y;
-
-    // calculate radius^2
-    float r2 = 0.0f;
-    for (const body &p : parts) {
-        const float r_tmp = p.distance_squared(x, y);
-        if (r_tmp > r2) {
-            r2 = r_tmp;
-        }
-    }
-
-    box.r2 = 100 * 100 /* minimal bb */ + r2;
 }
 
-void snake::update_box_sectors(sectors &ss) {
-    // remove snake from sectors which passed by
-    auto sec_end = box.sectors.end();
-    for (auto sec_i = box.sectors.begin(); sec_i != sec_end; sec_i ++) {
-        sector *sec = *sec_i;
-        if (!sec->intersect(box)) {
-            // clean up snake
-            sec->remove_snake(id);
-            // pop sector
-            box.sectors.erase(sec_i);
-            box.reg_old_sector_if_missing(sec);
-            sec_i --;
-            sec_end = box.sectors.end();
-        }
+void snake::update_box_radius() {
+    // calculate bb radius^2, len eval for step dist 42
+    float d = 41.4f + 42.0f + 37.7f + 37.7f + 33.0f + 28.5f;
+
+    if (parts.size() > 6) {
+        d += 24.0f * (parts.size() - 6);
     }
 
-    // register snake to new sectors
-    const int16_t width_2 = static_cast<int16_t>(1 + linear_sqrt(box.r2 / world_config::sector_size / world_config::sector_size));
-    const int16_t sx = static_cast<int16_t>(box.x / world_config::sector_size);
-    const int16_t sy = static_cast<int16_t>(box.y / world_config::sector_size);
+    box.r2 = d * d / 4.0f;
+}
 
+void snake::init_box_new_sectors(sectors &ss) {
+    body& head = parts[0];
+    update_box_new_sectors(ss, head.x, head.y, 0.0f, 0.0f);
+
+    const size_t len = parts.size();
+    // as far as having step dist = 42, k = 0.43, sec. size = 300, this could be 2 * 300 / 24.0f - 1, not just 14
+    for (size_t i = 14; i < len; i += 14) {
+        body &pt = parts[i];
+        update_box_new_sectors(ss, pt.x, pt.y, 0.0f, 0.0f);
+    }
+}
+
+void snake::update_box_new_sectors(sectors &ss, float new_x, float new_y, float old_x, float old_y) {
+    // register snake to new sectors
+    const int16_t new_sx = static_cast<int16_t>(new_x / world_config::sector_size);
+    const int16_t new_sy = static_cast<int16_t>(new_y / world_config::sector_size);
+    const int16_t old_sx = static_cast<int16_t>(old_x / world_config::sector_size);
+    const int16_t old_sy = static_cast<int16_t>(old_y / world_config::sector_size);
+
+    // nothing changed
+    if (new_sx == old_sx && new_sy == old_sy) {
+        return;
+    }
+
+    const size_t prev_len = box.sectors.size();
     const int16_t map_width_sectors = static_cast<int16_t>(world_config::sector_count_along_edge);
-    for (int16_t j = sy - width_2; j <= sy + width_2; j ++) {
-        for (int16_t i = sx - width_2; i <= sx + width_2; i ++) {
+    for (int16_t j = new_sy - 1; j <= new_sy + 1; j ++) {
+        for (int16_t i = new_sx - 1; i <= new_sx + 1; i ++) {
             if (i >= 0 && i < map_width_sectors && j >= 0 && j < map_width_sectors) {
                 sector *new_sector = ss.get_sector(i, j);
-                if (!box.any_of(new_sector) && new_sector->intersect(box)) {
+                if (!box.binary_search(new_sector) && new_sector->intersect(box)) {
                     new_sector->m_snakes.push_back(box);
                     box.sectors.push_back(new_sector);
                     box.reg_new_sector_if_missing(new_sector);
                 }
             }
         }
+    }
+
+    if (prev_len != box.sectors.size()) {
+        box.sort();
+    }
+}
+
+// remove snake from sectors which passed by
+void snake::update_box_old_sectors() {
+    const size_t prev_len = box.sectors.size();
+    auto i = box.sectors.begin();
+    auto sec_end = box.sectors.end();
+    while (i != sec_end) {
+        sector *s = *i;
+        if (!s->intersect(box)) {
+            box.reg_old_sector_if_missing(s);
+            s->remove_snake(id);
+            if (i + 1 != sec_end) {
+                *i = box.sectors.back();
+                box.sectors.pop_back();
+                sec_end = box.sectors.end();
+                continue;
+            } else {
+                box.sectors.pop_back();
+                break;
+            }
+        }
+        i ++;
+    }
+
+    if (prev_len != box.sectors.size()) {
+        box.sort();
     }
 }
 

@@ -37,6 +37,11 @@ float distance_squared(float v_x, float v_y, float w_x, float w_y, float p_x, fl
 // points p0, p1
 float distance_squared(float p0_x, float p0_y, float p1_x, float p1_y);
 
+// https://en.wikipedia.org/wiki/Methods_of_computing_square_roots
+float fastsqrt(float val);
+
+// float fastinvsqrt(float x);
+
 struct snake_bb_pos {
     float x;
     float y;
@@ -66,7 +71,9 @@ struct snake_bb : snake_bb_pos {
     snake_bb(snake_bb_pos in_pos, uint16_t in_id, const snake * in_ptr, std::vector<sector *> in_sectors) :
         snake_bb_pos(in_pos), id(in_id), snake_ptr(in_ptr), sectors(in_sectors) {}
 
-    bool any_of(sector *s);
+    void sort();
+    bool binary_search(sector *s);
+
     size_t get_sectors_count();
     size_t get_snakes_in_sectors_count();
     void reg_new_sector_if_missing(sector *s);

@@ -66,10 +66,13 @@ struct snake : std::enable_shared_from_this<snake> {
     snake_bb box;
     std::vector<body> parts;
 
-    bool tick(long dt);
+    bool tick(long dt, sectors &ss);
     void tick_ai(long frames);
-    void update_box();
-    void update_box_sectors(sectors &ss);
+    void update_box_center();
+    void update_box_radius();
+    void init_box_new_sectors(sectors &ss);
+    void update_box_new_sectors(sectors &ss, float new_x, float new_y, float old_x, float old_y);
+    void update_box_old_sectors();
 
     inline const body& get_head() const { return parts[0]; }
     inline float get_head_x() const { return parts[0].x; }
