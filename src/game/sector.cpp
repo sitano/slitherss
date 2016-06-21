@@ -81,6 +81,17 @@ float fastinvsqrt(float x) {
 }
 */
 
+bool snake_bb::remove_sector(const std::vector<sector *>::iterator &i) {
+    if (i + 1 != sectors.end()) {
+        *i = sectors.back();
+        sectors.pop_back();
+        return true;
+    } else {
+        sectors.pop_back();
+        return false;
+    }
+}
+
 void snake_bb::sort() {
     std::sort(sectors.begin(), sectors.end());
 }
@@ -114,7 +125,7 @@ void snake_bb::reg_old_sector_if_missing(sector *s) {
 }
 
 void sector::remove_snake(snake_id_t id) {
-    m_snakes.erase(std::remove_if(m_snakes.begin(), m_snakes.end(), [id](const snake_bb &bb){ return bb.id == id; }));
+    m_snakes.erase(std::remove_if(m_snakes.begin(), m_snakes.end(), [id](const snake_bb *bb){ return bb->id == id; }));
 }
 
 void sectors::init_sectors() {

@@ -23,8 +23,6 @@ struct body {
     float x;
     float y;
 
-    // todo: do we need float pos?
-    // todo: maybe we could have it int and relative coords
     inline void from(const body& p) {
         x = p.x;
         y = p.y;
@@ -63,7 +61,8 @@ struct snake : std::enable_shared_from_this<snake> {
     // 0 - 100, 0 - hungry, 100 - full
     uint8_t fullness;
 
-    snake_bb box;
+    snake_bb bb;
+    snake_bb vp;
     std::vector<body> parts;
 
     bool tick(long dt, sectors &ss);
@@ -71,8 +70,10 @@ struct snake : std::enable_shared_from_this<snake> {
     void update_box_center();
     void update_box_radius();
     void init_box_new_sectors(sectors &ss);
-    void update_box_new_sectors(sectors &ss, float new_x, float new_y, float old_x, float old_y);
-    void update_box_old_sectors();
+    template <int sr, bool track>
+    void update_box_new_sectors(sectors &ss, snake_bb *box, const float new_x, const float new_y, const float old_x, const float old_y);
+    template <bool track>
+    void update_box_old_sectors(snake_bb &box);
 
     inline const body& get_head() const { return parts[0]; }
     inline float get_head_x() const { return parts[0].x; }

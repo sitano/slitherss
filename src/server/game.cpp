@@ -87,7 +87,7 @@ void slither_server::broadcast_debug() {
         uint16_t sis = static_cast<uint16_t>(s->id * 1000);
 
         // bound box
-        draw.circles.push_back(d_draw_circle { sis ++, { s->box.x, s->box.y }, s->box.r, 0xc8c8c8 });
+        draw.circles.push_back(d_draw_circle { sis ++, { s->bb.x, s->bb.y }, s->bb.r, 0xc8c8c8 });
 
         // body inner circles
         const float r1 = 14.0f; // moving snake body radius
@@ -101,7 +101,7 @@ void slither_server::broadcast_debug() {
         draw.circles.push_back(d_draw_circle { sis ++, { s->parts.back().x, s->parts.back().y }, r1, 0x646464 });
 
         // bounds
-        for (const sector *ss: s->box.sectors) {
+        for (const sector *ss: s->bb.sectors) {
             draw.circles.push_back(d_draw_circle { sis ++, { ss->box.x, ss->box.y }, ss->box.r, 0x511883 });
         }
 
@@ -190,19 +190,19 @@ void slither_server::broadcast_updates() {
 }
 
 void slither_server::send_pov_update_to(sessions::iterator ses_i, snake *ptr) {
-    if (!ptr->box.new_sectors.empty()) {
-        for (const auto s_ptr : ptr->box.new_sectors) {
+    if (!ptr->vp.new_sectors.empty()) {
+        for (const auto s_ptr : ptr->vp.new_sectors) {
             send_binary(ses_i, packet_add_sector(s_ptr->x, s_ptr->y));
             send_binary(ses_i, packet_set_food(&s_ptr->m_food));
         }
-        ptr->box.new_sectors.clear();
+        ptr->vp.new_sectors.clear();
     }
 
-    if (!ptr->box.old_sectors.empty()) {
-        for (const auto s_ptr : ptr->box.old_sectors) {
+    if (!ptr->vp.old_sectors.empty()) {
+        for (const auto s_ptr : ptr->vp.old_sectors) {
             send_binary(ses_i, packet_remove_sector(s_ptr->x, s_ptr->y));
         }
-        ptr->box.old_sectors.clear();
+        ptr->vp.old_sectors.clear();
     }
 }
 

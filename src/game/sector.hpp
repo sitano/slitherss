@@ -70,8 +70,9 @@ struct snake_bb : snake_bb_pos {
     snake_bb(snake_bb_pos in_pos, uint16_t in_id, const snake * in_ptr, std::vector<sector *> in_sectors) :
         snake_bb_pos(in_pos), id(in_id), snake_ptr(in_ptr), sectors(in_sectors) {}
 
-    void sort();
+    bool remove_sector(const std::vector<sector *>::iterator &i);
     bool binary_search(sector *s);
+    void sort();
 
     size_t get_sectors_count();
     size_t get_snakes_in_sectors_count();
@@ -85,7 +86,7 @@ struct sector {
 
     snake_bb_pos box;
 
-    std::vector<snake_bb> m_snakes;
+    std::vector<snake_bb *> m_snakes;
     std::vector<food> m_food;
 
     sector(uint8_t in_x, uint8_t in_y) : x(in_x), y(in_y) {
@@ -112,10 +113,6 @@ public:
     void init_sectors();
     size_t get_index(uint16_t x, uint16_t y);
     sector *get_sector(uint16_t x, uint16_t y);
-
-private:
-
-    uint16_t width = 0;
 };
 
 #endif //SLITHER_GAME_SECTOR_HPP

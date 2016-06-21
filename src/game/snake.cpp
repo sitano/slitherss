@@ -62,7 +62,10 @@ bool snake::tick(long dt, sectors &ss) {
         head.x += cosf(angle) * move_dist;
         head.y += sinf(angle) * move_dist;
 
-        update_box_new_sectors(ss, head.x, head.y, prev.x, prev.y);
+        update_box_new_sectors<1, false>(ss, &bb, head.x, head.y, prev.x, prev.y);
+        if (!bot) {
+            update_box_new_sectors<3, true>(ss, &vp, head.x, head.y, prev.x, prev.y);
+        }
 
         // bound box
         float bbx = head.x;
@@ -102,7 +105,7 @@ bool snake::tick(long dt, sectors &ss) {
 
             // as far as having step dist = 42, k = 0.43, sec. size = 300, this could be 2 * 300 / 24.0f - 1, not just 14
             if (j + 14 >= i) {
-                update_box_new_sectors(ss, pt.x, pt.y, old.x, old.y);
+                update_box_new_sectors<1, false>(ss, &bb, pt.x, pt.y, old.x, old.y);
                 j = i;
             }
 
@@ -114,10 +117,15 @@ bool snake::tick(long dt, sectors &ss) {
         changes |= change_pos;
 
         // update bb
-        box.x = bbx / parts.size();
-        box.y = bby / parts.size();
+        bb.x = bbx / parts.size();
+        bb.y = bby / parts.size();
+        vp.x = head.x;
+        vp.y = head.y;
         update_box_radius();
-        update_box_old_sectors();
+        update_box_old_sectors<false>(bb);
+        if (!bot) {
+            update_box_old_sectors<true>(vp);
+        }
 
         // update speed
         const uint16_t wantedSpeed = acceleration ? boost_speed : base_move_speed;
@@ -160,8 +168,11 @@ void snake::update_box_center() {
     x /= parts.size();
     y /= parts.size();
 
-    box.x = x;
-    box.y = y;
+    bb.x = x;
+    bb.y = y;
+
+    vp.x = get_head_x();
+    vp.y = get_head_y();
 }
 
 void snake::update_box_radius() {
@@ -173,22 +184,29 @@ void snake::update_box_radius() {
     }
 
     // reserve 1 step ahead of the snake radius
-    box.r = (d + 2 * snake::move_step_distance) / 2.0f;
+    bb.r = (d + 2 * snake::move_step_distance) / 2.0f;
+
+    vp.r = world_config::sector_diag_size * 3.0f;
 }
 
 void snake::init_box_new_sectors(sectors &ss) {
     body& head = parts[0];
-    update_box_new_sectors(ss, head.x, head.y, 0.0f, 0.0f);
+    update_box_new_sectors<1, false>(ss, &bb, head.x, head.y, 0.0f, 0.0f);
+
+    if (!bot) {
+        update_box_new_sectors<3, true>(ss, &vp, head.x, head.y, 0.0f, 0.0f);
+    }
 
     const size_t len = parts.size();
     // as far as having step dist = 42, k = 0.43, sec. size = 300, this could be 2 * 300 / 24.0f - 1, not just 14
     for (size_t i = 14; i < len; i += 14) {
         body &pt = parts[i];
-        update_box_new_sectors(ss, pt.x, pt.y, 0.0f, 0.0f);
+        update_box_new_sectors<1, false>(ss, &bb, pt.x, pt.y, 0.0f, 0.0f);
     }
 }
 
-void snake::update_box_new_sectors(sectors &ss, float new_x, float new_y, float old_x, float old_y) {
+template <int sr, bool track>
+void snake::update_box_new_sectors(sectors &ss, snake_bb *box, const float new_x, const float new_y, const float old_x, const float old_y) {
     // register snake to new sectors
     const int16_t new_sx = static_cast<int16_t>(new_x / world_config::sector_size);
     const int16_t new_sy = static_cast<int16_t>(new_y / world_config::sector_size);
@@ -200,16 +218,19 @@ void snake::update_box_new_sectors(sectors &ss, float new_x, float new_y, float 
         return;
     }
 
-    const int16_t map_width_sectors = static_cast<int16_t>(world_config::sector_count_along_edge);
-    for (int16_t j = new_sy - 1; j <= new_sy + 1; j ++) {
-        for (int16_t i = new_sx - 1; i <= new_sx + 1; i ++) {
+    static const int16_t map_width_sectors = static_cast<int16_t>(world_config::sector_count_along_edge);
+    for (int16_t j = new_sy - sr; j <= new_sy + sr; j ++) {
+        for (int16_t i = new_sx - sr; i <= new_sx + sr; i ++) {
             if (i >= 0 && i < map_width_sectors && j >= 0 && j < map_width_sectors) {
                 sector *new_sector = ss.get_sector(i, j);
-                if (!box.binary_search(new_sector) && new_sector->intersect(box)) {
-                    new_sector->m_snakes.push_back(box);
-                    box.sectors.push_back(new_sector);
-                    box.sort(); // todo use sorted insert instead of sort after
-                    box.reg_new_sector_if_missing(new_sector);
+                if (!box->binary_search(new_sector) && new_sector->intersect(*box)) {
+                    box->sectors.push_back(new_sector);
+                    box->sort(); // todo use sorted insert instead of sort after
+                    if (track) {
+                        box->reg_new_sector_if_missing(new_sector);
+                    } else {
+                        new_sector->m_snakes.push_back(box);
+                    }
                 }
             }
         }
@@ -217,22 +238,23 @@ void snake::update_box_new_sectors(sectors &ss, float new_x, float new_y, float 
 }
 
 // remove snake from sectors which passed by
-void snake::update_box_old_sectors() {
+template <bool track>
+void snake::update_box_old_sectors(snake_bb &box) {
     const size_t prev_len = box.sectors.size();
     auto i = box.sectors.begin();
     auto sec_end = box.sectors.end();
     while (i != sec_end) {
-        sector *s = *i;
-        if (!s->intersect(box)) {
-            box.reg_old_sector_if_missing(s);
-            s->remove_snake(id);
-            if (i + 1 != sec_end) {
-                *i = box.sectors.back();
-                box.sectors.pop_back();
+        sector *sc = *i;
+        if (!sc->intersect(box)) {
+            if (track) {
+                box.reg_old_sector_if_missing(sc);
+            } else {
+                sc->remove_snake(id);
+            }
+            if (box.remove_sector(i)) {
                 sec_end = box.sectors.end();
                 continue;
             } else {
-                box.sectors.pop_back();
                 break;
             }
         }
@@ -240,7 +262,7 @@ void snake::update_box_old_sectors() {
     }
 
     if (prev_len != box.sectors.size()) {
-        box.sort();
+        box.sort(); // todo use sorted insert instead of sort after
     }
 }
 

@@ -40,7 +40,8 @@ snake::ptr world::create_snake() {
     s->angle = snake::normalize_angle(angle + f_pi);
     s->wangle = snake::normalize_angle(angle + f_pi);
 
-    s->box = s->get_new_box();
+    s->bb = s->get_new_box();
+    s->vp = s->get_new_box();
     s->update_box_center();
     s->update_box_radius();
     s->init_box_new_sectors(m_sectors);
@@ -128,8 +129,8 @@ void world::check_snake_bounds(snake * const s) {
                 // todo radius from snake mass
                 if (sec_ptr->intersect({ check.x, check.y, snake::move_step_distance * snake::move_step_distance })) {
                     // check sector snakes
-                    for (const snake_bb &bb_ptr: sec_ptr->m_snakes) {
-                        const snake *s2 = bb_ptr.snake_ptr;
+                    for (const snake_bb *bb_ptr: sec_ptr->m_snakes) {
+                        const snake *s2 = bb_ptr->snake_ptr;
                         if (s == s2) {
                             continue;
                         }
@@ -141,15 +142,11 @@ void world::check_snake_bounds(snake * const s) {
                             cs_cache.push_back(s2->id);
                         }
 
-                        // check if snake intersects our bound box
-                        if (!s->box.intersect(s2->box)) {
-                            continue;
-                        }
-
                         auto prev = s2->parts.begin();
                         auto bp_end = s2->parts.end();
                         for (auto bp_i = s2->parts.begin() + 1; bp_i != bp_end - 1; bp_i++) {
                             // todo radius from snake mass
+                            // todo skip by 2 sectors at once for start
                             // weak body part check
                             if (intersect_circle(bp_i->x, bp_i->y, check.x, check.y, snake::move_step_distance * 2)) {
                                 // check actual snake body
@@ -217,7 +214,7 @@ void world::remove_snake(snake_id_t id) {
 
     auto sn_i = get_snake(id);
     if (sn_i != m_snakes.end()) {
-        for (auto sec_ptr : sn_i->second->box.sectors) {
+        for (auto sec_ptr : sn_i->second->bb.sectors) {
             sec_ptr->remove_snake(id);
         }
 
