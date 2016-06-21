@@ -120,10 +120,10 @@ void world::check_snake_bounds(snake * const s) {
     static const int16_t width = 1;
 
     // 3x3 check head coverage
-    const int16_t map_width_sectors = static_cast<int16_t>(world_config::sector_count_along_edge);
+    static const int16_t map_width_sectors = static_cast<int16_t>(world_config::sector_count_along_edge);
     for (int16_t j = sy - width; j <= sy + width; j ++) {
         for (int16_t i = sx - width; i <= sx + width; i++) {
-            if (i >= 0 && i <= map_width_sectors && j >= 0 && j <= map_width_sectors) {
+            if (i >= 0 && i < map_width_sectors && j >= 0 && j < map_width_sectors) {
                 sector *sec_ptr = m_sectors.get_sector(i, j);
                 // check sector intersects head
                 // todo radius from snake mass
