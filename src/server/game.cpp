@@ -84,69 +84,30 @@ void slither_server::broadcast_debug() {
     packet_debug_draw draw;
 
     for (snake *s: m_world.get_changes()) {
-        uint16_t sis = static_cast<uint16_t>(s->id * 200);
+        uint16_t sis = static_cast<uint16_t>(s->id * 1000);
 
         // bound box
-        draw.circles.push_back(d_draw_circle {
-                sis ++,
-                {
-                    static_cast<uint16_t>(s->box.x),
-                    static_cast<uint16_t>(s->box.y)
-                },
-                static_cast<uint16_t>(s->box.r),
-                200 });
+        draw.circles.push_back(d_draw_circle { sis ++, { s->box.x, s->box.y }, s->box.r, 0xc8c8c8 });
 
         // body inner circles
         const float r1 = 14.0f; // moving snake body radius
 
-        auto prev = s->parts.begin();
-        draw.circles.push_back(d_draw_circle {
-                    sis ++,
-                    {
-                            static_cast<uint16_t>(prev->x),
-                            static_cast<uint16_t>(prev->y)
-                    },
-                    static_cast<uint16_t>(r1),
-                    200 });
+        auto head = s->parts.begin();
+        draw.circles.push_back(d_draw_circle { sis ++, { head->x, head->y }, r1, 0xc80000 });
 
         const body &sec = *(s->parts.begin() + 1);
-        draw.circles.push_back(d_draw_circle {
-                sis ++,
-                {
-                        static_cast<uint16_t>(sec.x),
-                        static_cast<uint16_t>(sec.y)
-                },
-                static_cast<uint16_t>(r1),
-                60 });
+        draw.circles.push_back(d_draw_circle { sis ++, { sec.x, sec.y }, r1, 0x3c3c3c });
+        draw.circles.push_back(d_draw_circle { sis ++, { sec.x + (head->x - sec.x) / 2.0f, sec.y + (head->y - sec.y) / 2.0f }, r1, 0x646464 });
+        draw.circles.push_back(d_draw_circle { sis ++, { s->parts.back().x, s->parts.back().y }, r1, 0x646464 });
 
-        draw.circles.push_back(d_draw_circle {
-                sis ++,
-                {
-                        static_cast<uint16_t>(sec.x + (prev->x - sec.x) / 2.0f),
-                        static_cast<uint16_t>(sec.y + (prev->y - sec.y) / 2.0f)
-                },
-                static_cast<uint16_t>(r1),
-                100 });
-
-        draw.circles.push_back(d_draw_circle {
-                sis ++,
-                {
-                        static_cast<uint16_t>(s->parts.back().x),
-                        static_cast<uint16_t>(s->parts.back().y)
-                },
-                static_cast<uint16_t>(r1),
-                100 });
+        // bounds
+        for (const sector *ss: s->box.sectors) {
+            draw.circles.push_back(d_draw_circle { sis ++, { ss->box.x, ss->box.y }, ss->box.r, 0x511883 });
+        }
 
         // body parts
         for (const body &b : s->parts) {
-            draw.circles.push_back(d_draw_circle {
-                    sis ++,
-                    {
-                            static_cast<uint16_t>(b.x),
-                            static_cast<uint16_t>(b.y)
-                    },
-                    static_cast<uint16_t>(snake::move_step_distance),
-                    102 });
+            draw.circles.push_back(d_draw_circle { sis ++, { b.x, b.y }, 1.0f * snake::move_step_distance, 0x646464 });
         }
     }
 
