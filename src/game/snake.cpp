@@ -172,7 +172,8 @@ void snake::update_box_radius() {
         d += tail_step_distance * (parts.size() - 6);
     }
 
-    box.r = d / 2.0f;
+    // reserve 1 step ahead of the snake radius
+    box.r = (d + 2 * snake::move_step_distance) / 2.0f;
 }
 
 void snake::init_box_new_sectors(sectors &ss) {

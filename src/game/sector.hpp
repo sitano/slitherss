@@ -83,18 +83,23 @@ struct sector {
     uint8_t x;
     uint8_t y;
 
+    snake_bb_pos box;
+
     std::vector<snake_bb> m_snakes;
     std::vector<food> m_food;
 
-    inline bool intersect(const snake_bb_pos &bb2) const {
+    sector(uint8_t in_x, uint8_t in_y) : x(in_x), y(in_y) {
         static const uint16_t half = world_config::sector_size / 2;
-        static constexpr float r_sqr = 1.0f * world_config::sector_diag_size * world_config::sector_diag_size;
+        static constexpr float r = world_config::sector_diag_size / 2.0f;
 
-        const snake_bb_pos bb1 = {
-                1.0f * (world_config::sector_size * x + half),
-                1.0f * (world_config::sector_size * y + half),
-                r_sqr };
-        return bb1.intersect(bb2);
+        box = {
+            1.0f * (world_config::sector_size * x + half),
+            1.0f * (world_config::sector_size * y + half),
+            r };
+    }
+
+    inline bool intersect(const snake_bb_pos &box2) const {
+        return box.intersect(box2);
     }
 
     void remove_snake(snake_id_t id);
@@ -104,7 +109,7 @@ class sectors : public std::vector<sector> {
 public:
     sectors() : std::vector<sector>() { }
 
-    void init_sectors(const uint16_t sector_count_along_edge);
+    void init_sectors();
     size_t get_index(uint16_t x, uint16_t y);
     sector *get_sector(uint16_t x, uint16_t y);
 

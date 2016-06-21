@@ -148,7 +148,7 @@ void world::check_snake_bounds(snake * const s) {
 
                         auto prev = s2->parts.begin();
                         auto bp_end = s2->parts.end();
-                        for (auto bp_i = s2->parts.begin() + 1; bp_i != bp_end; bp_i++) {
+                        for (auto bp_i = s2->parts.begin() + 1; bp_i != bp_end - 1; bp_i++) {
                             // todo radius from snake mass
                             // weak body part check
                             if (intersect_circle(bp_i->x, bp_i->y, check.x, check.y, snake::move_step_distance * 2)) {
@@ -187,7 +187,7 @@ void world::init(world_config config) {
 }
 
 void world::init_sectors() {
-    m_sectors.init_sectors(world_config::sector_count_along_edge);
+    m_sectors.init_sectors();
 }
 
 void world::init_food() {
