@@ -127,7 +127,7 @@ void world::check_snake_bounds(snake * const s) {
                 sector *sec_ptr = m_sectors.get_sector(i, j);
                 // check sector intersects head
                 // todo radius from snake mass
-                if (sec_ptr->intersect({ check.x, check.y, snake::move_step_distance * snake::move_step_distance })) {
+                if (sec_ptr->intersect({ check.x, check.y, snake::move_step_distance })) {
                     // check sector snakes
                     for (const snake_bb *bb_ptr: sec_ptr->m_snakes) {
                         const snake *s2 = bb_ptr->snake_ptr;
