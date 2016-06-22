@@ -224,8 +224,7 @@ void snake::update_box_new_sectors(sectors &ss, snake_bb *box, const float new_x
             if (i >= 0 && i < map_width_sectors && j >= 0 && j < map_width_sectors) {
                 sector *new_sector = ss.get_sector(i, j);
                 if (!box->binary_search(new_sector) && new_sector->intersect(*box)) {
-                    box->sectors.push_back(new_sector);
-                    box->sort(); // todo use sorted insert instead of sort after
+                    box->insert_sorted(new_sector);
                     if (track) {
                         box->reg_new_sector_if_missing(new_sector);
                     } else {
@@ -251,7 +250,7 @@ void snake::update_box_old_sectors(snake_bb &box) {
             } else {
                 sc->remove_snake(id);
             }
-            if (box.remove_sector(i)) {
+            if (box.remove_sector_unsorted(i)) {
                 sec_end = box.sectors.end();
                 continue;
             } else {
@@ -262,7 +261,7 @@ void snake::update_box_old_sectors(snake_bb &box) {
     }
 
     if (prev_len != box.sectors.size()) {
-        box.sort(); // todo use sorted insert instead of sort after
+        box.sort();
     }
 }
 

@@ -70,7 +70,8 @@ struct snake_bb : snake_bb_pos {
     snake_bb(snake_bb_pos in_pos, uint16_t in_id, const snake * in_ptr, std::vector<sector *> in_sectors) :
         snake_bb_pos(in_pos), id(in_id), snake_ptr(in_ptr), sectors(in_sectors) {}
 
-    bool remove_sector(const std::vector<sector *>::iterator &i);
+    void insert_sorted(sector *s);
+    bool remove_sector_unsorted(const std::vector<sector *>::iterator &i);
     bool binary_search(sector *s);
     void sort();
 

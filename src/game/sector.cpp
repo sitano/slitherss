@@ -81,7 +81,16 @@ float fastinvsqrt(float x) {
 }
 */
 
-bool snake_bb::remove_sector(const std::vector<sector *>::iterator &i) {
+void snake_bb::insert_sorted(sector *s) {
+    auto fwd_i = std::lower_bound(sectors.begin(), sectors.end(), s);
+    if (fwd_i != sectors.end()) {
+        sectors.insert(fwd_i, s);
+    } else {
+        sectors.push_back(s);
+    }
+}
+
+bool snake_bb::remove_sector_unsorted(const std::vector<sector *>::iterator &i) {
     if (i + 1 != sectors.end()) {
         *i = sectors.back();
         sectors.pop_back();
@@ -92,12 +101,12 @@ bool snake_bb::remove_sector(const std::vector<sector *>::iterator &i) {
     }
 }
 
-void snake_bb::sort() {
-    std::sort(sectors.begin(), sectors.end());
-}
-
 bool snake_bb::binary_search(sector *s) {
     return std::binary_search(sectors.begin(), sectors.end(), s);
+}
+
+void snake_bb::sort() {
+    std::sort(sectors.begin(), sectors.end());
 }
 
 size_t snake_bb::get_sectors_count() {
