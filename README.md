@@ -1,15 +1,18 @@
 TODO
 ====
 
-- reimpl snake bounds to contain only directly intersected sectors
-- impl head view cache
-- impl head pov cache
-- snake radius of head?
+- sector sorted inserts instead of sorts
+- on looking for new sectors, intersect to head step radius, not whole bound box
+- use binary search when intersecting foreign snake body
+- track snakes separatelly near view box
 
-- food intersection
-- eating food
+- snake radius of head?
 - snake mass
 - snake radius
+
+- keep food sorted by x-axis inside sectors
+- food intersection with binary search
+- eating food
 
 OTHER
 =====
