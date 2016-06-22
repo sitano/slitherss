@@ -27,8 +27,8 @@ snake::ptr world::create_snake() {
 
     for (int i = 0; i < len && i < snake::parts_skip_count + snake::parts_start_move_count; ++ i) {
         s->parts.push_back(body { 1.0f * x, 1.0f * y });
-        x += cosf(angle) * snake::move_step_distance;
-        y += sinf(angle) * snake::move_step_distance;
+        x += cosf(angle) * world_config::move_step_distance;
+        y += sinf(angle) * world_config::move_step_distance;
     }
 
     for (int i = snake::parts_skip_count + snake::parts_start_move_count; i < len; ++ i) {
@@ -40,8 +40,8 @@ snake::ptr world::create_snake() {
     s->angle = snake::normalize_angle(angle + f_pi);
     s->wangle = snake::normalize_angle(angle + f_pi);
 
-    s->bb = s->get_new_box();
-    s->vp = s->get_new_box();
+    s->sbb = snake_bb(s->get_new_box());
+    s->vp = view_port(s->get_new_box());
     s->update_box_center();
     s->update_box_radius();
     s->init_box_new_sectors(m_sectors);
@@ -127,9 +127,9 @@ void world::check_snake_bounds(snake * const s) {
                 sector *sec_ptr = m_sectors.get_sector(i, j);
                 // check sector intersects head
                 // todo radius from snake mass
-                if (sec_ptr->intersect({ check.x, check.y, snake::move_step_distance })) {
+                if (sec_ptr->intersect({ check.x, check.y, world_config::move_step_distance })) {
                     // check sector snakes
-                    for (const snake_bb *bb_ptr: sec_ptr->m_snakes) {
+                    for (const bb *bb_ptr: sec_ptr->m_snakes) {
                         const snake *s2 = bb_ptr->snake_ptr;
                         if (s == s2) {
                             continue;
@@ -148,7 +148,7 @@ void world::check_snake_bounds(snake * const s) {
                             // todo radius from snake mass
                             // todo skip by 2 sectors at once for start
                             // weak body part check
-                            if (intersect_circle(bp_i->x, bp_i->y, check.x, check.y, snake::move_step_distance * 2)) {
+                            if (intersect_circle(bp_i->x, bp_i->y, check.x, check.y, world_config::move_step_distance * 2)) {
                                 // check actual snake body
                                 // todo radius from snake mass
                                 const float r1 = 14.0f; // moving snake body radius
@@ -214,7 +214,7 @@ void world::remove_snake(snake_id_t id) {
 
     auto sn_i = get_snake(id);
     if (sn_i != m_snakes.end()) {
-        for (auto sec_ptr : sn_i->second->bb.sectors) {
+        for (auto sec_ptr : sn_i->second->sbb.m_sectors) {
             sec_ptr->remove_snake(id);
         }
 
@@ -276,7 +276,7 @@ std::ostream &operator<<(std::ostream &out, const world &w) {
          << "\n\tsnake_tail_k = " << snake::snake_tail_k
          << "\n\tparts_skip_count = " << snake::parts_skip_count
          << "\n\tparts_start_move_count = " << snake::parts_start_move_count
-         << "\n\tmove_step_distance = " << snake::move_step_distance
+         << "\n\tmove_step_distance = " << world_config::move_step_distance
          << "\n\trot_step_angle = " << snake::rot_step_angle;
 }
 

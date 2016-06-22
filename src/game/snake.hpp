@@ -61,8 +61,8 @@ struct snake : std::enable_shared_from_this<snake> {
     // 0 - 100, 0 - hungry, 100 - full
     uint8_t fullness;
 
-    snake_bb bb;
-    snake_bb vp;
+    snake_bb sbb;
+    view_port vp;
     std::vector<body> parts;
 
     bool tick(long dt, sectors &ss);
@@ -70,10 +70,6 @@ struct snake : std::enable_shared_from_this<snake> {
     void update_box_center();
     void update_box_radius();
     void init_box_new_sectors(sectors &ss);
-    template <int sr, bool track>
-    void update_box_new_sectors(sectors &ss, snake_bb *box, const float new_x, const float new_y, const float old_x, const float old_y);
-    template <bool track>
-    void update_box_old_sectors(snake_bb &box);
 
     inline const body& get_head() const { return parts[0]; }
     inline float get_head_x() const { return parts[0].x; }
@@ -82,7 +78,7 @@ struct snake : std::enable_shared_from_this<snake> {
     inline float get_head_dy() const { return parts[0].y - parts[1].y; }
 
     std::shared_ptr<snake> get_ptr();
-    snake_bb get_new_box() const;
+    bb get_new_box() const;
 
     static constexpr float spangdv = 4.8f;
     static constexpr float nsp1 = 5.39f;
@@ -99,9 +95,8 @@ struct snake : std::enable_shared_from_this<snake> {
 
     static const int parts_skip_count = 3;
     static const int parts_start_move_count = 4;
-    static const int move_step_distance = 42;
     static constexpr float tail_step_distance = 24.0f; // tail step eval for step dist = 42, k = 0.43
-    static constexpr float rot_step_angle = 1.0f * move_step_distance / boost_speed * snake_angular_speed; // radians step per max acc resolution time
+    static constexpr float rot_step_angle = 1.0f * world_config::move_step_distance / boost_speed * snake_angular_speed; // radians step per max acc resolution time
     static const long rot_step_interval = static_cast<long>(1000.0f * rot_step_angle / snake_angular_speed);
     static const long ai_step_interval = 1000;
 

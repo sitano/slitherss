@@ -87,7 +87,7 @@ void slither_server::broadcast_debug() {
         uint16_t sis = static_cast<uint16_t>(s->id * 1000);
 
         // bound box
-        draw.circles.push_back(d_draw_circle { sis ++, { s->bb.x, s->bb.y }, s->bb.r, 0xc8c8c8 });
+        draw.circles.push_back(d_draw_circle { sis ++, { s->sbb.x, s->sbb.y }, s->sbb.r, 0xc8c8c8 });
 
         // body inner circles
         const float r1 = 14.0f; // moving snake body radius
@@ -101,13 +101,13 @@ void slither_server::broadcast_debug() {
         draw.circles.push_back(d_draw_circle { sis ++, { s->parts.back().x, s->parts.back().y }, r1, 0x646464 });
 
         // bounds
-        for (const sector *ss: s->bb.sectors) {
+        for (const sector *ss: s->sbb.m_sectors) {
             draw.circles.push_back(d_draw_circle { sis ++, { ss->box.x, ss->box.y }, ss->box.r, 0x511883 });
         }
 
         // body parts
         for (const body &b : s->parts) {
-            draw.circles.push_back(d_draw_circle { sis ++, { b.x, b.y }, 1.0f * snake::move_step_distance, 0x646464 });
+            draw.circles.push_back(d_draw_circle { sis ++, { b.x, b.y }, 1.0f * world_config::move_step_distance, 0x646464 });
         }
     }
 

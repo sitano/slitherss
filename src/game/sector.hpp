@@ -42,16 +42,16 @@ float fastsqrt(float val);
 
 // float fastinvsqrt(float x);
 
-struct snake_bb_pos {
+struct bb_pos {
     float x;
     float y;
     float r; // squared radius
 
-    snake_bb_pos() = default;
-    snake_bb_pos(const snake_bb_pos &p) : x(p.x), y(p.y), r(p.r) {}
-    snake_bb_pos(float in_x, float in_y, float in_r) : x(in_x), y(in_y), r(in_r) {}
+    bb_pos() = default;
+    bb_pos(const bb_pos &p) : x(p.x), y(p.y), r(p.r) {}
+    bb_pos(float in_x, float in_y, float in_r) : x(in_x), y(in_y), r(in_r) {}
 
-    inline bool intersect(const snake_bb_pos &bb2) const {
+    inline bool intersect(const bb_pos &bb2) const {
         const float dx = x - bb2.x;
         const float dy = y - bb2.y;
         const float r2 = r + bb2.r;
@@ -59,16 +59,14 @@ struct snake_bb_pos {
     }
 };
 
-struct snake_bb : snake_bb_pos {
+struct bb : bb_pos {
     snake_id_t id;
     const snake * snake_ptr;
-    std::vector<sector *> sectors;
-    std::vector<sector *> new_sectors;
-    std::vector<sector *> old_sectors;
+    std::vector<sector *> m_sectors;
 
-    snake_bb() = default;
-    snake_bb(snake_bb_pos in_pos, uint16_t in_id, const snake * in_ptr, std::vector<sector *> in_sectors) :
-        snake_bb_pos(in_pos), id(in_id), snake_ptr(in_ptr), sectors(in_sectors) {}
+    bb() = default;
+    bb(bb_pos in_pos, uint16_t in_id, const snake * in_ptr, std::vector<sector *> in_sectors) :
+        bb_pos(in_pos), id(in_id), snake_ptr(in_ptr), m_sectors(in_sectors) {}
 
     void insert_sorted(sector *s);
     bool remove_sector_unsorted(const std::vector<sector *>::iterator &i);
@@ -77,17 +75,15 @@ struct snake_bb : snake_bb_pos {
 
     size_t get_sectors_count();
     size_t get_snakes_in_sectors_count();
-    void reg_new_sector_if_missing(sector *s);
-    void reg_old_sector_if_missing(sector *s);
 };
 
 struct sector {
     uint8_t x;
     uint8_t y;
 
-    snake_bb_pos box;
+    bb_pos box;
 
-    std::vector<snake_bb *> m_snakes;
+    std::vector<bb *> m_snakes;
     std::vector<food> m_food;
 
     sector(uint8_t in_x, uint8_t in_y) : x(in_x), y(in_y) {
@@ -100,7 +96,7 @@ struct sector {
             r };
     }
 
-    inline bool intersect(const snake_bb_pos &box2) const {
+    inline bool intersect(const bb_pos &box2) const {
         return box.intersect(box2);
     }
 
@@ -114,6 +110,35 @@ public:
     void init_sectors();
     size_t get_index(uint16_t x, uint16_t y);
     sector *get_sector(uint16_t x, uint16_t y);
+};
+
+struct snake_bb : bb {
+    snake_bb() = default;
+    snake_bb(bb_pos in_pos, uint16_t in_id, const snake *in_ptr, const std::vector<sector *> &in_sectors) : bb(
+            in_pos, in_id, in_ptr, in_sectors) {}
+    explicit snake_bb(bb in): bb({in.x, in.y, in.r}, in.id, in.snake_ptr, in.m_sectors) {}
+
+    void insert_sorted_with_reg(sector *s);
+    void update_box_new_sectors(sectors &ss, const float new_x, const float new_y, const float old_x, const float old_y);
+    void update_box_old_sectors();
+};
+
+struct view_port : bb {
+    std::vector<sector *> new_sectors;
+    std::vector<sector *> old_sectors;
+
+    view_port() = default;
+    view_port(bb_pos in_pos, uint16_t in_id, const snake *in_ptr, const std::vector<sector *> &in_sectors) : bb(
+            in_pos, in_id, in_ptr, in_sectors) {}
+    explicit view_port(bb in): bb({in.x, in.y, in.r}, in.id, in.snake_ptr, in.m_sectors) {}
+
+    void reg_new_sector_if_missing(sector *s);
+    void reg_old_sector_if_missing(sector *s);
+
+    void insert_sorted_with_delta(sector *s);
+
+    void update_box_new_sectors(sectors &ss, const float new_x, const float new_y, const float old_x, const float old_y);
+    void update_box_old_sectors();
 };
 
 #endif //SLITHER_GAME_SECTOR_HPP

@@ -81,60 +81,48 @@ float fastinvsqrt(float x) {
 }
 */
 
-void snake_bb::insert_sorted(sector *s) {
-    auto fwd_i = std::lower_bound(sectors.begin(), sectors.end(), s);
-    if (fwd_i != sectors.end()) {
-        sectors.insert(fwd_i, s);
+void bb::insert_sorted(sector *s) {
+    auto fwd_i = std::lower_bound(m_sectors.begin(), m_sectors.end(), s);
+    if (fwd_i != m_sectors.end()) {
+        m_sectors.insert(fwd_i, s);
     } else {
-        sectors.push_back(s);
+        m_sectors.push_back(s);
     }
 }
 
-bool snake_bb::remove_sector_unsorted(const std::vector<sector *>::iterator &i) {
-    if (i + 1 != sectors.end()) {
-        *i = sectors.back();
-        sectors.pop_back();
+bool bb::remove_sector_unsorted(const std::vector<sector *>::iterator &i) {
+    if (i + 1 != m_sectors.end()) {
+        *i = m_sectors.back();
+        m_sectors.pop_back();
         return true;
     } else {
-        sectors.pop_back();
+        m_sectors.pop_back();
         return false;
     }
 }
 
-bool snake_bb::binary_search(sector *s) {
-    return std::binary_search(sectors.begin(), sectors.end(), s);
+bool bb::binary_search(sector *s) {
+    return std::binary_search(m_sectors.begin(), m_sectors.end(), s);
 }
 
-void snake_bb::sort() {
-    std::sort(sectors.begin(), sectors.end());
+void bb::sort() {
+    std::sort(m_sectors.begin(), m_sectors.end());
 }
 
-size_t snake_bb::get_sectors_count() {
-    return sectors.size();
+size_t bb::get_sectors_count() {
+    return m_sectors.size();
 }
 
-size_t snake_bb::get_snakes_in_sectors_count() {
+size_t bb::get_snakes_in_sectors_count() {
     size_t i = 0;
-    for (sector *s : sectors) {
+    for (sector *s : m_sectors) {
         i += s->m_snakes.size();
     }
     return i;
 }
 
-void snake_bb::reg_new_sector_if_missing(sector *s) {
-    if (std::find(new_sectors.begin(), new_sectors.end(), s) == new_sectors.end()) {
-        new_sectors.push_back(s);
-    }
-}
-
-void snake_bb::reg_old_sector_if_missing(sector *s) {
-    if (std::find(old_sectors.begin(), old_sectors.end(), s) == old_sectors.end()) {
-        old_sectors.push_back(s);
-    }
-}
-
 void sector::remove_snake(snake_id_t id) {
-    m_snakes.erase(std::remove_if(m_snakes.begin(), m_snakes.end(), [id](const snake_bb *bb){ return bb->id == id; }));
+    m_snakes.erase(std::remove_if(m_snakes.begin(), m_snakes.end(), [id](const bb *bb){ return bb->id == id; }));
 }
 
 void sectors::init_sectors() {
@@ -155,5 +143,120 @@ sector *sectors::get_sector(uint16_t x, uint16_t y) {
     return &operator[](get_index(x, y));
 }
 
+
+void snake_bb::insert_sorted_with_reg(sector *s) {
+    insert_sorted(s);
+    s->m_snakes.push_back(this);
+}
+
+void view_port::reg_new_sector_if_missing(sector *s) {
+    if (std::find(new_sectors.begin(), new_sectors.end(), s) == new_sectors.end()) {
+        new_sectors.push_back(s);
+    }
+}
+
+void view_port::reg_old_sector_if_missing(sector *s) {
+    if (std::find(old_sectors.begin(), old_sectors.end(), s) == old_sectors.end()) {
+        old_sectors.push_back(s);
+    }
+}
+
+void view_port::insert_sorted_with_delta(sector *s) {
+    insert_sorted(s);
+    reg_new_sector_if_missing(s);
+}
+
+void snake_bb::update_box_new_sectors(sectors &ss, const float new_x, const float new_y, const float old_x, const float old_y) {
+    const int16_t new_sx = static_cast<int16_t>(new_x / world_config::sector_size);
+    const int16_t new_sy = static_cast<int16_t>(new_y / world_config::sector_size);
+    const int16_t old_sx = static_cast<int16_t>(old_x / world_config::sector_size);
+    const int16_t old_sy = static_cast<int16_t>(old_y / world_config::sector_size);
+    if (new_sx == old_sx && new_sy == old_sy) {
+        return;
+    }
+
+    // todo: max of move step dist + head r
+    const bb_pos box = { new_x, new_y, world_config::move_step_distance };
+
+    static const int16_t map_width_sectors = static_cast<int16_t>(world_config::sector_count_along_edge);
+    for (int16_t j = new_sy - 1; j <= new_sy + 1; j ++) {
+        for (int16_t i = new_sx - 1; i <= new_sx + 1; i ++) {
+            if (i >= 0 && i < map_width_sectors && j >= 0 && j < map_width_sectors) {
+                sector *new_sector = ss.get_sector(i, j);
+                if (!binary_search(new_sector) && new_sector->intersect(box)) {
+                    insert_sorted_with_reg(new_sector);
+                }
+            }
+        }
+    }
+}
+
+void snake_bb::update_box_old_sectors() {
+    const size_t prev_len = m_sectors.size();
+    auto i = m_sectors.begin();
+    auto sec_end = m_sectors.end();
+    while (i != sec_end) {
+        sector *sc = *i;
+        if (!sc->intersect(*this)) {
+            sc->remove_snake(id);
+            if (remove_sector_unsorted(i)) {
+                sec_end = m_sectors.end();
+                continue;
+            } else {
+                break;
+            }
+        }
+        i ++;
+    }
+
+    if (prev_len != m_sectors.size()) {
+        sort();
+    }
+}
+
+void view_port::update_box_new_sectors(sectors &ss, const float new_x, const float new_y, const float old_x, const float old_y) {
+    const int16_t new_sx = static_cast<int16_t>(new_x / world_config::sector_size);
+    const int16_t new_sy = static_cast<int16_t>(new_y / world_config::sector_size);
+    const int16_t old_sx = static_cast<int16_t>(old_x / world_config::sector_size);
+    const int16_t old_sy = static_cast<int16_t>(old_y / world_config::sector_size);
+    if (new_sx == old_sx && new_sy == old_sy) {
+        return;
+    }
+
+    static const int16_t map_width_sectors = static_cast<int16_t>(world_config::sector_count_along_edge);
+    for (int16_t j = new_sy - 3; j <= new_sy + 3; j ++) {
+        for (int16_t i = new_sx - 3; i <= new_sx + 3; i ++) {
+            if (i >= 0 && i < map_width_sectors && j >= 0 && j < map_width_sectors) {
+                sector *new_sector = ss.get_sector(i, j);
+                if (!binary_search(new_sector) && new_sector->intersect(*this)) {
+                    insert_sorted_with_delta(new_sector);
+                }
+            }
+        }
+    }
+}
+
+void view_port::update_box_old_sectors() {
+    const size_t prev_len = m_sectors.size();
+    auto i = m_sectors.begin();
+    auto sec_end = m_sectors.end();
+    while (i != sec_end) {
+        sector *sc = *i;
+        if (!sc->intersect(*this)) {
+            reg_old_sector_if_missing(sc);
+            if (remove_sector_unsorted(i)) {
+                sec_end = m_sectors.end();
+                continue;
+            } else {
+                break;
+            }
+        }
+        i ++;
+    }
+
+    if (prev_len != m_sectors.size()) {
+        sort();
+    }
+}
 
 
