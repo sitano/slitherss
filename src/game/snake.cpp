@@ -62,7 +62,7 @@ bool snake::tick(long dt, sectors &ss) {
         head.x += cosf(angle) * move_dist;
         head.y += sinf(angle) * move_dist;
 
-        sbb.update_box_new_sectors(ss, head.x, head.y, prev.x, prev.y);
+        sbb.update_box_new_sectors(ss, world_config::sector_size / 2, head.x, head.y, prev.x, prev.y);
         if (!bot) {
             vp.update_box_new_sectors(ss, head.x, head.y, prev.x, prev.y);
         }
@@ -103,9 +103,10 @@ bool snake::tick(long dt, sectors &ss) {
             pt.from(prev);
             pt.offset(snake_tail_k * (last.x - pt.x), snake_tail_k * (last.y - pt.y));
 
-            // as far as having step dist = 42, k = 0.43, sec. size = 300, this could be 2 * 300 / 24.0f - 1, not just 14
-            if (j + 14 >= i) {
-                sbb.update_box_new_sectors(ss, pt.x, pt.y, old.x, old.y);
+            // as far as having step dist = 42, k = 0.43, sec. size = 300, this could be 300 / 24.0f, with radius 150
+            static const size_t tail_step = static_cast<size_t>(world_config::sector_size / tail_step_distance);
+            if (j + tail_step >= i) {
+                sbb.update_box_new_sectors(ss, world_config::sector_size / 2, pt.x, pt.y, old.x, old.y);
                 j = i;
             }
 
@@ -191,17 +192,18 @@ void snake::update_box_radius() {
 
 void snake::init_box_new_sectors(sectors &ss) {
     body& head = parts[0];
-    sbb.update_box_new_sectors(ss, head.x, head.y, 0.0f, 0.0f);
+    sbb.update_box_new_sectors(ss, world_config::sector_size / 2, head.x, head.y, 0.0f, 0.0f);
 
     if (!bot) {
         vp.update_box_new_sectors(ss, head.x, head.y, 0.0f, 0.0f);
     }
 
     const size_t len = parts.size();
-    // as far as having step dist = 42, k = 0.43, sec. size = 300, this could be 2 * 300 / 24.0f - 1, not just 14
-    for (size_t i = 14; i < len; i += 14) {
+    // as far as having step dist = 42, k = 0.43, sec. size = 300, this could be 300 / 24.0f, with radius 150
+    static const size_t tail_step = static_cast<size_t>(world_config::sector_size / tail_step_distance);
+    for (size_t i = 3; i < len; i += tail_step) {
         body &pt = parts[i];
-        sbb.update_box_new_sectors(ss, pt.x, pt.y, 0.0f, 0.0f);
+        sbb.update_box_new_sectors(ss, world_config::sector_size / 2, pt.x, pt.y, 0.0f, 0.0f);
     }
 }
 

@@ -166,7 +166,7 @@ void view_port::insert_sorted_with_delta(sector *s) {
     reg_new_sector_if_missing(s);
 }
 
-void snake_bb::update_box_new_sectors(sectors &ss, const float new_x, const float new_y, const float old_x, const float old_y) {
+void snake_bb::update_box_new_sectors(sectors &ss, const float r, const float new_x, const float new_y, const float old_x, const float old_y) {
     const int16_t new_sx = static_cast<int16_t>(new_x / world_config::sector_size);
     const int16_t new_sy = static_cast<int16_t>(new_y / world_config::sector_size);
     const int16_t old_sx = static_cast<int16_t>(old_x / world_config::sector_size);
@@ -175,12 +175,11 @@ void snake_bb::update_box_new_sectors(sectors &ss, const float new_x, const floa
         return;
     }
 
-    // todo: max of move step dist + head r
-    const bb_pos box = { new_x, new_y, world_config::move_step_distance };
+    const bb_pos box = { new_x, new_y, r };
 
     static const int16_t map_width_sectors = static_cast<int16_t>(world_config::sector_count_along_edge);
-    for (int16_t j = new_sy - 1; j <= new_sy + 1; j ++) {
-        for (int16_t i = new_sx - 1; i <= new_sx + 1; i ++) {
+    for (int j = new_sy - 1; j <= new_sy + 1; j ++) {
+        for (int i = new_sx - 1; i <= new_sx + 1; i ++) {
             if (i >= 0 && i < map_width_sectors && j >= 0 && j < map_width_sectors) {
                 sector *new_sector = ss.get_sector(i, j);
                 if (!binary_search(new_sector) && new_sector->intersect(box)) {
@@ -224,8 +223,8 @@ void view_port::update_box_new_sectors(sectors &ss, const float new_x, const flo
     }
 
     static const int16_t map_width_sectors = static_cast<int16_t>(world_config::sector_count_along_edge);
-    for (int16_t j = new_sy - 3; j <= new_sy + 3; j ++) {
-        for (int16_t i = new_sx - 3; i <= new_sx + 3; i ++) {
+    for (int j = new_sy - 3; j <= new_sy + 3; j ++) {
+        for (int i = new_sx - 3; i <= new_sx + 3; i ++) {
             if (i >= 0 && i < map_width_sectors && j >= 0 && j < map_width_sectors) {
                 sector *new_sector = ss.get_sector(i, j);
                 if (!binary_search(new_sector) && new_sector->intersect(*this)) {
