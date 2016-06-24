@@ -92,12 +92,11 @@ void slither_server::broadcast_debug() {
         // body inner circles
         const float r1 = 14.0f; // moving snake body radius
 
-        auto head = s->parts.begin();
-        draw.circles.push_back(d_draw_circle { sis ++, { head->x, head->y }, r1, 0xc80000 });
+        draw.circles.push_back(d_draw_circle { sis ++, { s->get_head_x(), s->get_head_y() }, r1, 0xc80000 });
 
         const body &sec = *(s->parts.begin() + 1);
         draw.circles.push_back(d_draw_circle { sis ++, { sec.x, sec.y }, r1, 0x3c3c3c });
-        draw.circles.push_back(d_draw_circle { sis ++, { sec.x + (head->x - sec.x) / 2.0f, sec.y + (head->y - sec.y) / 2.0f }, r1, 0x646464 });
+        draw.circles.push_back(d_draw_circle { sis ++, { sec.x + (s->get_head_x() - sec.x) / 2.0f, sec.y + (s->get_head_y() - sec.y) / 2.0f }, r1, 0x646464 });
         draw.circles.push_back(d_draw_circle { sis ++, { s->parts.back().x, s->parts.back().y }, r1, 0x646464 });
 
         // bounds
@@ -105,9 +104,28 @@ void slither_server::broadcast_debug() {
             draw.circles.push_back(d_draw_circle { sis ++, { ss->box.x, ss->box.y }, ss->box.r, 0x511883 });
         }
 
-        // body parts
-        for (const body &b : s->parts) {
-            draw.circles.push_back(d_draw_circle { sis ++, { b.x, b.y }, 1.0f * world_config::move_step_distance, 0x646464 });
+        // intersection algorithm
+        static const size_t head_size = 8;
+        static const size_t tail_step = static_cast<size_t>(world_config::sector_size / snake::tail_step_distance);
+        static const size_t tail_step_half = tail_step / 2;
+        const size_t len = s->parts.size();
+
+        if (len <= head_size + tail_step) {
+            for (const body &b : s->parts) {
+                draw.circles.push_back(d_draw_circle { sis ++, { b.x, b.y }, world_config::move_step_distance, 0x646464 });
+            }
+        } else {
+            auto p = s->parts[3];
+            draw.circles.push_back(d_draw_circle { sis ++, { p.x, p.y }, world_config::sector_size / 2, 0x848484 });
+            p = s->parts[0];
+            draw.circles.push_back(d_draw_circle { sis ++, { p.x, p.y }, world_config::move_step_distance, 0x646464 });
+            p = s->parts[8];
+            draw.circles.push_back(d_draw_circle { sis ++, { p.x, p.y }, world_config::move_step_distance, 0x646464 });
+
+            auto end = s->parts.end();
+            for (auto i = s->parts.begin() + 7 + tail_step_half; i < end; i += tail_step) {
+                draw.circles.push_back(d_draw_circle { sis ++, { i->x, i->y }, world_config::sector_size / 2, 0x848484 });
+            }
         }
     }
 

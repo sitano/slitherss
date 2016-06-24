@@ -39,7 +39,6 @@ struct d_draw_circle {
     uint24_t color;
 
     d_draw_circle() = default;
-    d_draw_circle(uint24_t in_id, d_draw_point in_v, uint16_t in_r, uint24_t in_color) : id(in_id), v(in_v), r(in_r), color(in_color) { }
     d_draw_circle(uint24_t in_id, d_draw_point in_v, float in_r, uint24_t in_color) : id(in_id), v(in_v), r(static_cast<uint16_t>(in_r)), color(in_color) { }
 
     static uint8_t get_header() { return 'o'; }
