@@ -178,14 +178,15 @@ void snake::update_box_center() {
 
 void snake::update_box_radius() {
     // calculate bb radius, len eval for step dist = 42, k = 0.43
-    float d = 41.4f + 42.0f + 37.7f + 37.7f + 33.0f + 28.5f;
+    // parts ..  1  ..  2  ..  3   ..  4   ..  5   ..  6   ..  7  .. tail by 24.0f
+    float d = 42.0f + 42.0f + 42.0f + 37.7f + 37.7f + 33.0f + 28.5f;
 
-    if (parts.size() > 6) {
-        d += tail_step_distance * (parts.size() - 6);
+    if (parts.size() > 8) {
+        d += tail_step_distance * (parts.size() - 8);
     }
 
     // reserve 1 step ahead of the snake radius
-    sbb.r = (d + 2 * world_config::move_step_distance) / 2.0f;
+    sbb.r = (d + world_config::move_step_distance) / 2.0f;
 
     vp.r = world_config::sector_diag_size * 3.0f;
 }
@@ -224,3 +225,72 @@ void snake::tick_ai(long frames) {
         }
     }
 }
+
+bool snake::intersect(bb_pos foe,
+                      std::vector<body>::const_iterator prev,
+                      std::vector<body>::const_iterator i,
+                      std::vector<body>::const_iterator end) const {
+    while (i != end) {
+        // weak body part check
+        if (intersect_circle(i->x, i->y, foe.x, foe.y, world_config::move_step_distance * 2)) {
+            const float r = foe.r + get_snake_body_part_radius();
+
+            // check actual snake body part
+            if (intersect_circle(i->x, i->y, foe.x, foe.y, r) ||
+                    intersect_circle(prev->x, prev->y, foe.x, foe.y, r) ||
+                    intersect_circle(i->x + (prev->x - i->x) / 2.0f, i->y + (prev->y - i->y) / 2.0f, foe.x, foe.y, r)) {
+                return true;
+            }
+        }
+
+        ++prev;
+        ++i;
+    }
+
+    return false;
+}
+
+bool snake::intersect(bb_pos foe) const {
+    static const size_t head_size = 8;
+    static const size_t tail_step = static_cast<size_t>(world_config::sector_size / tail_step_distance);
+    static const size_t tail_step_half = tail_step / 2;
+    const size_t len = parts.size();
+
+    if (len <= head_size + tail_step) {
+        return intersect(foe, parts.begin(), parts.begin() + 1, parts.end());
+    } else {
+        // calculate bb radius, len eval for step dist = 42, k = 0.43
+        // parts ..  1  ..  2  ..  3  ..  4  ..  5  ..  6  ..  7  .. tail by 24.0f
+        // head center will be i = 3, len [0 .. 3] = 42 * 3 = 126, len [3 .. 7] = 136.9, both < sector_size / 2 = 150
+        auto head = parts[3];
+        if (intersect_circle(head.x, head.y, foe.x, foe.y, world_config::sector_size / 2)) {
+            if (intersect(foe, parts.begin(), parts.begin() + 1, parts.begin() + 9)) {
+                return true;
+            }
+        }
+
+        // first tail sector center will be... skip 8 + tail_step / 2
+        auto end = parts.end();
+        for (auto i = parts.begin() + 7 + tail_step_half; i < end; i += tail_step) {
+            if (intersect_circle(i->x, i->y, foe.x, foe.y, world_config::sector_size / 2)) {
+                auto start = i - tail_step_half;
+                auto last = i + tail_step_half;
+                if (last > end) {
+                    last = end;
+                }
+                if (intersect(foe, i - 1, start, last)) {
+                    return true;
+                }
+            }
+        }
+    }
+
+    return false;
+}
+
+float snake::get_snake_body_part_radius() const {
+    // todo radius from snake mass
+    return 14.0f;
+}
+
+

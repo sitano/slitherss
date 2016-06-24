@@ -71,11 +71,18 @@ struct snake : std::enable_shared_from_this<snake> {
     void update_box_radius();
     void init_box_new_sectors(sectors &ss);
 
+    bool intersect(bb_pos foe) const;
+    bool intersect(bb_pos foe,
+                   std::vector<body>::const_iterator prev,
+                   std::vector<body>::const_iterator i,
+                   std::vector<body>::const_iterator end) const;
+
     inline const body& get_head() const { return parts[0]; }
     inline float get_head_x() const { return parts[0].x; }
     inline float get_head_y() const { return parts[0].y; }
     inline float get_head_dx() const { return parts[0].x - parts[1].x; }
     inline float get_head_dy() const { return parts[0].y - parts[1].y; }
+    float get_snake_body_part_radius() const;
 
     std::shared_ptr<snake> get_ptr();
     bb get_new_box() const;

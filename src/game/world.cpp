@@ -1,4 +1,5 @@
 #include "world.hpp"
+
 #include <ctime>
 #include <iostream>
 #include <algorithm>
@@ -112,7 +113,7 @@ void world::check_snake_bounds(snake * const s) {
     }
 
     // because we check after move being made
-    auto check = s->parts[0];
+    bb_pos check(s->get_head_x(), s->get_head_y(), s->get_snake_body_part_radius());
 
     // check bound coverage
     const int16_t sx = static_cast<int16_t>(check.x / world_config::sector_size);
@@ -126,7 +127,6 @@ void world::check_snake_bounds(snake * const s) {
             if (i >= 0 && i < map_width_sectors && j >= 0 && j < map_width_sectors) {
                 sector *sec_ptr = m_sectors.get_sector(i, j);
                 // check sector intersects head
-                // todo radius from snake mass
                 if (sec_ptr->intersect({ check.x, check.y, world_config::move_step_distance })) {
                     // check sector snakes
                     for (const bb *bb_ptr: sec_ptr->m_snakes) {
@@ -142,29 +142,9 @@ void world::check_snake_bounds(snake * const s) {
                             cs_cache.push_back(s2->id);
                         }
 
-                        auto prev = s2->parts.begin();
-                        auto bp_end = s2->parts.end();
-                        for (auto bp_i = s2->parts.begin() + 1; bp_i != bp_end - 1; bp_i++) {
-                            // todo radius from snake mass
-                            // todo skip by 2 sectors at once for start
-                            // weak body part check
-                            if (intersect_circle(bp_i->x, bp_i->y, check.x, check.y, world_config::move_step_distance * 2)) {
-                                // check actual snake body
-                                // todo radius from snake mass
-                                const float r1 = 14.0f; // moving snake body radius
-                                // todo radius from snake mass
-                                const float r2 = 14.0f; // checked snake body radius
-                                const float r = r1 + r2;
-
-                                if (intersect_circle(bp_i->x, bp_i->y, check.x, check.y, r) ||
-                                        intersect_circle(prev->x, prev->y, check.x, check.y, r) ||
-                                        intersect_circle(bp_i->x + (prev->x - bp_i->x) / 2.0f, bp_i->y + (prev->y - bp_i->y) / 2.0f, check.x, check.y, r)) {
-                                    s->update |= change_dying;
-                                    return;
-                                }
-                            }
-
-                            prev++;
+                        if (s2->intersect(check)) {
+                            s->update |= change_dying;
+                            return;
                         }
                     }
                 }
