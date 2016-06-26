@@ -52,6 +52,7 @@ private:
     void broadcast_debug();
     void broadcast_updates();
     void send_pov_update_to(sessions::iterator ses_i, snake *ptr);
+    void send_food_update_to(sessions::iterator ses_i, snake *ptr);
     void cleanup_dead();
 
     long get_now_tp();

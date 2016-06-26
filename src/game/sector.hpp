@@ -37,6 +37,9 @@ float distance_squared(float v_x, float v_y, float w_x, float w_y, float p_x, fl
 // points p0, p1
 float distance_squared(float p0_x, float p0_y, float p1_x, float p1_y);
 
+// points p0, p1
+uint32_t distance_squared(uint16_t p0_x, uint16_t p0_y, uint16_t p1_x, uint16_t p1_y);
+
 // https://en.wikipedia.org/wiki/Methods_of_computing_square_roots
 float fastsqrt(float val);
 
@@ -100,6 +103,11 @@ struct sector {
         return box.intersect(box2);
     }
 
+    void insert_sorted(const food &f);
+    bool remove_food(const std::vector<food>::iterator &i);
+    std::vector<food>::iterator find_closest_food(uint16_t x);
+    void sort();
+
     void remove_snake(snake_id_t id);
 };
 
@@ -121,6 +129,7 @@ struct snake_bb : bb {
     void insert_sorted_with_reg(sector *s);
     void update_box_new_sectors(sectors &ss, const float r, const float new_x, const float new_y, const float old_x, const float old_y);
     void update_box_old_sectors();
+
 };
 
 struct view_port : bb {

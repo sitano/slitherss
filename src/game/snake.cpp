@@ -127,6 +127,7 @@ bool snake::tick(long dt, sectors &ss) {
         if (!bot) {
             vp.update_box_old_sectors();
         }
+        update_eaten_food(ss);
 
         // update speed
         const uint16_t wantedSpeed = acceleration ? boost_speed : base_move_speed;
@@ -205,6 +206,46 @@ void snake::init_box_new_sectors(sectors &ss) {
     for (size_t i = 3; i < len; i += tail_step) {
         body &pt = parts[i];
         sbb.update_box_new_sectors(ss, world_config::sector_size / 2, pt.x, pt.y, 0.0f, 0.0f);
+    }
+}
+
+void snake::update_eaten_food(sectors &ss) {
+    const uint16_t hx = static_cast<uint16_t>(get_head_x());
+    const uint16_t hy = static_cast<uint16_t>(get_head_y());
+    const uint16_t r = static_cast<uint16_t>(14 + get_snake_body_part_radius() + world_config::move_step_distance);
+    const uint32_t r2 = r * r;
+
+    const uint16_t sx = hx / world_config::sector_size;
+    const uint16_t sy = hy / world_config::sector_size;
+
+    // head sector
+    {
+        sector *sc = ss.get_sector(sx, sy);
+        auto begin = sc->m_food.begin();
+        auto i = sc->find_closest_food(hx);
+        // to left
+        {
+            auto left = i - 1;
+            while (left >= begin && distance_squared(left->x, left->y, hx, hy) <= r2) {
+                // std::cout << "eaten food <left> x = " << left->x << ", y = " << left->y << std::endl;
+                fullness += i->size;
+                eaten.push_back(*left);
+                sc->remove_food(left);
+                i--;
+                left--;
+            }
+        }
+        // to right
+        {
+            auto end = sc->m_food.end();
+            while (i < end && distance_squared(i->x, i->y, hx, hy) <= r2) {
+                // std::cout << "eaten food <right> x = " << i->x << ", y = " << i->y << std::endl;
+                fullness += i->size;
+                eaten.push_back(*i);
+                sc->remove_food(i);
+                end--;
+            }
+        }
     }
 }
 
@@ -288,9 +329,15 @@ bool snake::intersect(bb_pos foe) const {
     return false;
 }
 
+void snake::increase_snake() {
+    parts.push_back(parts.back());
+}
+
 float snake::get_snake_body_part_radius() const {
     // todo radius from snake mass
     return 14.0f;
 }
+
+
 
 

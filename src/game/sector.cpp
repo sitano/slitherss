@@ -55,6 +55,12 @@ float distance_squared(float p0_x, float p0_y, float p1_x, float p1_y) {
     return dx * dx + dy * dy;
 }
 
+uint32_t distance_squared(uint16_t p0_x, uint16_t p0_y, uint16_t p1_x, uint16_t p1_y) {
+    const int32_t dx = p0_x - p1_x;
+    const int32_t dy = p0_y - p1_y;
+    return dx * dx + dy * dy;
+}
+
 // https://en.wikipedia.org/wiki/Methods_of_computing_square_roots
 float fastsqrt(float val)  {
     union
@@ -123,6 +129,27 @@ size_t bb::get_snakes_in_sectors_count() {
 
 void sector::remove_snake(snake_id_t id) {
     m_snakes.erase(std::remove_if(m_snakes.begin(), m_snakes.end(), [id](const bb *bb){ return bb->id == id; }));
+}
+
+void sector::insert_sorted(const food &f) {
+    auto fwd_i = std::lower_bound(m_food.begin(), m_food.end(), f, [](const food &a, const food &b) { return a.x < b.x; });
+    if (fwd_i != m_food.end()) {
+        m_food.insert(fwd_i, f);
+    } else {
+        m_food.push_back(f);
+    }
+}
+
+bool sector::remove_food(const std::vector<food>::iterator &i) {
+    m_food.erase(i);
+}
+
+void sector::sort() {
+    std::sort(m_food.begin(), m_food.end(), [](const food &a, const food &b) { return a.x < b.x; });
+}
+
+std::vector<food>::iterator sector::find_closest_food(uint16_t x) {
+    return std::lower_bound(m_food.begin(), m_food.end(), food { x, 0, 0, 0} , [](const food &a, const food &b) { return a.x < b.x; });
 }
 
 void sectors::init_sectors() {

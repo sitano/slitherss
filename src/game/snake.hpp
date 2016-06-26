@@ -59,17 +59,19 @@ struct snake : std::enable_shared_from_this<snake> {
     float wangle;
 
     // 0 - 100, 0 - hungry, 100 - full
-    uint8_t fullness;
+    uint16_t fullness;
 
     snake_bb sbb;
     view_port vp;
     std::vector<body> parts;
+    std::vector<food> eaten;
 
     bool tick(long dt, sectors &ss);
     void tick_ai(long frames);
     void update_box_center();
     void update_box_radius();
     void init_box_new_sectors(sectors &ss);
+    void update_eaten_food(sectors &ss);
 
     bool intersect(bb_pos foe) const;
     bool intersect(bb_pos foe,
@@ -77,12 +79,14 @@ struct snake : std::enable_shared_from_this<snake> {
                    std::vector<body>::const_iterator i,
                    std::vector<body>::const_iterator end) const;
 
+    void increase_snake();
+    float get_snake_body_part_radius() const;
+
     inline const body& get_head() const { return parts[0]; }
     inline float get_head_x() const { return parts[0].x; }
     inline float get_head_y() const { return parts[0].y; }
     inline float get_head_dx() const { return parts[0].x - parts[1].x; }
     inline float get_head_dy() const { return parts[0].y - parts[1].y; }
-    float get_snake_body_part_radius() const;
 
     std::shared_ptr<snake> get_ptr();
     bb get_new_box() const;

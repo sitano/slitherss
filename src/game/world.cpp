@@ -182,6 +182,7 @@ void world::init_food() {
                     next_random<uint8_t>(28)
             });
         }
+        s.sort();
     }
 }
 
