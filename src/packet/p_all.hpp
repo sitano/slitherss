@@ -13,7 +13,7 @@
 #include "p_highscore.hpp"
 #include "p_minimap.hpp"
 #include "p_snake.hpp"
-#include "d_draw.hpp"
+#include "p_food.hpp"
 #include "p_prey.hpp"
 #include "p_pong.hpp"
 

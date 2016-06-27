@@ -15,8 +15,9 @@ enum snake_changes : uint8_t {
     change_angle = 1 << 1,
     change_wangle = 1 << 2,
     change_speed = 1 << 3,
-    change_dying = 1 << 4,
-    change_dead = 1 << 5
+    change_fullness = 1 << 4,
+    change_dying = 1 << 5,
+    change_dead = 1 << 6
 };
 
 struct body {
@@ -65,6 +66,8 @@ struct snake : std::enable_shared_from_this<snake> {
     view_port vp;
     std::vector<body> parts;
     std::vector<food> eaten;
+    std::vector<food> spawn;
+    size_t clientPartsIndex;
 
     bool tick(long dt, sectors &ss);
     void tick_ai(long frames);
@@ -79,7 +82,11 @@ struct snake : std::enable_shared_from_this<snake> {
                    std::vector<body>::const_iterator i,
                    std::vector<body>::const_iterator end) const;
 
-    void increase_snake();
+    void eaten_food(food f);
+    void increase_snake(uint16_t volume);
+    void decrease_snake(uint16_t volume);
+    void spawn_food(food f);
+    void spawn_food_when_dead();
     float get_snake_body_part_radius() const;
 
     inline const body& get_head() const { return parts[0]; }

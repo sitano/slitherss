@@ -38,6 +38,7 @@ snake::ptr world::create_snake() {
         y += sinf(angle) * snake::tail_step_distance;
     }
 
+    s->clientPartsIndex = s->parts.size();
     s->angle = snake::normalize_angle(angle + f_pi);
     s->wangle = snake::normalize_angle(angle + f_pi);
 

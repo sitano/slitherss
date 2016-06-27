@@ -26,6 +26,7 @@ struct packet_set_food : public packet_base {
 // The food id is calculated with (y * GameRadius * 3) + x
 struct packet_spawn_food : public packet_base {
     packet_spawn_food() : packet_base(packet_t_spawn_food) {}
+    explicit packet_spawn_food(food f) : packet_base(packet_t_spawn_food), m_food(f) {}
 
     /**
      * 3	int8	Color?
@@ -42,6 +43,7 @@ struct packet_spawn_food : public packet_base {
 // The food id is calculated with (y * GameRadius * 3) + x
 struct packet_add_food : public packet_base {
     packet_add_food() : packet_base(packet_t_add_food) {}
+    explicit packet_add_food(food f) : packet_base(packet_t_add_food), m_food(f) {}
 
     /**
      * 3	int8	Color?
@@ -56,7 +58,7 @@ struct packet_add_food : public packet_base {
 
 struct packet_eat_food : public packet_base {
     packet_eat_food() : packet_base(packet_t_eat_food) {}
-    packet_eat_food(uint16_t id, food f) : packet_base(packet_t_eat_food), snakeId(id), m_food(f) {}
+    packet_eat_food(uint16_t id, food f) : packet_base(packet_t_eat_food), m_food(f), snakeId(id) {}
 
     /**
      * 3-4	int16	Food X

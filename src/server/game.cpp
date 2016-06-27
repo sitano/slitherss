@@ -192,20 +192,30 @@ void slither_server::broadcast_updates() {
             if (flags & change_pos) {
                 ptr->update ^= change_pos;
 
-                if (ptr->fullness >= 100) {
-                    ptr->fullness -= 100;
-                    ptr->increase_snake();
+                // increase length
+                if (ptr->clientPartsIndex < ptr->parts.size()) {
                     broadcast_binary(packet_inc(ptr));
+                    ptr->clientPartsIndex ++;
                 } else {
+                    // decrease length
+                    if (ptr->clientPartsIndex > ptr->parts.size()) {
+                        broadcast_binary(packet_remove_part(ptr));
+                        ptr->clientPartsIndex --;
+                    }
+
+                    // move
                     broadcast_binary(packet_move(ptr));
                 }
 
+                send_food_update(ptr);
                 if (!ptr->bot) {
                     const auto ses_i = load_session_i(id);
                     send_pov_update_to(ses_i, ptr);
-                    send_food_update_to(ses_i, ptr);
-                } else {
-                    send_food_update_to(m_sessions.end(), ptr);
+
+                    if (flags & change_fullness) {
+                        send_binary(ses_i, packet_fullness(ptr));
+                        ptr->update ^= change_fullness;
+                    }
                 }
             }
         }
@@ -231,17 +241,23 @@ void slither_server::send_pov_update_to(sessions::iterator ses_i, snake *ptr) {
     }
 }
 
-void slither_server::send_food_update_to(sessions::iterator ses_i, snake *ptr) {
+void slither_server::send_food_update(snake *ptr) {
     if (!ptr->eaten.empty()) {
         const snake_id_t id = ptr->id;
         for (const food &f : ptr->eaten) {
             // todo: to those who observers me
             broadcast_binary(packet_eat_food(id, f));
-            if (ses_i != m_sessions.end()) {
-                send_binary(ses_i, packet_fullness(ptr));
-            }
+
         }
         ptr->eaten.clear();
+    }
+
+    if (!ptr->spawn.empty()) {
+        for (const food &f : ptr->spawn) {
+            // todo: to those who observers me
+            broadcast_binary(packet_spawn_food(f));
+        }
+        ptr->spawn.clear();
     }
 }
 

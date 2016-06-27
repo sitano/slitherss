@@ -129,7 +129,6 @@ struct snake_bb : bb {
     void insert_sorted_with_reg(sector *s);
     void update_box_new_sectors(sectors &ss, const float r, const float new_x, const float new_y, const float old_x, const float old_y);
     void update_box_old_sectors();
-
 };
 
 struct view_port : bb {

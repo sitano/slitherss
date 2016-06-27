@@ -1,4 +1,4 @@
-#include "d_draw.hpp"
+#include "p_food.hpp"
 
 std::ostream& operator<<(std::ostream & out, const packet_set_food & p) {
     out << static_cast<packet_base>(p);

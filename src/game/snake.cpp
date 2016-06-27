@@ -130,6 +130,13 @@ bool snake::tick(long dt, sectors &ss) {
         update_eaten_food(ss);
 
         // update speed
+        if (acceleration) {
+            if (parts.size() <= 3) {
+                acceleration = false;
+            } else {
+                decrease_snake(33);
+            }
+        }
         const uint16_t wantedSpeed = acceleration ? boost_speed : base_move_speed;
         if (speed != wantedSpeed) {
             const float sgn = wantedSpeed > speed ? 1.0f : -1.0f;
@@ -228,8 +235,7 @@ void snake::update_eaten_food(sectors &ss) {
             auto left = i - 1;
             while (left >= begin && distance_squared(left->x, left->y, hx, hy) <= r2) {
                 // std::cout << "eaten food <left> x = " << left->x << ", y = " << left->y << std::endl;
-                fullness += i->size;
-                eaten.push_back(*left);
+                eaten_food(*left);
                 sc->remove_food(left);
                 i--;
                 left--;
@@ -240,8 +246,7 @@ void snake::update_eaten_food(sectors &ss) {
             auto end = sc->m_food.end();
             while (i < end && distance_squared(i->x, i->y, hx, hy) <= r2) {
                 // std::cout << "eaten food <right> x = " << i->x << ", y = " << i->y << std::endl;
-                fullness += i->size;
-                eaten.push_back(*i);
+                eaten_food(*i);
                 sc->remove_food(i);
                 end--;
             }
@@ -329,14 +334,65 @@ bool snake::intersect(bb_pos foe) const {
     return false;
 }
 
-void snake::increase_snake() {
-    parts.push_back(parts.back());
+void snake::eaten_food(food f) {
+    increase_snake(f.size);
+    eaten.push_back(f);
+}
+
+void snake::increase_snake(uint16_t volume) {
+    fullness += volume;
+    update |= change_fullness;
+    if (fullness >= 100) {
+        fullness -= 100;
+        parts.push_back(parts.back());
+    }
+}
+
+void snake::decrease_snake(uint16_t volume) {
+    update |= change_fullness;
+    if (volume > fullness) {
+        volume -= fullness;
+        const uint16_t reduce = static_cast<uint16_t>(1 + volume / 100);
+        for (uint16_t i = 0; i < reduce; i ++) {
+            if (parts.size() > 3) {
+                const body& last = parts.back();
+                spawn_food({
+                   static_cast<uint16_t>(last.x),
+                   static_cast<uint16_t>(last.y),
+                   100, // todo size dep on snake mass, use random
+                   skin});
+                parts.pop_back();
+            }
+        }
+        fullness = static_cast<uint16_t>(100 - volume % 100);
+    } else {
+        fullness -= volume;
+    }
+}
+
+void snake::spawn_food(food f) {
+    const int16_t sx = static_cast<int16_t>(f.x / world_config::sector_size);
+    const int16_t sy = static_cast<int16_t>(f.y / world_config::sector_size);
+
+    for (sector *sc: sbb.m_sectors) {
+        if (sc->x == sx && sc->y == sy) {
+            sc->insert_sorted(f);
+            spawn.push_back(f);
+            break;
+        }
+    }
+}
+
+void snake::spawn_food_when_dead() {
+    // todo + random
 }
 
 float snake::get_snake_body_part_radius() const {
     // todo radius from snake mass
     return 14.0f;
 }
+
+
 
 
 
