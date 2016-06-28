@@ -46,6 +46,7 @@ snake::ptr world::create_snake() {
     s->vp = view_port(s->get_new_box());
     s->update_box_center();
     s->update_box_radius();
+    s->update_snake_const();
     s->init_box_new_sectors(m_sectors);
 
     return s;

@@ -140,7 +140,7 @@ void sector::insert_sorted(const food &f) {
     }
 }
 
-bool sector::remove_food(const std::vector<food>::iterator &i) {
+void sector::remove_food(const std::vector<food>::iterator &i) {
     m_food.erase(i);
 }
 
@@ -148,8 +148,8 @@ void sector::sort() {
     std::sort(m_food.begin(), m_food.end(), [](const food &a, const food &b) { return a.x < b.x; });
 }
 
-std::vector<food>::iterator sector::find_closest_food(uint16_t x) {
-    return std::lower_bound(m_food.begin(), m_food.end(), food { x, 0, 0, 0} , [](const food &a, const food &b) { return a.x < b.x; });
+std::vector<food>::iterator sector::find_closest_food(uint16_t fx) {
+    return std::lower_bound(m_food.begin(), m_food.end(), food { fx, 0, 0, 0} , [](const food &a, const food &b) { return a.x < b.x; });
 }
 
 void sectors::init_sectors() {
@@ -193,7 +193,7 @@ void view_port::insert_sorted_with_delta(sector *s) {
     reg_new_sector_if_missing(s);
 }
 
-void snake_bb::update_box_new_sectors(sectors &ss, const float r, const float new_x, const float new_y, const float old_x, const float old_y) {
+void snake_bb::update_box_new_sectors(sectors &ss, const float bb_r, const float new_x, const float new_y, const float old_x, const float old_y) {
     const int16_t new_sx = static_cast<int16_t>(new_x / world_config::sector_size);
     const int16_t new_sy = static_cast<int16_t>(new_y / world_config::sector_size);
     const int16_t old_sx = static_cast<int16_t>(old_x / world_config::sector_size);
@@ -202,7 +202,7 @@ void snake_bb::update_box_new_sectors(sectors &ss, const float r, const float ne
         return;
     }
 
-    const bb_pos box = { new_x, new_y, r };
+    const bb_pos box = { new_x, new_y, bb_r };
 
     static const int16_t map_width_sectors = static_cast<int16_t>(world_config::sector_count_along_edge);
     for (int j = new_sy - 1; j <= new_sy + 1; j ++) {
@@ -222,9 +222,9 @@ void snake_bb::update_box_old_sectors() {
     auto i = m_sectors.begin();
     auto sec_end = m_sectors.end();
     while (i != sec_end) {
-        sector *sc = *i;
-        if (!sc->intersect(*this)) {
-            sc->remove_snake(id);
+        sector *sec = *i;
+        if (!sec->intersect(*this)) {
+            sec->remove_snake(id);
             if (remove_sector_unsorted(i)) {
                 sec_end = m_sectors.end();
                 continue;
@@ -267,9 +267,9 @@ void view_port::update_box_old_sectors() {
     auto i = m_sectors.begin();
     auto sec_end = m_sectors.end();
     while (i != sec_end) {
-        sector *sc = *i;
-        if (!sc->intersect(*this)) {
-            reg_old_sector_if_missing(sc);
+        sector *sec = *i;
+        if (!sec->intersect(*this)) {
+            reg_old_sector_if_missing(sec);
             if (remove_sector_unsorted(i)) {
                 sec_end = m_sectors.end();
                 continue;

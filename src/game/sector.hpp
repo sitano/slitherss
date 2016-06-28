@@ -104,8 +104,8 @@ struct sector {
     }
 
     void insert_sorted(const food &f);
-    bool remove_food(const std::vector<food>::iterator &i);
-    std::vector<food>::iterator find_closest_food(uint16_t x);
+    void remove_food(const std::vector<food>::iterator &i);
+    std::vector<food>::iterator find_closest_food(uint16_t fx);
     void sort();
 
     void remove_snake(snake_id_t id);
@@ -127,7 +127,7 @@ struct snake_bb : bb {
     explicit snake_bb(bb in): bb({in.x, in.y, in.r}, in.id, in.snake_ptr, in.m_sectors) {}
 
     void insert_sorted_with_reg(sector *s);
-    void update_box_new_sectors(sectors &ss, const float r, const float new_x, const float new_y, const float old_x, const float old_y);
+    void update_box_new_sectors(sectors &ss, const float bb_r, const float new_x, const float new_y, const float old_x, const float old_y);
     void update_box_old_sectors();
 };
 

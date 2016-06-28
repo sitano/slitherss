@@ -123,6 +123,7 @@ bool snake::tick(long dt, sectors &ss) {
         vp.x = head.x;
         vp.y = head.y;
         update_box_radius();
+        update_snake_const();
         sbb.update_box_old_sectors();
         if (!bot) {
             vp.update_box_old_sectors();
@@ -227,27 +228,27 @@ void snake::update_eaten_food(sectors &ss) {
 
     // head sector
     {
-        sector *sc = ss.get_sector(sx, sy);
-        auto begin = sc->m_food.begin();
-        auto i = sc->find_closest_food(hx);
+        sector *sec = ss.get_sector(sx, sy);
+        auto begin = sec->m_food.begin();
+        auto i = sec->find_closest_food(hx);
         // to left
         {
             auto left = i - 1;
             while (left >= begin && distance_squared(left->x, left->y, hx, hy) <= r2) {
                 // std::cout << "eaten food <left> x = " << left->x << ", y = " << left->y << std::endl;
                 eaten_food(*left);
-                sc->remove_food(left);
+                sec->remove_food(left);
                 i--;
                 left--;
             }
         }
         // to right
         {
-            auto end = sc->m_food.end();
+            auto end = sec->m_food.end();
             while (i < end && distance_squared(i->x, i->y, hx, hy) <= r2) {
                 // std::cout << "eaten food <right> x = " << i->x << ", y = " << i->y << std::endl;
                 eaten_food(*i);
-                sc->remove_food(i);
+                sec->remove_food(i);
                 end--;
             }
         }
@@ -341,15 +342,15 @@ void snake::eaten_food(food f) {
 
 void snake::increase_snake(uint16_t volume) {
     fullness += volume;
-    update |= change_fullness;
     if (fullness >= 100) {
         fullness -= 100;
         parts.push_back(parts.back());
     }
+    update |= change_fullness;
+    update_snake_const();
 }
 
 void snake::decrease_snake(uint16_t volume) {
-    update |= change_fullness;
     if (volume > fullness) {
         volume -= fullness;
         const uint16_t reduce = static_cast<uint16_t>(1 + volume / 100);
@@ -368,15 +369,17 @@ void snake::decrease_snake(uint16_t volume) {
     } else {
         fullness -= volume;
     }
+    update |= change_fullness;
+    update_snake_const();
 }
 
 void snake::spawn_food(food f) {
     const int16_t sx = static_cast<int16_t>(f.x / world_config::sector_size);
     const int16_t sy = static_cast<int16_t>(f.y / world_config::sector_size);
 
-    for (sector *sc: sbb.m_sectors) {
-        if (sc->x == sx && sc->y == sy) {
-            sc->insert_sorted(f);
+    for (sector *sec: sbb.m_sectors) {
+        if (sec->x == sx && sec->y == sy) {
+            sec->insert_sorted(f);
             spawn.push_back(f);
             break;
         }
@@ -387,13 +390,51 @@ void snake::spawn_food_when_dead() {
     // todo + random
 }
 
-float snake::get_snake_body_part_radius() const {
-    // todo radius from snake mass
-    return 14.0f;
+float snake::get_snake_scale() const {
+    return gsc;
 }
 
+float snake::get_snake_body_part_radius() const {
+    return sbpr;
+}
 
+std::array<float, world_config::max_snake_parts> get_fmlts() {
+    std::array<float, world_config::max_snake_parts> data = { 0.0f };
+    for (size_t i = 0; i < data.size(); i ++) {
+        data[i] = powf(1.0f - 1.0f * i / data.size(), 2.25f);
+    }
+    return data;
+}
 
+std::array<float, world_config::max_snake_parts> get_fpsls(const std::array<float, world_config::max_snake_parts> &fmlts) {
+    std::array<float, world_config::max_snake_parts> data = { 0.0f };
+    for (size_t i = 1; i < data.size(); i ++) {
+        data[i] = data[i - 1] + 1.0f / fmlts[i - 1];
+    }
+    return data;
+}
 
+uint16_t snake::get_snake_score() const {
+    static std::array<float, world_config::max_snake_parts> fmlts = get_fmlts();
+    static std::array<float, world_config::max_snake_parts> fpsls = get_fpsls(fmlts);
 
+    size_t sct = parts.size() - 1;
+    if (sct >= fmlts.size()) {
+        sct = fmlts.size() - 1;
+    }
 
+    return static_cast<uint16_t>(15.0f * (fpsls[sct] + fullness / 100.0f / fmlts[sct] - 1) - 5);
+}
+
+void snake::update_snake_const() {
+    gsc = 0.5f + 0.4f / fmaxf(1.0f, 1.0f * (parts.size() - 1 + 16) / 36.0f);
+    sc = fminf(6.0f, 1.0f + 1.0f * (parts.size() - 1 - 2) / 106.0f);
+
+    const float scang_x = 1.0f * (7 - parts.size() - 1) / 6.0f;
+    scang = 0.13f + 0.87f * scang_x * scang_x;
+
+    ssp = nsp1 + nsp2 * sc;
+    fsp = ssp + 0.1f;
+
+    sbpr = 29.0f * 0.5f /* render mode 2 const */ * sc;
+}

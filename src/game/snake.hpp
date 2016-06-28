@@ -73,6 +73,7 @@ struct snake : std::enable_shared_from_this<snake> {
     void tick_ai(long frames);
     void update_box_center();
     void update_box_radius();
+    void update_snake_const();
     void init_box_new_sectors(sectors &ss);
     void update_eaten_food(sectors &ss);
 
@@ -87,7 +88,10 @@ struct snake : std::enable_shared_from_this<snake> {
     void decrease_snake(uint16_t volume);
     void spawn_food(food f);
     void spawn_food_when_dead();
+
+    float get_snake_scale() const;
     float get_snake_body_part_radius() const;
+    uint16_t get_snake_score() const;
 
     inline const body& get_head() const { return parts[0]; }
     inline float get_head_x() const { return parts[0].x; }
@@ -126,6 +130,17 @@ struct snake : std::enable_shared_from_this<snake> {
     }
 
 private:
+
+    float gsc = 0.0f; // snake scale 0.5f + 0.4f / fmaxf(1.0f, 1.0f * (parts.size() - 1 + 16) / 36.0f)
+    float sc = 0.0f; // 106th length on snake, min 1, start from 6. Math.min(6, 1 + (f.sct - 2) / 106)
+    float scang = 0.0f; // .13 + .87 * Math.pow((7 - f.sc) / 6, 2)
+    float ssp = 0.0f; // nsp1 + nsp2 * f.sc;
+    float fsp = 0.0f; // f.ssp + .1;
+    // snake body part radius, in screen coords it is:
+    // - gsc * sbpr * 52 / 32 inner r, and
+    // - gsc * sbpr * 62 / 32 for outer r.
+    // thus, for sbpr 14.5, inner 21.20, outer 25.28
+    float sbpr = 0.0f;
 
     long m_mov_ticks = 0;
     long m_rot_ticks = 0;
