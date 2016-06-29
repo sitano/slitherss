@@ -175,12 +175,12 @@ void world::init_food() {
         const uint8_t cy = cx;
         const uint16_t dist = (s.x - cx) * (s.x - cx) + (s.y - cy) * (s.y - cy);
         const float dp = 1.0f - 1.0f * dist / (world_config::sector_count_along_edge * world_config::sector_count_along_edge);
-        const size_t density = static_cast<size_t>(dp * 3);
+        const size_t density = static_cast<size_t>(dp * 10);
         for (size_t i = 0; i < density; i ++) {
             s.m_food.push_back(food{
                     static_cast<uint16_t>(s.x * world_config::sector_size + next_random<uint16_t>(world_config::sector_size)),
                     static_cast<uint16_t>(s.y * world_config::sector_size + next_random<uint16_t>(world_config::sector_size)),
-                    static_cast<uint8_t>(1 + next_random<uint8_t>(31)),
+                    static_cast<uint8_t>(1 + next_random<uint8_t>(10)),
                     next_random<uint8_t>(29)
             });
         }
