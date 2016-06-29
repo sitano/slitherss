@@ -90,7 +90,7 @@ void slither_server::broadcast_debug() {
         draw.circles.push_back(d_draw_circle { sis ++, { s->sbb.x, s->sbb.y }, s->sbb.r, 0xc8c8c8 });
 
         // body inner circles
-        const float r1 = 14.0f; // moving snake body radius
+        const float r1 = s->get_snake_body_part_radius();
 
         draw.circles.push_back(d_draw_circle { sis ++, { s->get_head_x(), s->get_head_y() }, r1, 0xc80000 });
 

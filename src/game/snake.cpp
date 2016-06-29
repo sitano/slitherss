@@ -325,7 +325,7 @@ bool snake::intersect(bb_pos foe) const {
                 if (last > end) {
                     last = end;
                 }
-                if (intersect(foe, i - 1, start, last)) {
+                if (intersect(foe, start, start + 1, last)) {
                     return true;
                 }
             }
@@ -398,7 +398,7 @@ void snake::spawn_food_when_dead(sectors &ss, std::function<float ()> next_rando
     for (auto i = parts.begin(); i != end; ++ i) {
         const uint16_t sx = static_cast<uint16_t>(i->x / world_config::sector_size);
         const uint16_t sy = static_cast<uint16_t>(i->y / world_config::sector_size);
-        if (sx > 0 && sx < world_config::sector_count_along_edge && sy > 0 && sy < world_config::sector_count_along_edge) {
+        if (sx > 0 && sx < world_config::sector_count_along_edge - 1 && sy > 0 && sy < world_config::sector_count_along_edge - 1) {
             for (size_t j = 0; j < count; j++) {
                 food f = {
                         static_cast<uint16_t>(i->x + r - next_randomf() * r2),
