@@ -390,7 +390,7 @@ void snake::spawn_food_when_dead(sectors &ss, std::function<float ()> next_rando
     auto end = parts.end();
 
     const float r = get_snake_body_part_radius();
-    const uint16_t r2 = static_cast<uint16_t>(r * 2.0f);
+    const uint16_t r2 = static_cast<uint16_t>(r * 4);
 
     const size_t count = static_cast<size_t>(sc * 2);
     const uint8_t food_size = static_cast<uint8_t>(100 / count);
@@ -403,10 +403,9 @@ void snake::spawn_food_when_dead(sectors &ss, std::function<float ()> next_rando
                 food f = {
                         static_cast<uint16_t>(i->x + r - next_randomf() * r2),
                         static_cast<uint16_t>(i->y + r - next_randomf() * r2),
-                        static_cast<uint8_t>(1 + next_randomf() * 31),
-                        food_size
+                        food_size,
+                        static_cast<uint8_t>(29 * next_randomf())
                 };
-
 
                 sector *sec = ss.get_sector(sx, sy);
                 sec->insert_sorted(f);

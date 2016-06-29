@@ -181,7 +181,7 @@ void world::init_food() {
                     static_cast<uint16_t>(s.x * world_config::sector_size + next_random<uint16_t>(world_config::sector_size)),
                     static_cast<uint16_t>(s.y * world_config::sector_size + next_random<uint16_t>(world_config::sector_size)),
                     static_cast<uint8_t>(1 + next_random<uint8_t>(31)),
-                    next_random<uint8_t>(28)
+                    next_random<uint8_t>(29)
             });
         }
         s.sort();
