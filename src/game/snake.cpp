@@ -123,7 +123,6 @@ bool snake::tick(long dt, sectors &ss) {
         vp.x = head.x;
         vp.y = head.y;
         update_box_radius();
-        update_snake_const();
         sbb.update_box_old_sectors();
         if (!bot) {
             vp.update_box_old_sectors();
@@ -279,6 +278,7 @@ bool snake::intersect(bb_pos foe,
                       std::vector<body>::const_iterator end) const {
     while (i != end) {
         // weak body part check
+        // todo: reduce this whole thing to middle circle check
         if (intersect_circle(i->x, i->y, foe.x, foe.y, world_config::move_step_distance * 2)) {
             const float r = foe.r + get_snake_body_part_radius();
 
@@ -390,7 +390,7 @@ void snake::spawn_food_when_dead(sectors &ss, std::function<float ()> next_rando
     auto end = parts.end();
 
     const float r = get_snake_body_part_radius();
-    const uint16_t r2 = static_cast<uint16_t>(r * 4);
+    const uint16_t r2 = static_cast<uint16_t>(r * 3);
 
     const size_t count = static_cast<size_t>(sc * 2);
     const uint8_t food_size = static_cast<uint8_t>(100 / count);
