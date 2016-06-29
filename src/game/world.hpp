@@ -33,6 +33,7 @@ public:
     void remove_snake(snake_id_t id);
     snakes::iterator get_snake(snake_id_t id);
     snakes& get_snakes();
+    sectors& get_sectors();
     v_ids& get_dead();
 
     std::vector<snake *>& get_changes();

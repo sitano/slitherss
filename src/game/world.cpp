@@ -180,7 +180,7 @@ void world::init_food() {
             s.m_food.push_back(food{
                     static_cast<uint16_t>(s.x * world_config::sector_size + next_random<uint16_t>(world_config::sector_size)),
                     static_cast<uint16_t>(s.y * world_config::sector_size + next_random<uint16_t>(world_config::sector_size)),
-                    next_random<uint8_t>(32),
+                    static_cast<uint8_t>(1 + next_random<uint8_t>(31)),
                     next_random<uint8_t>(28)
             });
         }
@@ -237,6 +237,10 @@ void world::spawn_snakes(const int snakes) {
     for (int i = 0; i < snakes; i++) {
         add_snake(create_snake_bot());
     }
+}
+
+sectors &world::get_sectors() {
+    return m_sectors;
 }
 
 std::ostream &operator<<(std::ostream &out, const world &w) {

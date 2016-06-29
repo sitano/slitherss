@@ -87,7 +87,7 @@ struct snake : std::enable_shared_from_this<snake> {
     void increase_snake(uint16_t volume);
     void decrease_snake(uint16_t volume);
     void spawn_food(food f);
-    void spawn_food_when_dead();
+    void spawn_food_when_dead(sectors &ss, std::function<float ()> next_randomf);
 
     float get_snake_scale() const;
     float get_snake_body_part_radius() const;

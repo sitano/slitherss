@@ -154,6 +154,9 @@ void slither_server::broadcast_updates() {
                 }
             }
 
+            ptr->spawn_food_when_dead(m_world.get_sectors(), [&]() -> float { return m_world.next_randomf(); });
+            send_food_update(ptr);
+
             broadcast_binary(packet_remove_snake(ptr->id, packet_remove_snake::status_snake_died));
             broadcast_binary(packet_remove_snake(ptr->id, packet_remove_snake::status_snake_left));
 

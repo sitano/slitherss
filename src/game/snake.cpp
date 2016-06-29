@@ -386,8 +386,34 @@ void snake::spawn_food(food f) {
     }
 }
 
-void snake::spawn_food_when_dead() {
-    // todo + random
+void snake::spawn_food_when_dead(sectors &ss, std::function<float ()> next_randomf) {
+    auto end = parts.end();
+
+    const float r = get_snake_body_part_radius();
+    const uint16_t r2 = static_cast<uint16_t>(r * 2.0f);
+
+    const size_t count = static_cast<size_t>(sc * 2);
+    const uint8_t food_size = static_cast<uint8_t>(100 / count);
+
+    for (auto i = parts.begin(); i != end; ++ i) {
+        const uint16_t sx = static_cast<uint16_t>(i->x / world_config::sector_size);
+        const uint16_t sy = static_cast<uint16_t>(i->y / world_config::sector_size);
+        if (sx > 0 && sx < world_config::sector_count_along_edge && sy > 0 && sy < world_config::sector_count_along_edge) {
+            for (size_t j = 0; j < count; j++) {
+                food f = {
+                        static_cast<uint16_t>(i->x + r - next_randomf() * r2),
+                        static_cast<uint16_t>(i->y + r - next_randomf() * r2),
+                        static_cast<uint8_t>(1 + next_randomf() * 31),
+                        food_size
+                };
+
+
+                sector *sec = ss.get_sector(sx, sy);
+                sec->insert_sorted(f);
+                spawn.push_back(f);
+            }
+        }
+    }
 }
 
 float snake::get_snake_scale() const {

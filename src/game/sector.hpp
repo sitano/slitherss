@@ -116,8 +116,8 @@ public:
     sectors() : std::vector<sector>() { }
 
     void init_sectors();
-    size_t get_index(uint16_t x, uint16_t y);
-    sector *get_sector(uint16_t x, uint16_t y);
+    size_t get_index(const uint16_t x, const uint16_t y);
+    sector *get_sector(const uint16_t x, const uint16_t y);
 };
 
 struct snake_bb : bb {

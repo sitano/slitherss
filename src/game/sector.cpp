@@ -162,11 +162,11 @@ void sectors::init_sectors() {
     }
 }
 
-size_t sectors::get_index(uint16_t x, uint16_t y) {
+size_t sectors::get_index(const uint16_t x, const uint16_t y) {
     return y * world_config::sector_count_along_edge + x;
 }
 
-sector *sectors::get_sector(uint16_t x, uint16_t y) {
+sector *sectors::get_sector(const uint16_t x, const uint16_t y) {
     return &operator[](get_index(x, y));
 }
 
