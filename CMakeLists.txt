@@ -12,6 +12,7 @@ endif ()
 set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR})
 include (cmake/cppcheck-target-cmake/FindCPPCHECK)
 include (cmake/cppcheck-target-cmake/CPPCheck)
+include (cmake/StyleCheck)
 
 # Detect clang. Not officially reported by cmake.
 execute_process(COMMAND "${CMAKE_CXX_COMPILER}" "-v" ERROR_VARIABLE CXX_VER_STDERR)
@@ -21,25 +22,13 @@ endif ()
 
 # Default CXX flags
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-
-# Visual studio
-if (MSVC)
-    set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /GL /Gy /GF /Ox /Ob2 /Ot /Oi /MP /arch:SSE2 /fp:fast")
-    set (CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_SHARED_LINKER_FLAGS_RELEASE} /LTCG /INCREMENTAL:NO /OPT:REF /OPT:ICF")
-    add_definitions (/W4 /W44640 /wd4996 /wd4995 /wd4355)
-    add_definitions (-DUNICODE -D_UNICODE)
-    add_definitions (-D_CRT_SECURE_NO_WARNINGS -D_SCL_SECURE_NO_WARNINGS)
-    add_definitions (-DNOMINMAX)
-endif ()
-
-# clang or gcc
-if (CMAKE_COMPILER_IS_CLANGXX OR CMAKE_COMPILER_IS_GNUCXX)
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wshadow -Wnon-virtual-dtor -pedantic")
-endif ()
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wextra -Wshadow -Wnon-virtual-dtor -Werror -pedantic -DDEBUG ")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall -Wextra -Wshadow -Wnon-virtual-dtor -Werror -pedantic -ffast-math -funroll-loops -march=native -O3")
 
 # Source & includes
 file (GLOB_RECURSE SOURCE_FILES src/*.cpp)
 file (GLOB_RECURSE HEADER_FILES src/*.hpp)
+set (FILES ${SOURCE_FILES} ${HEADER_FILES})
 
 include_directories (src)
 include_directories (third_party/websocketpp)
@@ -87,5 +76,7 @@ target_link_libraries (${PROJECT_NAME} ${Boost_LIBRARIES})
 set_target_properties (${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin)
 
 # CppCheck
-cppcheck_target_sources (${PROJECT_NAME} INCLUDES ${INCLUDES})
+cppcheck_target_sources (${PROJECT_NAME})
 
+# StyleCheck
+add_style_check_target (${PROJECT_NAME} ${FILES})
