@@ -1,9 +1,9 @@
 find_package(PythonInterp)
 
-# set(STYLE_FILTER)
+set(STYLE_FILTER)
 
-# Disable 80 columns per line
-# set (STYLE_FILTER ${STYLE_FILTER},-whitespace/line_length)
+# Allow native C-types to be used for old funcs
+set(STYLE_FILTER ${STYLE_FILTER},-runtime/int)
 
 set(STYLE_CHECK_DIR "${CMAKE_SOURCE_DIR}/third_party/cpplint")
 set(STYLE_CHECK_SCRIPT "${STYLE_CHECK_DIR}/cpplint.py")
@@ -26,7 +26,7 @@ function(add_style_check_target PROJECT SOURCES_LIST)
             "${CMAKE_SOURCE_DIR}"
             "${PYTHON_EXECUTABLE}"
             "${STYLE_CHECK_SCRIPT}"
-            # "--filter=${STYLE_FILTER}"
+            "--filter=${STYLE_FILTER}"
             ${SOURCES_LIST}
         DEPENDS ${SOURCES_LIST} ${STYLE_CHECK_SCRIPT}
         COMMENT "Checking code style."

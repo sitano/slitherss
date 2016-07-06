@@ -4,4 +4,4 @@
 #include "debug/d_clean.h"
 #include "debug/d_draw.h"
 
-#endif //SLITHER_PACKET_DEBUG_ALL_HPP
+#endif  // SLITHER_PACKET_DEBUG_ALL_HPP
