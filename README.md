@@ -10,8 +10,11 @@ TODO
 OTHER
 -----
 
-- inject googletest
-- inject benchmark framework
+- inject googletest / boost testing
+- inject benchmark framework (
+    https://github.com/google/benchmark,
+    https://github.com/DigitalInBlue/Celero,
+    https://github.com/nickbruun/hayai)
 - fixed point math test
 - intersections math test
 
