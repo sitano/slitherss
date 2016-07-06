@@ -26,8 +26,8 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wextra -Wshadow -Wnon
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall -Wextra -Wshadow -Wnon-virtual-dtor -Werror -pedantic -ffast-math -funroll-loops -march=native -O3")
 
 # Source & includes
-file (GLOB_RECURSE SOURCE_FILES src/*.cpp)
-file (GLOB_RECURSE HEADER_FILES src/*.hpp)
+file (GLOB_RECURSE SOURCE_FILES src/*.cc)
+file (GLOB_RECURSE HEADER_FILES src/*.h)
 set (FILES ${SOURCE_FILES} ${HEADER_FILES})
 
 include_directories (src)
