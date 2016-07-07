@@ -1,5 +1,5 @@
-#ifndef SLITHER_PACKET_MOVE_HPP
-#define SLITHER_PACKET_MOVE_HPP
+#ifndef SRC_PACKET_MOVE_H_
+#define SRC_PACKET_MOVE_H_
 
 #include "game/snake.h"
 #include "p_base.h"
@@ -46,4 +46,4 @@ struct packet_move_rel : public packet_base {
 std::ostream& operator<<(std::ostream& out, const packet_move& p);
 std::ostream& operator<<(std::ostream& out, const packet_move_rel& p);
 
-#endif  // SLITHER_PACKET_MOVE_HPP
+#endif  // SRC_PACKET_MOVE_H_

@@ -1,5 +1,5 @@
-#ifndef SLITHER_PACKET_MINIMAP_HPP
-#define SLITHER_PACKET_MINIMAP_HPP
+#ifndef SRC_PACKET_MINIMAP_H_
+#define SRC_PACKET_MINIMAP_H_
 
 #include "p_base.h"
 
@@ -29,4 +29,4 @@ struct packet_minimap : public packet_base {
 
 std::ostream& operator<<(std::ostream& out, const packet_minimap& p);
 
-#endif  // SLITHER_PACKET_MINIMAP_HPP
+#endif  // SRC_PACKET_MINIMAP_H_

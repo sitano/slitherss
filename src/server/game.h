@@ -1,5 +1,5 @@
-#ifndef SLITHER_SERVER_GAME_HPP
-#define SLITHER_SERVER_GAME_HPP
+#ifndef SRC_SERVER_GAME_H_
+#define SRC_SERVER_GAME_H_
 
 #include "server.h"
 
@@ -108,4 +108,4 @@ class slither_server {
   connections m_connections;
 };
 
-#endif  // SLITHER_SERVER_GAME_HPP
+#endif  // SRC_SERVER_GAME_H_

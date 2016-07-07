@@ -1,13 +1,13 @@
-#ifndef SLITHER_GAME_SECTOR_HPP
-#define SLITHER_GAME_SECTOR_HPP
-
-#include "config.h"
-#include "food.h"
+#ifndef SRC_GAME_SECTOR_H_
+#define SRC_GAME_SECTOR_H_
 
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <vector>
+
+#include "game/config.h"
+#include "game/food.h"
 
 struct snake;
 struct sector;
@@ -136,9 +136,9 @@ struct snake_bb : bb {
       : bb({in.x, in.y, in.r}, in.id, in.snake_ptr, in.m_sectors) {}
 
   void insert_sorted_with_reg(sector *s);
-  void update_box_new_sectors(sectors &ss, const float bb_r, const float new_x,
-                              const float new_y, const float old_x,
-                              const float old_y);
+  void update_box_new_sectors(sectors *ss, const float bb_r,
+                              const float new_x, const float new_y,
+                              const float old_x, const float old_y);
   void update_box_old_sectors();
 };
 
@@ -158,9 +158,10 @@ struct view_port : bb {
 
   void insert_sorted_with_delta(sector *s);
 
-  void update_box_new_sectors(sectors &ss, const float new_x, const float new_y,
+  void update_box_new_sectors(sectors *ss,
+                              const float new_x, const float new_y,
                               const float old_x, const float old_y);
   void update_box_old_sectors();
 };
 
-#endif  // SLITHER_GAME_SECTOR_HPP
+#endif  // SRC_GAME_SECTOR_H_

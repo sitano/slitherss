@@ -1,14 +1,14 @@
-#ifndef SLITHER_GAME_SNAKE_HPP
-#define SLITHER_GAME_SNAKE_HPP
-
-#include "config.h"
-#include "sector.h"
+#ifndef SRC_GAME_SNAKE_H_
+#define SRC_GAME_SNAKE_H_
 
 #include <cmath>
 #include <cstdint>
 #include <memory>
 #include <string>
 #include <vector>
+
+#include "game/config.h"
+#include "game/sector.h"
 
 enum snake_changes : uint8_t {
   change_pos = 1,
@@ -69,16 +69,17 @@ struct snake : std::enable_shared_from_this<snake> {
   std::vector<food> spawn;
   size_t clientPartsIndex;
 
-  bool tick(long dt, sectors &ss);
+  bool tick(long dt, sectors *ss);
   void tick_ai(long frames);
   void update_box_center();
   void update_box_radius();
   void update_snake_const();
-  void init_box_new_sectors(sectors &ss);
-  void update_eaten_food(sectors &ss);
+  void init_box_new_sectors(sectors *ss);
+  void update_eaten_food(sectors *ss);
 
   bool intersect(bb_pos foe) const;
-  bool intersect(bb_pos foe, std::vector<body>::const_iterator prev,
+  bool intersect(bb_pos foe,
+                 std::vector<body>::const_iterator prev,
                  std::vector<body>::const_iterator i,
                  std::vector<body>::const_iterator end) const;
 
@@ -86,7 +87,7 @@ struct snake : std::enable_shared_from_this<snake> {
   void increase_snake(uint16_t volume);
   void decrease_snake(uint16_t volume);
   void spawn_food(food f);
-  void spawn_food_when_dead(sectors &ss, std::function<float()> next_randomf);
+  void spawn_food_when_dead(sectors *ss, std::function<float()> next_randomf);
 
   float get_snake_scale() const;
   float get_snake_body_part_radius() const;
@@ -156,4 +157,4 @@ struct snake : std::enable_shared_from_this<snake> {
   long m_ai_ticks = 0;
 };
 
-#endif  // SLITHER_GAME_SNAKE_HPP
+#endif  // SRC_GAME_SNAKE_H_

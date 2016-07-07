@@ -1,5 +1,5 @@
-#ifndef SLITHER_PACKET_FORMAT_H
-#define SLITHER_PACKET_FORMAT_H
+#ifndef SRC_PACKET_FORMAT_H_
+#define SRC_PACKET_FORMAT_H_
 
 #include <cstdint>
 #include <ostream>
@@ -52,4 +52,4 @@ inline ostream_write_value<uint24_t> write_ang24(fixed_point_t v) {
 ostream_write_value<uint24_t> write_fp24(fixed_point_t v);
 ostream_write_value<const std::string&> write_string(const std::string& s);
 
-#endif  // SLITHER_PACKET_FORMAT_H
+#endif  // SRC_PACKET_FORMAT_H_

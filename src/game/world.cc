@@ -1,8 +1,9 @@
-#include "world.h"
+#include "game/world.h"
 
 #include <algorithm>
 #include <ctime>
 #include <iostream>
+#include <vector>
 
 snake::ptr world::create_snake() {
   m_lastSnakeId++;

@@ -1,5 +1,5 @@
-#ifndef SLITHER_PACKET_SNAKE_HPP
-#define SLITHER_PACKET_SNAKE_HPP
+#ifndef SRC_PACKET_SNAKE_H_
+#define SRC_PACKET_SNAKE_H_
 
 #include "game/snake.h"
 #include "p_base.h"
@@ -54,4 +54,4 @@ struct packet_remove_snake : public packet_base {
 std::ostream& operator<<(std::ostream& out, const packet_add_snake& p);
 std::ostream& operator<<(std::ostream& out, const packet_remove_snake& p);
 
-#endif  // SLITHER_PACKET_SNAKE_HPP
+#endif  // SRC_PACKET_SNAKE_H_

@@ -1,5 +1,5 @@
-#ifndef SLITHER_PACKET_DEBUG_DRAW_HPP
-#define SLITHER_PACKET_DEBUG_DRAW_HPP
+#ifndef SRC_PACKET_DEBUG_DRAW_H_
+#define SRC_PACKET_DEBUG_DRAW_H_
 
 #include "packet/p_base.h"
 
@@ -75,4 +75,4 @@ struct packet_debug_draw : public packet_base {
 
 std::ostream& operator<<(std::ostream & out, const packet_debug_draw & p);
 
-#endif //SLITHER_PACKET_DEBUG_DRAW_HPP
+#endif //SRC_PACKET_DEBUG_DRAW_H_

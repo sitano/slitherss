@@ -1,5 +1,5 @@
-#ifndef SLITHER_SERVER_SERVER_HPP
-#define SLITHER_SERVER_SERVER_HPP
+#ifndef SRC_SERVER_SERVER_H_
+#define SRC_SERVER_SERVER_H_
 
 #include "config.h"
 #include "streambuf_array.h"
@@ -55,4 +55,4 @@ class server : public websocketpp::server<slither_server_config> {
 
 typedef server::message_ptr message_ptr;
 
-#endif  // SLITHER_SERVER_SERVER_HPP
+#endif  // SRC_SERVER_SERVER_H_

@@ -1,5 +1,5 @@
-#ifndef SLITHER_PACKET_REMOVE_PART_HPP
-#define SLITHER_PACKET_REMOVE_PART_HPP
+#ifndef SRC_PACKET_REMOVE_PART_H_
+#define SRC_PACKET_REMOVE_PART_H_
 
 #include "game/snake.h"
 #include "p_base.h"
@@ -19,4 +19,4 @@ struct packet_remove_part : public packet_base {
 
 std::ostream& operator<<(std::ostream& out, const packet_remove_part& p);
 
-#endif  // SLITHER_PACKET_REMOVE_PART_HPP
+#endif  // SRC_PACKET_REMOVE_PART_H_

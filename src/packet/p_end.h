@@ -1,5 +1,5 @@
-#ifndef SLITHER_PACKET_END_HPP
-#define SLITHER_PACKET_END_HPP
+#ifndef SRC_PACKET_END_H_
+#define SRC_PACKET_END_H_
 
 #include "p_base.h"
 
@@ -36,4 +36,4 @@ struct packet_kill : public packet_base {
 std::ostream& operator<<(std::ostream& out, const packet_end& p);
 std::ostream& operator<<(std::ostream& out, const packet_kill& p);
 
-#endif  // SLITHER_PACKET_END_HPP
+#endif  // SRC_PACKET_END_H_

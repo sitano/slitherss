@@ -1,10 +1,9 @@
-#include "sector.h"
+#include "game/sector.h"
 
 #include <algorithm>
 
 bool intersect_segments(float p0_x, float p0_y, float p1_x, float p1_y,
                         float p2_x, float p2_y, float p3_x, float p3_y) {
-
   float s1_x, s1_y, s2_x, s2_y;
 
   s1_x = p1_x - p0_x;
@@ -75,12 +74,14 @@ float fastsqrt(float val) {
     int tmp;
     float val;
   } u;
+
   u.val = val;
   u.tmp -= 1 << 23; /* Remove last bit so 1.0 gives 1.0 */
   /* tmp is now an approximation to logbase2(val) */
   u.tmp >>= 1;      /* divide by 2 */
   u.tmp += 1 << 29; /* add 64 to exponent: (e+127)/2 =(e/2)+63, */
   /* that represents (e/2)-64 but we want e/2 */
+
   return u.val;
 }
 
@@ -204,7 +205,7 @@ void view_port::insert_sorted_with_delta(sector *s) {
   reg_new_sector_if_missing(s);
 }
 
-void snake_bb::update_box_new_sectors(sectors &ss, const float bb_r,
+void snake_bb::update_box_new_sectors(sectors *ss, const float bb_r,
                                       const float new_x, const float new_y,
                                       const float old_x, const float old_y) {
   const int16_t new_sx =
@@ -215,18 +216,19 @@ void snake_bb::update_box_new_sectors(sectors &ss, const float bb_r,
       static_cast<int16_t>(old_x / world_config::sector_size);
   const int16_t old_sy =
       static_cast<int16_t>(old_y / world_config::sector_size);
+
   if (new_sx == old_sx && new_sy == old_sy) {
     return;
   }
 
   const bb_pos box = {new_x, new_y, bb_r};
-
   static const int16_t map_width_sectors =
       static_cast<int16_t>(world_config::sector_count_along_edge);
+
   for (int j = new_sy - 1; j <= new_sy + 1; j++) {
     for (int i = new_sx - 1; i <= new_sx + 1; i++) {
       if (i >= 0 && i < map_width_sectors && j >= 0 && j < map_width_sectors) {
-        sector *new_sector = ss.get_sector(i, j);
+        sector *new_sector = ss->get_sector(i, j);
         if (!binary_search(new_sector) && new_sector->intersect(box)) {
           insert_sorted_with_reg(new_sector);
         }
@@ -258,9 +260,9 @@ void snake_bb::update_box_old_sectors() {
   }
 }
 
-void view_port::update_box_new_sectors(sectors &ss, const float new_x,
-                                       const float new_y, const float old_x,
-                                       const float old_y) {
+void view_port::update_box_new_sectors(sectors *ss,
+                                       const float new_x, const float new_y,
+                                       const float old_x, const float old_y) {
   const int16_t new_sx =
       static_cast<int16_t>(new_x / world_config::sector_size);
   const int16_t new_sy =
@@ -269,16 +271,18 @@ void view_port::update_box_new_sectors(sectors &ss, const float new_x,
       static_cast<int16_t>(old_x / world_config::sector_size);
   const int16_t old_sy =
       static_cast<int16_t>(old_y / world_config::sector_size);
+
   if (new_sx == old_sx && new_sy == old_sy) {
     return;
   }
 
   static const int16_t map_width_sectors =
       static_cast<int16_t>(world_config::sector_count_along_edge);
+
   for (int j = new_sy - 3; j <= new_sy + 3; j++) {
     for (int i = new_sx - 3; i <= new_sx + 3; i++) {
       if (i >= 0 && i < map_width_sectors && j >= 0 && j < map_width_sectors) {
-        sector *new_sector = ss.get_sector(i, j);
+        sector *new_sector = ss->get_sector(i, j);
         if (!binary_search(new_sector) && new_sector->intersect(*this)) {
           insert_sorted_with_delta(new_sector);
         }

@@ -1,5 +1,5 @@
-#ifndef SLITHER_PACKET_FOOD_HPP
-#define SLITHER_PACKET_FOOD_HPP
+#ifndef SRC_PACKET_FOOD_H_
+#define SRC_PACKET_FOOD_H_
 
 #include "game/food.h"
 #include "p_base.h"
@@ -82,4 +82,4 @@ std::ostream& operator<<(std::ostream& out, const packet_spawn_food& p);
 std::ostream& operator<<(std::ostream& out, const packet_add_food& p);
 std::ostream& operator<<(std::ostream& out, const packet_eat_food& p);
 
-#endif  // SLITHER_PACKET_FOOD_HPP
+#endif  // SRC_PACKET_FOOD_H_

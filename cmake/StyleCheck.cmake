@@ -2,6 +2,9 @@ find_package(PythonInterp)
 
 set(STYLE_FILTER)
 
+# No copyright in a header
+set(STYLE_FILTER ${STYLE_FILTER},-legal/copyright)
+
 # Allow native C-types to be used for old funcs
 set(STYLE_FILTER ${STYLE_FILTER},-runtime/int)
 

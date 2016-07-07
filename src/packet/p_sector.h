@@ -1,5 +1,5 @@
-#ifndef SLITHER_PACKET_SECTOR_HPP
-#define SLITHER_PACKET_SECTOR_HPP
+#ifndef SRC_PACKET_SECTOR_H_
+#define SRC_PACKET_SECTOR_H_
 
 #include "p_base.h"
 
@@ -28,4 +28,4 @@ struct packet_remove_sector : public packet_sector {
 
 std::ostream& operator<<(std::ostream& out, const packet_sector& p);
 
-#endif  // SLITHER_PACKET_SECTOR_HPP
+#endif  // SRC_PACKET_SECTOR_H_

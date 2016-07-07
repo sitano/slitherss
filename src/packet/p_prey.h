@@ -1,5 +1,5 @@
-#ifndef SLITHER_PACKET_PREY_HPP
-#define SLITHER_PACKET_PREY_HPP
+#ifndef SRC_PACKET_PREY_H_
+#define SRC_PACKET_PREY_H_
 
 #include "p_base.h"
 
@@ -70,4 +70,4 @@ struct packet_remove_prey : public packet_base {
   // TODO size_t get_size() const noexcept { return ...; }
 };
 
-#endif  // SLITHER_PACKET_PREY_HPP
+#endif  // SRC_PACKET_PREY_H_

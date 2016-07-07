@@ -1,5 +1,5 @@
-#ifndef SLITHER_PACKET_INCREMENT_HPP
-#define SLITHER_PACKET_INCREMENT_HPP
+#ifndef SRC_PACKET_INCREMENT_H_
+#define SRC_PACKET_INCREMENT_H_
 
 #include "game/snake.h"
 #include "p_base.h"
@@ -55,4 +55,4 @@ struct packet_inc_rel : public packet_base {
 std::ostream& operator<<(std::ostream& out, const packet_inc& p);
 std::ostream& operator<<(std::ostream& out, const packet_inc_rel& p);
 
-#endif  // SLITHER_PACKET_INCREMENT_HPP
+#endif  // SRC_PACKET_INCREMENT_H_

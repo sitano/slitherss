@@ -1,5 +1,5 @@
-#ifndef SLITHER_PACKET_DEBUG_CLEAN_HPP
-#define SLITHER_PACKET_DEBUG_CLEAN_HPP
+#ifndef SRC_PACKET_DEBUG_CLEAN_H_
+#define SRC_PACKET_DEBUG_CLEAN_H_
 
 #include "packet/p_base.h"
 
@@ -12,4 +12,4 @@ struct packet_debug_reset : public packet_base {
 
 std::ostream& operator<<(std::ostream & out, const packet_debug_reset & p);
 
-#endif //SLITHER_PACKET_DEBUG_CLEAN_HPP
+#endif //SRC_PACKET_DEBUG_CLEAN_H_

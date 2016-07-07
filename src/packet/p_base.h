@@ -1,5 +1,5 @@
-#ifndef SLITHER_PACKET_BASE_HPP
-#define SLITHER_PACKET_BASE_HPP
+#ifndef SRC_PACKET_BASE_H_
+#define SRC_PACKET_BASE_H_
 
 #include <iostream>
 #include "p_format.h"
@@ -92,4 +92,4 @@ enum out_packet_t : uint8_t {
 std::ostream& operator<<(std::ostream& out, const packet_base& p);
 std::istream& operator>>(std::istream& in, in_packet_t& p);
 
-#endif  // SLITHER_PACKET_BASE_HPP
+#endif  // SRC_PACKET_BASE_H_

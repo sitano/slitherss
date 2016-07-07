@@ -1,5 +1,5 @@
-#ifndef SLITHER_PACKET_LEADERBOARD_HPP
-#define SLITHER_PACKET_LEADERBOARD_HPP
+#ifndef SRC_PACKET_LEADERBOARD_H_
+#define SRC_PACKET_LEADERBOARD_H_
 
 #include "game/snake.h"
 #include "p_base.h"
@@ -40,4 +40,4 @@ struct packet_leaderboard : public packet_base {
 
 std::ostream& operator<<(std::ostream& out, const packet_leaderboard& p);
 
-#endif  // SLITHER_PACKET_LEADERBOARD_HPP
+#endif  // SRC_PACKET_LEADERBOARD_H_

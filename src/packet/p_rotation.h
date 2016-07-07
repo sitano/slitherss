@@ -1,5 +1,5 @@
-#ifndef SLITHER_PACKET_ROTATION_HPP
-#define SLITHER_PACKET_ROTATION_HPP
+#ifndef SRC_PACKET_ROTATION_H_
+#define SRC_PACKET_ROTATION_H_
 
 #include <cmath>
 #include "p_base.h"
@@ -30,4 +30,4 @@ struct packet_rotation : public packet_base {
 
 std::ostream& operator<<(std::ostream& out, const packet_rotation& p);
 
-#endif  // SLITHER_PACKET_ROTATION_HPP
+#endif  // SRC_PACKET_ROTATION_H_

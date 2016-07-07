@@ -1,10 +1,8 @@
-// Copyright (C) 2016 Ivan Prisyazhnyy <john.koepi@gmail.com>.
-
 #include "game/snake.h"
 
 #include <iostream>
 
-bool snake::tick(long dt, sectors &ss) {
+bool snake::tick(long dt, sectors *ss) {
   uint8_t changes = 0;
 
   if (update & (change_dying | change_dead)) {
@@ -207,7 +205,7 @@ void snake::update_box_radius() {
   vp.r = world_config::sector_diag_size * 3.0f;
 }
 
-void snake::init_box_new_sectors(sectors &ss) {
+void snake::init_box_new_sectors(sectors *ss) {
   body &head = parts[0];
   sbb.update_box_new_sectors(ss, world_config::sector_size / 2, head.x, head.y,
                              0.0f, 0.0f);
@@ -228,7 +226,7 @@ void snake::init_box_new_sectors(sectors &ss) {
   }
 }
 
-void snake::update_eaten_food(sectors &ss) {
+void snake::update_eaten_food(sectors *ss) {
   const uint16_t hx = static_cast<uint16_t>(get_head_x());
   const uint16_t hy = static_cast<uint16_t>(get_head_y());
   const uint16_t r = static_cast<uint16_t>(14 + get_snake_body_part_radius() +
@@ -240,7 +238,7 @@ void snake::update_eaten_food(sectors &ss) {
 
   // head sector
   {
-    sector *sec = ss.get_sector(sx, sy);
+    sector *sec = ss->get_sector(sx, sy);
     auto begin = sec->m_food.begin();
     auto i = sec->find_closest_food(hx);
     // to left
@@ -407,7 +405,7 @@ void snake::spawn_food(food f) {
   }
 }
 
-void snake::spawn_food_when_dead(sectors &ss,
+void snake::spawn_food_when_dead(sectors *ss,
                                  std::function<float()> next_randomf) {
   auto end = parts.end();
 
@@ -427,7 +425,7 @@ void snake::spawn_food_when_dead(sectors &ss,
                   static_cast<uint16_t>(i->y + r - next_randomf() * r2),
                   food_size, static_cast<uint8_t>(29 * next_randomf())};
 
-        sector *sec = ss.get_sector(sx, sy);
+        sector *sec = ss->get_sector(sx, sy);
         sec->insert_sorted(f);
         spawn.push_back(f);
       }

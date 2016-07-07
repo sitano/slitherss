@@ -1,5 +1,5 @@
-#ifndef SLITHER_PACKET_INIT_HPP
-#define SLITHER_PACKET_INIT_HPP
+#ifndef SRC_PACKET_INIT_H_
+#define SRC_PACKET_INIT_H_
 
 #include "p_base.h"
 
@@ -32,4 +32,4 @@ struct packet_init : public packet_base {
 
 std::ostream& operator<<(std::ostream& out, const packet_init& p);
 
-#endif  // SLITHER_PACKET_INIT_HPP
+#endif  // SRC_PACKET_INIT_H_

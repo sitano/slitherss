@@ -1,5 +1,5 @@
-#ifndef SLITHER_SERVER_STREAMBUF_ARRAY_HPP
-#define SLITHER_SERVER_STREAMBUF_ARRAY_HPP
+#ifndef SRC_SERVER_STREAMBUF_ARRAY_H_
+#define SRC_SERVER_STREAMBUF_ARRAY_H_
 
 #include <array>
 #include <boost/asio.hpp>
@@ -207,4 +207,4 @@ inline std::size_t read_size_helper(streambuf_array<_Nm> &sb,
       512, std::min<std::size_t>(max_size, sb.max_size() - sb.size()));
 }
 
-#endif  // SLITHER_SERVER_STREAMBUF_ARRAY_HPP
+#endif  // SRC_SERVER_STREAMBUF_ARRAY_H_

@@ -1,5 +1,5 @@
-#ifndef SLITHER_PACKET_HIGHSCORE_HPP
-#define SLITHER_PACKET_HIGHSCORE_HPP
+#ifndef SRC_PACKET_H_IGHSCORE_H_
+#define SRC_PACKET_H_IGHSCORE_H_
 
 #include "game/snake.h"
 #include "p_base.h"
@@ -25,4 +25,4 @@ struct packet_highscore : public packet_base {
 
 std::ostream& operator<<(std::ostream& out, const packet_highscore& p);
 
-#endif  // SLITHER_PACKET_HIGHSCORE_HPP
+#endif  // SRC_PACKET_H_IGHSCORE_H_

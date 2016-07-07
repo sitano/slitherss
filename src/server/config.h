@@ -1,5 +1,5 @@
-#ifndef SLITHER_SERVER_CONFIG_HPP_H
-#define SLITHER_SERVER_CONFIG_HPP_H
+#ifndef SRC_SERVER_CONFIG_H__H_
+#define SRC_SERVER_CONFIG_H__H_
 
 #include "game/config.h"
 

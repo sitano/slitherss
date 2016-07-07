@@ -1,5 +1,5 @@
-#ifndef SLITHER_PACKET_FULLNESS_HPP
-#define SLITHER_PACKET_FULLNESS_HPP
+#ifndef SRC_PACKET_FULLNESS_H_
+#define SRC_PACKET_FULLNESS_H_
 
 #include "game/snake.h"
 #include "p_base.h"
@@ -23,4 +23,4 @@ struct packet_fullness : public packet_base {
 
 std::ostream& operator<<(std::ostream& out, const packet_fullness& p);
 
-#endif  // SLITHER_PACKET_FULLNESS_HPP
+#endif  // SRC_PACKET_FULLNESS_H_

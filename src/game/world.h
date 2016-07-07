@@ -1,5 +1,5 @@
-#ifndef SLITHER_GAME_WORLD_HPP
-#define SLITHER_GAME_WORLD_HPP
+#ifndef SRC_GAME_WORLD_H_
+#define SRC_GAME_WORLD_H_
 
 #include <cstdint>
 #include <memory>
@@ -75,4 +75,4 @@ class world {
 
 std::ostream& operator<<(std::ostream& out, const world& w);
 
-#endif  // SLITHER_GAME_WORLD_HPP
+#endif  // SRC_GAME_WORLD_H_
