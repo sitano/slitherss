@@ -1,4 +1,4 @@
-#include "game.h"
+#include "server/game.h"
 
 int main(const int argc, const char* const argv[]) {
   slither_server s;

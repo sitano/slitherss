@@ -1,8 +1,8 @@
-#ifndef SRC_PACKET_FULLNESS_H_
-#define SRC_PACKET_FULLNESS_H_
+#ifndef SRC_PACKET_P_FULLNESS_H_
+#define SRC_PACKET_P_FULLNESS_H_
 
 #include "game/snake.h"
-#include "p_base.h"
+#include "packet/p_base.h"
 
 struct packet_fullness : public packet_base {
   packet_fullness() : packet_base(packet_t_set_fullness) {}
@@ -23,4 +23,4 @@ struct packet_fullness : public packet_base {
 
 std::ostream& operator<<(std::ostream& out, const packet_fullness& p);
 
-#endif  // SRC_PACKET_FULLNESS_H_
+#endif  // SRC_PACKET_P_FULLNESS_H_

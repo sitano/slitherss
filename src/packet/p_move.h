@@ -1,8 +1,8 @@
-#ifndef SRC_PACKET_MOVE_H_
-#define SRC_PACKET_MOVE_H_
+#ifndef SRC_PACKET_P_MOVE_H_
+#define SRC_PACKET_P_MOVE_H_
 
 #include "game/snake.h"
-#include "p_base.h"
+#include "packet/p_base.h"
 
 struct packet_move : public packet_base {
   packet_move() : packet_base(packet_t_mov) {}
@@ -36,9 +36,9 @@ struct packet_move_rel : public packet_base {
         dx(static_cast<uint8_t>(s->get_head_dx())),
         dy(static_cast<uint8_t>(s->get_head_dy())) {}
 
-  uint16_t snakeId = 0;  // 3-4	int16	Snake id
-  uint8_t dx = 0;        // 5	int8	value - 128 + head.x -> x
-  uint8_t dy = 0;        // 6	int8	value - 128 + head.y -> y
+  uint16_t snakeId = 0;  // 3-4  int16   Snake id
+  uint8_t dx = 0;        // 5    int8    value - 128 + head.x -> x
+  uint8_t dy = 0;        // 6    int8    value - 128 + head.y -> y
 
   size_t get_size() const noexcept { return 7; }
 };
@@ -46,4 +46,4 @@ struct packet_move_rel : public packet_base {
 std::ostream& operator<<(std::ostream& out, const packet_move& p);
 std::ostream& operator<<(std::ostream& out, const packet_move_rel& p);
 
-#endif  // SRC_PACKET_MOVE_H_
+#endif  // SRC_PACKET_P_MOVE_H_

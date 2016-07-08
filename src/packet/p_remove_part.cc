@@ -1,4 +1,4 @@
-#include "p_remove_part.h"
+#include "packet/p_remove_part.h"
 
 std::ostream& operator<<(std::ostream& out, const packet_remove_part& p) {
   out << static_cast<packet_base>(p);

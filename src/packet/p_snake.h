@@ -1,8 +1,8 @@
-#ifndef SRC_PACKET_SNAKE_H_
-#define SRC_PACKET_SNAKE_H_
+#ifndef SRC_PACKET_P_SNAKE_H_
+#define SRC_PACKET_P_SNAKE_H_
 
 #include "game/snake.h"
-#include "p_base.h"
+#include "packet/p_base.h"
 
 // Sent when another snake enters range.
 struct packet_add_snake : public packet_base {
@@ -54,4 +54,4 @@ struct packet_remove_snake : public packet_base {
 std::ostream& operator<<(std::ostream& out, const packet_add_snake& p);
 std::ostream& operator<<(std::ostream& out, const packet_remove_snake& p);
 
-#endif  // SRC_PACKET_SNAKE_H_
+#endif  // SRC_PACKET_P_SNAKE_H_

@@ -1,7 +1,7 @@
-#ifndef SRC_PACKET_SECTOR_H_
-#define SRC_PACKET_SECTOR_H_
+#ifndef SRC_PACKET_P_SECTOR_H_
+#define SRC_PACKET_P_SECTOR_H_
 
-#include "p_base.h"
+#include "packet/p_base.h"
 
 struct packet_sector : public packet_base {
   explicit packet_sector(out_packet_t t) : packet_base(t) {}
@@ -28,4 +28,4 @@ struct packet_remove_sector : public packet_sector {
 
 std::ostream& operator<<(std::ostream& out, const packet_sector& p);
 
-#endif  // SRC_PACKET_SECTOR_H_
+#endif  // SRC_PACKET_P_SECTOR_H_

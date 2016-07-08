@@ -1,5 +1,5 @@
-#include "p_format.h"
-#include "p_base.h"
+#include "packet/p_format.h"
+#include "packet/p_base.h"
 
 std::ostream& operator<<(std::ostream& __os, ostream_write_value<uint8_t> __f) {
   return __os.put(__f.v);
@@ -7,17 +7,22 @@ std::ostream& operator<<(std::ostream& __os, ostream_write_value<uint8_t> __f) {
 
 std::ostream& operator<<(std::ostream& __os,
                          ostream_write_value<uint16_t> __f) {
-  return __os.put((char)(__f.v >> 8)).put((char)__f.v);
+  return __os
+      .put(static_cast<char>(__f.v >> 8))
+      .put(static_cast<char>(__f.v));
 }
 
 std::ostream& operator<<(std::ostream& __os,
                          ostream_write_value<uint24_t> __f) {
-  return __os.put((char)(__f.v >> 16)).put((char)(__f.v >> 8)).put((char)__f.v);
+  return __os
+      .put(static_cast<char>(__f.v >> 16))
+      .put(static_cast<char>(__f.v >> 8))
+      .put(static_cast<char>(__f.v));
 }
 
 std::ostream& operator<<(std::ostream& __os,
                          ostream_write_value<const std::string&> __f) {
-  __os.put((char)__f.v.length());
+  __os.put(static_cast<char>(__f.v.length()));
   for (const char c : __f.v) {
     __os.put(c);
   }

@@ -1,8 +1,10 @@
 #ifndef SRC_SERVER_STREAMBUF_ARRAY_H_
 #define SRC_SERVER_STREAMBUF_ARRAY_H_
 
-#include <array>
 #include <boost/asio.hpp>
+
+#include <array>
+#include <algorithm>
 #include <limits>
 
 template <std::size_t _Nm = 128>
@@ -18,7 +20,7 @@ class streambuf_array : public std::streambuf, private boost::noncopyable {
    * Constructs a streambuf with the specified maximum size. The initial size
    * of the streambuf's input sequence is 0.
    */
-  explicit streambuf_array() : max_size_(_Nm) {
+  streambuf_array() : max_size_(_Nm) {
     const std::size_t pend = max_size_;
     setg(&buffer_[0], &buffer_[0], &buffer_[0]);
     setp(&buffer_[0], &buffer_[0] + pend);
@@ -190,7 +192,7 @@ class streambuf_array : public std::streambuf, private boost::noncopyable {
   std::array<char_type, _Nm> buffer_;
 
   // Helper function to get the preferred size for reading data.
-  friend std::size_t read_size_helper(streambuf_array &sb,
+  friend std::size_t read_size_helper(const streambuf_array &sb,
                                       std::size_t max_size) {
     return std::min<std::size_t>(
         std::max<std::size_t>(512, sb.buffer_.max_size() - sb.size()),
@@ -201,7 +203,7 @@ class streambuf_array : public std::streambuf, private boost::noncopyable {
 // Helper function to get the preferred size for reading data. Used for any
 // user-provided specialisations of streambuf_array.
 template <std::size_t _Nm>
-inline std::size_t read_size_helper(streambuf_array<_Nm> &sb,
+inline std::size_t read_size_helper(const streambuf_array<_Nm> &sb,
                                     std::size_t max_size) {
   return std::min<std::size_t>(
       512, std::min<std::size_t>(max_size, sb.max_size() - sb.size()));

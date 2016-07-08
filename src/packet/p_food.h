@@ -1,10 +1,10 @@
-#ifndef SRC_PACKET_FOOD_H_
-#define SRC_PACKET_FOOD_H_
-
-#include "game/food.h"
-#include "p_base.h"
+#ifndef SRC_PACKET_P_FOOD_H_
+#define SRC_PACKET_P_FOOD_H_
 
 #include <vector>
+
+#include "game/food.h"
+#include "packet/p_base.h"
 
 // Sent when food that existed before enters range.
 // The food id is calculated with (y * GameRadius * 3) + x
@@ -13,10 +13,10 @@ struct packet_set_food : public packet_base {
       : packet_base(packet_t_set_food), food_ptr(ptr) {}
 
   /**
-   * 3	int8	Color?
-   * 4-5	int16	Food X
-   * 6-7	int16	Food Y
-   * 8	int8	value / 5 -> Size
+   * 3    int8    Color?
+   * 4-5  int16   Food X
+   * 6-7  int16   Food Y
+   * 8    int8    value / 5 -> Size
    */
   const std::vector<food>* food_ptr;
 
@@ -32,10 +32,10 @@ struct packet_spawn_food : public packet_base {
       : packet_base(packet_t_spawn_food), m_food(f) {}
 
   /**
-   * 3	int8	Color?
-   * 4-5	int16	Food X
-   * 6-7	int16	Food Y
-   * 8	int8	value / 5 -> Size
+   * 3    int8    Color?
+   * 4-5  int16    Food X
+   * 6-7  int16    Food Y
+   * 8    int8    value / 5 -> Size
    */
   food m_food;
 
@@ -50,10 +50,10 @@ struct packet_add_food : public packet_base {
       : packet_base(packet_t_add_food), m_food(f) {}
 
   /**
-   * 3	int8	Color?
-   * 4-5	int16	Food X
-   * 6-7	int16	Food Y
-   * 8	int8	value / 5 -> Size
+   * 3    int8    Color?
+   * 4-5  int16   Food X
+   * 6-7  int16   Food Y
+   * 8    int8    value / 5 -> Size
    */
   food m_food;
 
@@ -66,12 +66,12 @@ struct packet_eat_food : public packet_base {
       : packet_base(packet_t_eat_food), m_food(f), snakeId(id) {}
 
   /**
-   * 3-4	int16	Food X
-   * 5-6	int16	Food Y
+   * 3-4    int16    Food X
+   * 5-6    int16    Food Y
    */
   food m_food;
 
-  // 7-8	int16	Eater snake id
+  // 7-8    int16    Eater snake id
   uint16_t snakeId = 0;
 
   size_t get_size() const noexcept { return 3 + 6; }
@@ -82,4 +82,4 @@ std::ostream& operator<<(std::ostream& out, const packet_spawn_food& p);
 std::ostream& operator<<(std::ostream& out, const packet_add_food& p);
 std::ostream& operator<<(std::ostream& out, const packet_eat_food& p);
 
-#endif  // SRC_PACKET_FOOD_H_
+#endif  // SRC_PACKET_P_FOOD_H_

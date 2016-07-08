@@ -1,7 +1,7 @@
-#ifndef SRC_PACKET_MINIMAP_H_
-#define SRC_PACKET_MINIMAP_H_
+#ifndef SRC_PACKET_P_MINIMAP_H_
+#define SRC_PACKET_P_MINIMAP_H_
 
-#include "p_base.h"
+#include "packet/p_base.h"
 
 #include <vector>
 
@@ -29,4 +29,4 @@ struct packet_minimap : public packet_base {
 
 std::ostream& operator<<(std::ostream& out, const packet_minimap& p);
 
-#endif  // SRC_PACKET_MINIMAP_H_
+#endif  // SRC_PACKET_P_MINIMAP_H_

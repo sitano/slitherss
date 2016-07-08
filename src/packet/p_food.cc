@@ -1,4 +1,4 @@
-#include "p_food.h"
+#include "packet/p_food.h"
 
 std::ostream& operator<<(std::ostream& out, const packet_set_food& p) {
   out << static_cast<packet_base>(p);

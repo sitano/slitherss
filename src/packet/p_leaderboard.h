@@ -1,11 +1,11 @@
-#ifndef SRC_PACKET_LEADERBOARD_H_
-#define SRC_PACKET_LEADERBOARD_H_
-
-#include "game/snake.h"
-#include "p_base.h"
+#ifndef SRC_PACKET_P_LEADERBOARD_H_
+#define SRC_PACKET_P_LEADERBOARD_H_
 
 #include <memory>
 #include <vector>
+
+#include "game/snake.h"
+#include "packet/p_base.h"
 
 struct packet_leaderboard : public packet_base {
   packet_leaderboard() : packet_base(packet_t_leaderboard) {}
@@ -40,4 +40,4 @@ struct packet_leaderboard : public packet_base {
 
 std::ostream& operator<<(std::ostream& out, const packet_leaderboard& p);
 
-#endif  // SRC_PACKET_LEADERBOARD_H_
+#endif  // SRC_PACKET_P_LEADERBOARD_H_

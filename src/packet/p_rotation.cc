@@ -1,4 +1,4 @@
-#include "p_rotation.h"
+#include "packet/p_rotation.h"
 
 out_packet_t packet_rotation::get_rot_type() const noexcept {
   if (wang == -1.0f) {
@@ -11,7 +11,7 @@ out_packet_t packet_rotation::get_rot_type() const noexcept {
     }
   } else {
     if (ang == -1.0f) {
-      // TODO: could use last snake direction???
+      // could use last snake direction
       if (snakeSpeed == -1.0f) {
         return packet_t_rot_ccw_wang;
       } else {

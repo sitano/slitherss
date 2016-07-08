@@ -1,7 +1,7 @@
-#ifndef SRC_PACKET_END_H_
-#define SRC_PACKET_END_H_
+#ifndef SRC_PACKET_P_END_H_
+#define SRC_PACKET_P_END_H_
 
-#include "p_base.h"
+#include "packet/p_base.h"
 
 // Sent when player died (dead/disconnect packet)
 struct packet_end : public packet_base {
@@ -27,8 +27,8 @@ struct packet_end : public packet_base {
 struct packet_kill : public packet_base {
   packet_kill() : packet_base(packet_t_kill) {}
 
-  uint16_t snakeId = 0;  // 3-4	int16	killer snake id
-  uint32_t kills = 0;    // 5-7	int24	total number of kills
+  uint16_t snakeId = 0;  // 3-4    int16    killer snake id
+  uint32_t kills = 0;    // 5-7    int24    total number of kills
 
   size_t get_size() const noexcept { return 8; }
 };
@@ -36,4 +36,4 @@ struct packet_kill : public packet_base {
 std::ostream& operator<<(std::ostream& out, const packet_end& p);
 std::ostream& operator<<(std::ostream& out, const packet_kill& p);
 
-#endif  // SRC_PACKET_END_H_
+#endif  // SRC_PACKET_P_END_H_

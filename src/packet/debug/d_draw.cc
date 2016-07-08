@@ -1,4 +1,4 @@
-#include "d_draw.h"
+#include "packet/debug/d_draw.h"
 
 std::ostream& operator<<(std::ostream & out, const packet_debug_draw & p) {
     out << static_cast<packet_base>(p);

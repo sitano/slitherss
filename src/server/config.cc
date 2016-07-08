@@ -1,8 +1,6 @@
-#include "config.h"
+#include "server/config.h"
 
 #include <boost/program_options.hpp>
-#include <cstdint>
-#include <ostream>
 
 namespace po = boost::program_options;
 

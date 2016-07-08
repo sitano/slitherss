@@ -1,10 +1,10 @@
 #ifndef SRC_SERVER_SERVER_H_
 #define SRC_SERVER_SERVER_H_
 
-#include "config.h"
-#include "streambuf_array.h"
-
 #include <websocketpp/server.hpp>
+
+#include "server/config.h"
+#include "server/streambuf_array.h"
 
 typedef websocketpp::connection_hdl connection_hdl;
 typedef websocketpp::frame::opcode::value opcode;
@@ -13,7 +13,7 @@ typedef websocketpp::lib::error_code error_code;
 class server : public websocketpp::server<slither_server_config> {
  public:
   template <typename T>
-  void send(connection_hdl hdl, T packet, opcode op, error_code &ec) {
+  void send(connection_hdl hdl, T packet, opcode op, const error_code &ec) {
     const connection_ptr con = get_con_from_hdl(hdl, ec);
     if (ec) {
       return;
@@ -39,7 +39,7 @@ class server : public websocketpp::server<slither_server_config> {
   }
 
   template <typename T>
-  void send_binary(connection_hdl hdl, T packet, error_code &ec) {
+  void send_binary(connection_hdl hdl, T packet, const error_code &ec) {
     send(hdl, packet, opcode::binary, ec);
   }
 

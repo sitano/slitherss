@@ -1,16 +1,17 @@
 #ifndef SRC_SERVER_GAME_H_
 #define SRC_SERVER_GAME_H_
 
-#include "server.h"
+#include <chrono>
+#include <map>
+#include <memory>
+#include <string>
+
+#include "server/server.h"
 
 #include "game/world.h"
 
 #include "packet/d_all.h"
 #include "packet/p_all.h"
-
-#include <chrono>
-#include <map>
-#include <memory>
 
 using websocketpp::lib::placeholders::_1;
 using websocketpp::lib::placeholders::_2;
@@ -43,7 +44,7 @@ class slither_server {
   typedef std::unordered_map<snake_id_t, connection_hdl> connections;
 
  private:
-  void on_socket_init(connection_hdl, boost::asio::ip::tcp::socket &s);
+  void on_socket_init(connection_hdl, boost::asio::ip::tcp::socket *s);
   void on_open(connection_hdl hdl);
   void on_message(connection_hdl hdl, message_ptr ptr);
   void on_close(connection_hdl hdl);

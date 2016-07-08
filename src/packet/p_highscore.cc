@@ -1,4 +1,4 @@
-#include "p_highscore.h"
+#include "packet/p_highscore.h"
 
 std::ostream& operator<<(std::ostream& out, const packet_highscore& p) {
   out << static_cast<packet_base>(p);

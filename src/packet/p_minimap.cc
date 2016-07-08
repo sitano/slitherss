@@ -1,4 +1,4 @@
-#include "p_minimap.h"
+#include "packet/p_minimap.h"
 
 std::ostream& operator<<(std::ostream& out, const packet_minimap& p) {
   out << static_cast<packet_base>(p);

@@ -1,4 +1,4 @@
-#include "p_init.h"
+#include "packet/p_init.h"
 
 std::ostream& operator<<(std::ostream& out, const packet_init& p) {
   return out << static_cast<packet_base>(p) << write_uint24(p.game_radius)

@@ -1,5 +1,4 @@
-#include "p_snake.h"
-#include <iostream>
+#include "packet/p_snake.h"
 
 std::ostream& operator<<(std::ostream& out, const packet_add_snake& p) {
   out << static_cast<packet_base>(p);

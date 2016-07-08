@@ -1,4 +1,4 @@
-#include "p_move.h"
+#include "packet/p_move.h"
 
 std::ostream& operator<<(std::ostream& out, const packet_move& p) {
   out << static_cast<packet_base>(p);

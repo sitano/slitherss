@@ -1,8 +1,8 @@
-#ifndef SRC_PACKET_INCREMENT_H_
-#define SRC_PACKET_INCREMENT_H_
+#ifndef SRC_PACKET_P_INC_H_
+#define SRC_PACKET_P_INC_H_
 
 #include "game/snake.h"
-#include "p_base.h"
+#include "packet/p_base.h"
 
 struct packet_inc : public packet_base {
   packet_inc() : packet_base(packet_t_inc) {}
@@ -44,10 +44,10 @@ struct packet_inc_rel : public packet_base {
         dy(static_cast<uint8_t>(s->get_head_dy())),
         fullness(static_cast<uint8_t>(s->fullness)) {}
 
-  uint16_t snakeId = 0;  // 3-4, int16, Snake id
-  uint8_t dx = 0;        // 5	int8	value - 128 + head.x -> x
-  uint8_t dy = 0;        // 6	int8	value - 128 + head.y -> y
-  uint8_t fullness = 0;  // 9-11, int24, value / 16777215 -> fam
+  uint16_t snakeId = 0;  // 3-4,  int16,  Snake id
+  uint8_t dx = 0;        // 5     int8    value - 128 + head.x -> x
+  uint8_t dy = 0;        // 6     int8    value - 128 + head.y -> y
+  uint8_t fullness = 0;  // 9-11, int24,  value / 16777215 -> fam
 
   size_t get_size() const noexcept { return 10; }
 };
@@ -55,4 +55,4 @@ struct packet_inc_rel : public packet_base {
 std::ostream& operator<<(std::ostream& out, const packet_inc& p);
 std::ostream& operator<<(std::ostream& out, const packet_inc_rel& p);
 
-#endif  // SRC_PACKET_INCREMENT_H_
+#endif  // SRC_PACKET_P_INC_H_

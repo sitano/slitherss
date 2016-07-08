@@ -1,4 +1,4 @@
-#include "p_leaderboard.h"
+#include "packet/p_leaderboard.h"
 
 std::ostream& operator<<(std::ostream& out, const packet_leaderboard& p) {
   out << static_cast<packet_base>(p);

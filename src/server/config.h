@@ -1,5 +1,5 @@
-#ifndef SRC_SERVER_CONFIG_H__H_
-#define SRC_SERVER_CONFIG_H__H_
+#ifndef SRC_SERVER_CONFIG_H_
+#define SRC_SERVER_CONFIG_H_
 
 #include "game/config.h"
 
@@ -31,7 +31,7 @@ struct slither_server_config : public websocketpp::config::asio {
   typedef core::response_type response_type;
   typedef core::message_type message_type;
 
-  // TODO: provide pool managers
+  // TODO(john.koepi): provide pool managers
   typedef core::con_msg_manager_type con_msg_manager_type;
   typedef core::endpoint_msg_manager_type endpoint_msg_manager_type;
 
@@ -67,4 +67,4 @@ struct slither_server_config : public websocketpp::config::asio {
   //    <permessage_deflate_config> permessage_deflate_type;
 };
 
-#endif
+#endif  // SRC_SERVER_CONFIG_H_

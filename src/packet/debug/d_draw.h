@@ -1,17 +1,23 @@
-#ifndef SRC_PACKET_DEBUG_DRAW_H_
-#define SRC_PACKET_DEBUG_DRAW_H_
-
-#include "packet/p_base.h"
+#ifndef SRC_PACKET_DEBUG_D_DRAW_H_
+#define SRC_PACKET_DEBUG_D_DRAW_H_
 
 #include <vector>
+
+#include "packet/p_base.h"
 
 struct d_draw_point {
     uint16_t x;
     uint16_t y;
 
     d_draw_point() = default;
-    d_draw_point(uint16_t in_x, uint16_t in_y) : x(in_x), y(in_y) { }
-    d_draw_point(float in_x, float in_y) : x(static_cast<uint16_t>(in_x)), y(static_cast<uint16_t>(in_y)) { }
+
+    d_draw_point(uint16_t in_x, uint16_t in_y) :
+        x(in_x),
+        y(in_y) { }
+
+    d_draw_point(float in_x, float in_y) :
+        x(static_cast<uint16_t>(in_x)),
+        y(static_cast<uint16_t>(in_y)) { }
 };
 
 struct d_draw_dot {
@@ -39,7 +45,9 @@ struct d_draw_circle {
     uint24_t color;
 
     d_draw_circle() = default;
-    d_draw_circle(uint24_t in_id, d_draw_point in_v, float in_r, uint24_t in_color) : id(in_id), v(in_v), r(static_cast<uint16_t>(in_r)), color(in_color) { }
+    d_draw_circle(
+        uint24_t in_id, d_draw_point in_v, float in_r, uint24_t in_color) :
+          id(in_id), v(in_v), r(static_cast<uint16_t>(in_r)), color(in_color) {}
 
     static uint8_t get_header() { return 'o'; }
     static size_t get_size() { return 1 + 3 + 4 + 2 + 3; }
@@ -63,7 +71,11 @@ struct packet_debug_draw : public packet_base {
     std::vector<d_draw_circle> circles;
 
     bool empty() {
-        return dots.empty() && segments.empty() && rects.empty() && circles.empty();
+        return
+            dots.empty()
+            && segments.empty()
+            && rects.empty()
+            && circles.empty();
     }
 
     size_t get_size() const noexcept { return 3 +
@@ -75,4 +87,4 @@ struct packet_debug_draw : public packet_base {
 
 std::ostream& operator<<(std::ostream & out, const packet_debug_draw & p);
 
-#endif //SRC_PACKET_DEBUG_DRAW_H_
+#endif  // SRC_PACKET_DEBUG_D_DRAW_H_

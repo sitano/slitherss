@@ -8,6 +8,9 @@ set(STYLE_FILTER ${STYLE_FILTER},-legal/copyright)
 # Allow native C-types to be used for old funcs
 set(STYLE_FILTER ${STYLE_FILTER},-runtime/int)
 
+# Disagree to ban C++11 features, chrono and etc
+set(STYLE_FILTER ${STYLE_FILTER},-build/c++11)
+
 set(STYLE_CHECK_DIR "${CMAKE_SOURCE_DIR}/third_party/cpplint")
 set(STYLE_CHECK_SCRIPT "${STYLE_CHECK_DIR}/cpplint.py")
 

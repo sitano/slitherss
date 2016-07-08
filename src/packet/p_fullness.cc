@@ -1,4 +1,4 @@
-#include "p_fullness.h"
+#include "packet/p_fullness.h"
 
 std::ostream& operator<<(std::ostream& out, const packet_fullness& p) {
   out << static_cast<packet_base>(p);

@@ -3,9 +3,11 @@
 
 #include <cstdint>
 #include <memory>
+#include <vector>
 #include <unordered_map>
-#include "sector.h"
-#include "snake.h"
+
+#include "game/sector.h"
+#include "game/snake.h"
 
 class world {
  public:

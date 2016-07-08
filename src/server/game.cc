@@ -1,4 +1,6 @@
-#include "game.h"
+#include "server/game.h"
+
+#include <algorithm>
 
 slither_server::slither_server() {
   // set up access channels to only log interesting things
@@ -298,9 +300,9 @@ void slither_server::cleanup_dead() {
 }
 
 void slither_server::on_socket_init(websocketpp::connection_hdl,
-                                    boost::asio::ip::tcp::socket &s) {
+                                    boost::asio::ip::tcp::socket *s) {
   boost::asio::ip::tcp::no_delay option(true);
-  s.set_option(option);
+  s->set_option(option);
 }
 
 void slither_server::on_open(connection_hdl hdl) {
@@ -465,7 +467,10 @@ packet_init slither_server::build_init_packet() {
 }
 
 long slither_server::get_now_tp() {
-  using namespace std::chrono;
+  using std::chrono::milliseconds;
+  using std::chrono::duration_cast;
+  using std::chrono::steady_clock;
+
   return duration_cast<milliseconds>(steady_clock::now().time_since_epoch())
       .count();
 }

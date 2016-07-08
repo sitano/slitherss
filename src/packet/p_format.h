@@ -1,8 +1,9 @@
-#ifndef SRC_PACKET_FORMAT_H_
-#define SRC_PACKET_FORMAT_H_
+#ifndef SRC_PACKET_P_FORMAT_H_
+#define SRC_PACKET_P_FORMAT_H_
 
 #include <cstdint>
 #include <ostream>
+#include <string>
 
 #define M_2PI (2.0 * 3.14159265358979323846) /* 2 * pi */
 
@@ -52,4 +53,4 @@ inline ostream_write_value<uint24_t> write_ang24(fixed_point_t v) {
 ostream_write_value<uint24_t> write_fp24(fixed_point_t v);
 ostream_write_value<const std::string&> write_string(const std::string& s);
 
-#endif  // SRC_PACKET_FORMAT_H_
+#endif  // SRC_PACKET_P_FORMAT_H_
