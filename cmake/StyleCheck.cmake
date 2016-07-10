@@ -33,6 +33,7 @@ function(add_style_check_target PROJECT SOURCES_LIST)
             "${PYTHON_EXECUTABLE}"
             "${STYLE_CHECK_SCRIPT}"
             "--filter=${STYLE_FILTER}"
+            "--linelength=120"
             ${SOURCES_LIST}
         DEPENDS ${SOURCES_LIST} ${STYLE_CHECK_SCRIPT}
         COMMENT "Checking code style."

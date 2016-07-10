@@ -13,12 +13,10 @@ slither_server::slither_server() {
   m_endpoint.set_reuse_addr(true);
 
   // Bind the handlers we are using
-  m_endpoint.set_socket_init_handler(
-      bind(&slither_server::on_socket_init, this, ::_1, ::_2));
+  m_endpoint.set_socket_init_handler(bind(&slither_server::on_socket_init, this, ::_1, ::_2));
 
   m_endpoint.set_open_handler(bind(&slither_server::on_open, this, _1));
-  m_endpoint.set_message_handler(
-      bind(&slither_server::on_message, this, _1, _2));
+  m_endpoint.set_message_handler(bind(&slither_server::on_message, this, _1, _2));
   m_endpoint.set_close_handler(bind(&slither_server::on_close, this, _1));
 }
 
@@ -178,15 +176,13 @@ void slither_server::broadcast_updates() {
         }
       }
 
-      ptr->spawn_food_when_dead(m_world.get_sectors(), [&]() -> float {
+      ptr->spawn_food_when_dead(&m_world.get_sectors(), [&]() -> float {
         return m_world.next_randomf();
       });
       send_food_update(ptr);
 
-      broadcast_binary(
-          packet_remove_snake(ptr->id, packet_remove_snake::status_snake_died));
-      broadcast_binary(
-          packet_remove_snake(ptr->id, packet_remove_snake::status_snake_left));
+      broadcast_binary(packet_remove_snake(ptr->id, packet_remove_snake::status_snake_died));
+      broadcast_binary(packet_remove_snake(ptr->id, packet_remove_snake::status_snake_left));
 
       ptr->update |= change_dead;
 
@@ -300,9 +296,9 @@ void slither_server::cleanup_dead() {
 }
 
 void slither_server::on_socket_init(websocketpp::connection_hdl,
-                                    boost::asio::ip::tcp::socket *s) {
+                                    boost::asio::ip::tcp::socket &s) {
   boost::asio::ip::tcp::no_delay option(true);
-  s->set_option(option);
+  s.set_option(option);
 }
 
 void slither_server::on_open(connection_hdl hdl) {

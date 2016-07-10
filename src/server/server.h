@@ -13,7 +13,7 @@ typedef websocketpp::lib::error_code error_code;
 class server : public websocketpp::server<slither_server_config> {
  public:
   template <typename T>
-  void send(connection_hdl hdl, T packet, opcode op, const error_code &ec) {
+  void send(connection_hdl hdl, T packet, opcode op, error_code &ec) {  // NOLINT(runtime/references)
     const connection_ptr con = get_con_from_hdl(hdl, ec);
     if (ec) {
       return;
@@ -24,8 +24,7 @@ class server : public websocketpp::server<slither_server_config> {
       streambuf_array<128> buf;
       std::ostream out(&buf);
       out << packet;
-      ec = con->send(boost::asio::buffer_cast<void const *>(buf.data()),
-                     buf.size(), op);
+      ec = con->send(boost::asio::buffer_cast<void const *>(buf.data()), buf.size(), op);
     } else {
       boost::asio::streambuf buf(max);
       buf.prepare(max);
@@ -33,13 +32,12 @@ class server : public websocketpp::server<slither_server_config> {
       std::ostream out(&buf);
       out << packet;
 
-      ec = con->send(boost::asio::buffer_cast<void const *>(buf.data()),
-                     buf.size(), op);
+      ec = con->send(boost::asio::buffer_cast<void const *>(buf.data()), buf.size(), op);
     }
   }
 
   template <typename T>
-  void send_binary(connection_hdl hdl, T packet, const error_code &ec) {
+  void send_binary(connection_hdl hdl, T packet, error_code &ec) {  // NOLINT(runtime/references)
     send(hdl, packet, opcode::binary, ec);
   }
 

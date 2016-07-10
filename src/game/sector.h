@@ -15,19 +15,13 @@ struct sector;
 /**
  * http://stackoverflow.com/questions/563198/how-do-you-detect-where-two-line-segments-intersect
  *
- * FWIW, the following function (in C) both detects line intersections and
- * determines the intersection point.
- * It is based on an algorithm in Andre LeMothe's "Tricks of the Windows Game
- * Programming Gurus".
- * It's not dissimilar to some of the algorithm's in other answers (e.g.
- * Gareth's).
- * LeMothe then uses Cramer's Rule (don't ask me) to solve the equations
- * themselves.
+ * FWIW, the following function (in C) both detects line intersections and determines the intersection point.
+ * It is based on an algorithm in Andre LeMothe's "Tricks of the Windows Game Programming Gurus".
+ * It's not dissimilar to some of the algorithm's in other answers (e.g. Gareth's).
+ * LeMothe then uses Cramer's Rule (don't ask me) to solve the equations themselves.
  *
- * I can attest that it works in my feeble asteroids clone, and seems to deal
- * correctly with the edge cases
- * described in other answers by Elemental, Dan and Wodzu. It's also probably
- * faster than the code posted by
+ * I can attest that it works in my feeble asteroids clone, and seems to deal correctly with the edge cases
+ * described in other answers by Elemental, Dan and Wodzu. It's also probably faster than the code posted by
  * KingNestor because it's all multiplication and division, no square roots!
  */
 bool intersect_segments(float p0_x, float p0_y, float p1_x, float p1_y,
@@ -45,8 +39,7 @@ float distance_squared(float v_x, float v_y, float w_x, float w_y, float p_x,
 float distance_squared(float p0_x, float p0_y, float p1_x, float p1_y);
 
 // points p0, p1
-uint32_t distance_squared(uint16_t p0_x, uint16_t p0_y, uint16_t p1_x,
-                          uint16_t p1_y);
+uint32_t distance_squared(uint16_t p0_x, uint16_t p0_y, uint16_t p1_x, uint16_t p1_y);
 
 // https://en.wikipedia.org/wiki/Methods_of_computing_square_roots
 float fastsqrt(float val);

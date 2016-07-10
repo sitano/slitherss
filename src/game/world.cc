@@ -52,7 +52,7 @@ snake::ptr world::create_snake() {
   s->update_box_center();
   s->update_box_radius();
   s->update_snake_const();
-  s->init_box_new_sectors(m_sectors);
+  s->init_box_new_sectors(&m_sectors);
 
   return s;
 }
@@ -90,7 +90,7 @@ void world::tick_snakes(long dt) {
   for (auto pair : m_snakes) {
     snake *const s = pair.second.get();
 
-    if (s->tick(dt, m_sectors)) {
+    if (s->tick(dt, &m_sectors)) {
       m_changes.push_back(s);
     }
   }

@@ -4,12 +4,10 @@
 
 bool intersect_segments(float p0_x, float p0_y, float p1_x, float p1_y,
                         float p2_x, float p2_y, float p3_x, float p3_y) {
-  float s1_x, s1_y, s2_x, s2_y;
-
-  s1_x = p1_x - p0_x;
-  s1_y = p1_y - p0_y;
-  s2_x = p3_x - p2_x;
-  s2_y = p3_y - p2_y;
+  const float s1_x = p1_x - p0_x;
+  const float s1_y = p1_y - p0_y;
+  const float s2_x = p3_x - p2_x;
+  const float s2_y = p3_y - p2_y;
 
   const float d = (-s2_x * s1_y + s1_x * s2_y);
   static const float epsilon = 0.0001f;
@@ -24,11 +22,7 @@ bool intersect_segments(float p0_x, float p0_y, float p1_x, float p1_y,
   }
 
   const float t = (s2_x * (p0_y - p2_y) - s2_y * (p0_x - p2_x));
-  if (t < 0 || t > d) {
-    return false;
-  }
-
-  return true;
+  return !(t < 0 || t > d);
 }
 
 // center, point, radius
@@ -41,17 +35,17 @@ bool intersect_circle(float c_x, float c_y, float p_x, float p_y, float r) {
 float distance_squared(float v_x, float v_y, float w_x, float w_y, float p_x,
                        float p_y) {
   // Return minimum distance between line segment vw and point p
-  const float l2 =
-      distance_squared(v_x, v_y, w_x, w_y);  // i.e. |w-v|^2 -  avoid a sqrt
-  if (l2 == 0.0) return distance_squared(p_x, p_y, w_x, w_x);  // v == w case
+  const float l2 = distance_squared(v_x, v_y, w_x, w_y);  // i.e. |w-v|^2 -  avoid a sqrt
+  if (l2 == 0.0) {  // v == w case
+    return distance_squared(p_x, p_y, w_x, w_x);
+  }
   // Consider the line extending the segment, parameterized as v + t (w - v).
   // We find projection of point p onto the line.
   // It falls where t = [(p-v) . (w-v)] / |w-v|^2
   // We clamp t from [0,1] to handle points outside the segment vw.
   float t = ((p_x - v_x) * (w_x - v_x) + (p_y - v_y) * (w_y - v_y)) / l2;
   t = fmaxf(0, fminf(1, t));
-  return distance_squared(p_x, p_y, v_x + t * (w_x - v_x),
-                          v_y + t * (w_y - v_y));
+  return distance_squared(p_x, p_y, v_x + t * (w_x - v_x), v_y + t * (w_y - v_y));
 }
 
 // points p0, p1
@@ -208,15 +202,10 @@ void view_port::insert_sorted_with_delta(sector *s) {
 void snake_bb::update_box_new_sectors(sectors *ss, const float bb_r,
                                       const float new_x, const float new_y,
                                       const float old_x, const float old_y) {
-  const int16_t new_sx =
-      static_cast<int16_t>(new_x / world_config::sector_size);
-  const int16_t new_sy =
-      static_cast<int16_t>(new_y / world_config::sector_size);
-  const int16_t old_sx =
-      static_cast<int16_t>(old_x / world_config::sector_size);
-  const int16_t old_sy =
-      static_cast<int16_t>(old_y / world_config::sector_size);
-
+  const int16_t new_sx = static_cast<int16_t>(new_x / world_config::sector_size);
+  const int16_t new_sy = static_cast<int16_t>(new_y / world_config::sector_size);
+  const int16_t old_sx = static_cast<int16_t>(old_x / world_config::sector_size);
+  const int16_t old_sy = static_cast<int16_t>(old_y / world_config::sector_size);
   if (new_sx == old_sx && new_sy == old_sy) {
     return;
   }

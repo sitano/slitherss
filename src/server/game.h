@@ -39,12 +39,11 @@ class slither_server {
 
   packet_init build_init_packet();
 
-  typedef std::map<connection_hdl, session, std::owner_less<connection_hdl>>
-      sessions;
+  typedef std::map<connection_hdl, session, std::owner_less<connection_hdl>> sessions;
   typedef std::unordered_map<snake_id_t, connection_hdl> connections;
 
  private:
-  void on_socket_init(connection_hdl, boost::asio::ip::tcp::socket *s);
+  void on_socket_init(connection_hdl, boost::asio::ip::tcp::socket &s);  // NOLINT(runtime/references)
   void on_open(connection_hdl hdl);
   void on_message(connection_hdl hdl, message_ptr ptr);
   void on_close(connection_hdl hdl);
