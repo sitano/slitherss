@@ -89,23 +89,23 @@ struct sector {
   bb_pos box;
 
   std::vector<bb *> m_snakes;
-  std::vector<food> m_food;
+  std::vector<Food> m_food;
 
   sector(uint8_t in_x, uint8_t in_y) : x(in_x), y(in_y) {
-    static const uint16_t half = world_config::sector_size / 2;
-    static constexpr float r = world_config::sector_diag_size / 2.0f;
+    static const uint16_t half = WorldConfig::sector_size / 2;
+    static constexpr float r = WorldConfig::sector_diag_size / 2.0f;
 
-    box = {1.0f * (world_config::sector_size * x + half),
-           1.0f * (world_config::sector_size * y + half), r};
+    box = {1.0f * (WorldConfig::sector_size * x + half),
+           1.0f * (WorldConfig::sector_size * y + half), r};
   }
 
   inline bool intersect(const bb_pos &box2) const {
     return box.intersect(box2);
   }
 
-  void insert_sorted(const food &f);
-  void remove_food(const std::vector<food>::iterator &i);
-  std::vector<food>::iterator find_closest_food(uint16_t fx);
+  void insert_sorted(const Food &f);
+  void remove_food(const std::vector<Food>::iterator &i);
+  std::vector<Food>::iterator find_closest_food(uint16_t fx);
   void sort();
 
   void remove_snake(snake_id_t id);

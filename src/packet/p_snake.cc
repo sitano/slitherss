@@ -1,7 +1,7 @@
 #include "packet/p_snake.h"
 
 std::ostream& operator<<(std::ostream& out, const packet_add_snake& p) {
-  out << static_cast<packet_base>(p);
+  out << static_cast<PacketBase>(p);
 
   const snake* s = p.s;
 
@@ -40,7 +40,7 @@ std::ostream& operator<<(std::ostream& out, const packet_add_snake& p) {
 }
 
 std::ostream& operator<<(std::ostream& out, const packet_remove_snake& p) {
-  out << static_cast<packet_base>(p);
+  out << static_cast<PacketBase>(p);
   out << write_uint16(p.snakeId);
   out << write_uint8(p.status);
   return out;

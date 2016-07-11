@@ -3,10 +3,10 @@
 
 #include "packet/p_base.h"
 
-struct packet_sector : public packet_base {
-  explicit packet_sector(out_packet_t t) : packet_base(t) {}
+struct packet_sector : public PacketBase {
+  explicit packet_sector(out_packet_t t) : PacketBase(t) {}
   packet_sector(out_packet_t t, uint8_t in_x, uint8_t in_y)
-      : packet_base(t), x(in_x), y(in_y) {}
+      : PacketBase(t), x(in_x), y(in_y) {}
 
   uint8_t x = 0;  // 3, int8, x-coordinate of the sector
   uint8_t y = 0;  // 4, int8, y-coordinate of the sector

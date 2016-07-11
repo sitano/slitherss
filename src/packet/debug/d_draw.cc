@@ -1,7 +1,7 @@
 #include "packet/debug/d_draw.h"
 
 std::ostream& operator<<(std::ostream & out, const packet_debug_draw & p) {
-    out << static_cast<packet_base>(p);
+    out << static_cast<PacketBase>(p);
 
     for (const d_draw_dot &v : p.dots) {
         out << write_uint8(d_draw_dot::get_header())

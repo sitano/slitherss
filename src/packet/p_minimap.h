@@ -5,8 +5,8 @@
 
 #include <vector>
 
-struct packet_minimap : public packet_base {
-  packet_minimap() : packet_base(packet_t_minimap) {}
+struct packet_minimap : public PacketBase {
+  packet_minimap() : PacketBase(packet_t_minimap) {}
 
   /**
    *

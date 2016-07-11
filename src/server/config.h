@@ -9,7 +9,7 @@
 using websocketpp::log::alevel;
 using websocketpp::log::elevel;
 
-struct game_config {
+struct IncomingConfig {
   uint16_t port = 8080;
 
   bool help = false;
@@ -17,12 +17,12 @@ struct game_config {
   bool verbose = false;
   bool debug = false;
 
-  world_config world;
+  WorldConfig world;
 };
 
-game_config parse_command_line(const int argc, const char* const argv[]);
+IncomingConfig ParseCommandLine(const int argc, const char *const *argv);
 
-struct slither_server_config : public websocketpp::config::asio {
+struct WSPPServerConfig : public websocketpp::config::asio {
   // pull default settings from our core config
   typedef websocketpp::config::asio core;
 
@@ -52,8 +52,7 @@ struct slither_server_config : public websocketpp::config::asio {
     static bool const enable_multithreading = true;
   };
 
-  typedef websocketpp::transport::asio::endpoint<transport_config>
-      transport_type;
+  typedef websocketpp::transport::asio::endpoint<transport_config> transport_type;
 
   /// static const websocketpp::log::level elog_level =
   ///    websocketpp::log::elevel::none;

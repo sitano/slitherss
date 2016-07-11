@@ -1,6 +1,6 @@
 #include "packet/p_base.h"
 
-std::ostream& operator<<(std::ostream& out, const packet_base& p) {
+std::ostream& operator<<(std::ostream& out, const PacketBase& p) {
   return out << write_uint16(p.client_time) << write_uint8(p.packet_type);
 }
 

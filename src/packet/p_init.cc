@@ -1,7 +1,7 @@
 #include "packet/p_init.h"
 
-std::ostream& operator<<(std::ostream& out, const packet_init& p) {
-  return out << static_cast<packet_base>(p) << write_uint24(p.game_radius)
+std::ostream& operator<<(std::ostream& out, const PacketInit& p) {
+  return out << static_cast<PacketBase>(p) << write_uint24(p.game_radius)
              << write_uint16(p.max_snake_parts) << write_uint16(p.sector_size)
              << write_uint16(p.sector_count_along_edge) << write_fp8(p.spangdv)
              << write_fp16<2>(p.nsp1) << write_fp16<2>(p.nsp2)

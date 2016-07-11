@@ -1,7 +1,7 @@
 #include "packet/p_leaderboard.h"
 
 std::ostream& operator<<(std::ostream& out, const packet_leaderboard& p) {
-  out << static_cast<packet_base>(p);
+  out << static_cast<PacketBase>(p);
   out << write_uint8(p.leaderboard_rank);
   out << write_uint16(p.local_rank);
   out << write_uint16(p.players);

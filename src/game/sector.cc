@@ -130,10 +130,10 @@ void sector::remove_snake(snake_id_t id) {
                                 [id](const bb *bb) { return bb->id == id; }));
 }
 
-void sector::insert_sorted(const food &f) {
+void sector::insert_sorted(const Food &f) {
   auto fwd_i =
       std::lower_bound(m_food.begin(), m_food.end(), f,
-                       [](const food &a, const food &b) { return a.x < b.x; });
+                       [](const Food &a, const Food &b) { return a.x < b.x; });
   if (fwd_i != m_food.end()) {
     m_food.insert(fwd_i, f);
   } else {
@@ -141,34 +141,34 @@ void sector::insert_sorted(const food &f) {
   }
 }
 
-void sector::remove_food(const std::vector<food>::iterator &i) {
+void sector::remove_food(const std::vector<Food>::iterator &i) {
   m_food.erase(i);
 }
 
 void sector::sort() {
   std::sort(m_food.begin(), m_food.end(),
-            [](const food &a, const food &b) { return a.x < b.x; });
+            [](const Food &a, const Food &b) { return a.x < b.x; });
 }
 
-std::vector<food>::iterator sector::find_closest_food(uint16_t fx) {
+std::vector<Food>::iterator sector::find_closest_food(uint16_t fx) {
   return std::lower_bound(
-      m_food.begin(), m_food.end(), food{fx, 0, 0, 0},
-      [](const food &a, const food &b) { return a.x < b.x; });
+      m_food.begin(), m_food.end(), Food{fx, 0, 0, 0},
+      [](const Food &a, const Food &b) { return a.x < b.x; });
 }
 
 void sectors::init_sectors() {
-  const size_t len = world_config::sector_count_along_edge *
-                     world_config::sector_count_along_edge;
+  const size_t len = WorldConfig::sector_count_along_edge *
+                     WorldConfig::sector_count_along_edge;
   reserve(len);
   for (size_t i = 0; i < len; i++) {
     push_back(sector{
-        static_cast<uint8_t>(i % world_config::sector_count_along_edge),
-        static_cast<uint8_t>(i / world_config::sector_count_along_edge)});
+        static_cast<uint8_t>(i % WorldConfig::sector_count_along_edge),
+        static_cast<uint8_t>(i / WorldConfig::sector_count_along_edge)});
   }
 }
 
 size_t sectors::get_index(const uint16_t x, const uint16_t y) {
-  return y * world_config::sector_count_along_edge + x;
+  return y * WorldConfig::sector_count_along_edge + x;
 }
 
 sector *sectors::get_sector(const uint16_t x, const uint16_t y) {
@@ -202,17 +202,17 @@ void view_port::insert_sorted_with_delta(sector *s) {
 void snake_bb::update_box_new_sectors(sectors *ss, const float bb_r,
                                       const float new_x, const float new_y,
                                       const float old_x, const float old_y) {
-  const int16_t new_sx = static_cast<int16_t>(new_x / world_config::sector_size);
-  const int16_t new_sy = static_cast<int16_t>(new_y / world_config::sector_size);
-  const int16_t old_sx = static_cast<int16_t>(old_x / world_config::sector_size);
-  const int16_t old_sy = static_cast<int16_t>(old_y / world_config::sector_size);
+  const int16_t new_sx = static_cast<int16_t>(new_x / WorldConfig::sector_size);
+  const int16_t new_sy = static_cast<int16_t>(new_y / WorldConfig::sector_size);
+  const int16_t old_sx = static_cast<int16_t>(old_x / WorldConfig::sector_size);
+  const int16_t old_sy = static_cast<int16_t>(old_y / WorldConfig::sector_size);
   if (new_sx == old_sx && new_sy == old_sy) {
     return;
   }
 
   const bb_pos box = {new_x, new_y, bb_r};
   static const int16_t map_width_sectors =
-      static_cast<int16_t>(world_config::sector_count_along_edge);
+      static_cast<int16_t>(WorldConfig::sector_count_along_edge);
 
   for (int j = new_sy - 1; j <= new_sy + 1; j++) {
     for (int i = new_sx - 1; i <= new_sx + 1; i++) {
@@ -253,20 +253,20 @@ void view_port::update_box_new_sectors(sectors *ss,
                                        const float new_x, const float new_y,
                                        const float old_x, const float old_y) {
   const int16_t new_sx =
-      static_cast<int16_t>(new_x / world_config::sector_size);
+      static_cast<int16_t>(new_x / WorldConfig::sector_size);
   const int16_t new_sy =
-      static_cast<int16_t>(new_y / world_config::sector_size);
+      static_cast<int16_t>(new_y / WorldConfig::sector_size);
   const int16_t old_sx =
-      static_cast<int16_t>(old_x / world_config::sector_size);
+      static_cast<int16_t>(old_x / WorldConfig::sector_size);
   const int16_t old_sy =
-      static_cast<int16_t>(old_y / world_config::sector_size);
+      static_cast<int16_t>(old_y / WorldConfig::sector_size);
 
   if (new_sx == old_sx && new_sy == old_sy) {
     return;
   }
 
   static const int16_t map_width_sectors =
-      static_cast<int16_t>(world_config::sector_count_along_edge);
+      static_cast<int16_t>(WorldConfig::sector_count_along_edge);
 
   for (int j = new_sy - 3; j <= new_sy + 3; j++) {
     for (int i = new_sx - 3; i <= new_sx + 3; i++) {

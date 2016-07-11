@@ -3,8 +3,8 @@
 
 #include "packet/p_base.h"
 
-struct packet_init : public packet_base {
-  packet_init() : packet_base(packet_t_init) {}
+struct PacketInit : public PacketBase {
+  PacketInit() : PacketBase(packet_t_init) {}
 
   uint32_t game_radius = 21600;    // 3-5, int24, Game Radius = 21600
   uint16_t max_snake_parts = 411;  // 6-7, int16, mscps (maximum snake length in
@@ -30,6 +30,6 @@ struct packet_init : public packet_base {
   size_t get_size() const noexcept { return 26; }
 };
 
-std::ostream& operator<<(std::ostream& out, const packet_init& p);
+std::ostream& operator<<(std::ostream& out, const PacketInit& p);
 
 #endif  // SRC_PACKET_P_INIT_H_

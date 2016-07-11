@@ -5,7 +5,7 @@
 
 typedef uint16_t snake_id_t;
 
-struct world_config {
+struct WorldConfig {
   // generate bots on start count
   uint16_t bots = 0;
 

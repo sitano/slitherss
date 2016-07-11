@@ -62,8 +62,8 @@ struct d_draw_rect {
     static size_t get_size() { return 1 + 3 + 4 + 4 + 3; }
 };
 
-struct packet_debug_draw : public packet_base {
-    packet_debug_draw() : packet_base(packet_d_draw) {}
+struct packet_debug_draw : public PacketBase {
+    packet_debug_draw() : PacketBase(packet_d_draw) {}
 
     std::vector<d_draw_dot> dots;
     std::vector<d_draw_segment> segments;

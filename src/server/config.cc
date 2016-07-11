@@ -8,8 +8,8 @@ namespace po = boost::program_options;
 // https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=797917
 // http://stackoverflow.com/questions/34387406/boost-program-options-not-linking-correctly-under-clang
 // http://developerblog.redhat.com/2015/02/05/gcc5-and-the-c11-abi/
-game_config parse_command_line(const int argc, const char *const argv[]) {
-  game_config config;
+IncomingConfig ParseCommandLine(const int argc, const char *const *argv) {
+  IncomingConfig config;
 
   po::options_description generic("Generic options");
   generic.add_options()("help,h", po::bool_switch(&config.help),

@@ -2,87 +2,85 @@
 
 #include <algorithm>
 
-slither_server::slither_server() {
+GameServer::GameServer() {
   // set up access channels to only log interesting things
-  m_endpoint.clear_access_channels(alevel::all);
-  m_endpoint.set_access_channels(alevel::access_core);
-  m_endpoint.set_access_channels(alevel::app);
+  endpoint.clear_access_channels(alevel::all);
+  endpoint.set_access_channels(alevel::access_core);
+  endpoint.set_access_channels(alevel::app);
 
   // Initialize the Asio transport policy
-  m_endpoint.init_asio();
-  m_endpoint.set_reuse_addr(true);
+  endpoint.init_asio();
+  endpoint.set_reuse_addr(true);
 
   // Bind the handlers we are using
-  m_endpoint.set_socket_init_handler(bind(&slither_server::on_socket_init, this, ::_1, ::_2));
+  endpoint.set_socket_init_handler(bind(&GameServer::on_socket_init, this, ::_1, ::_2));
 
-  m_endpoint.set_open_handler(bind(&slither_server::on_open, this, _1));
-  m_endpoint.set_message_handler(bind(&slither_server::on_message, this, _1, _2));
-  m_endpoint.set_close_handler(bind(&slither_server::on_close, this, _1));
+  endpoint.set_open_handler(bind(&GameServer::on_open, this, _1));
+  endpoint.set_message_handler(bind(&GameServer::on_message, this, _1, _2));
+  endpoint.set_close_handler(bind(&GameServer::on_close, this, _1));
 }
 
-void slither_server::run(game_config config) {
-  m_endpoint.get_alog().write(
-      websocketpp::log::alevel::app,
+int GameServer::Run(IncomingConfig config) {
+  endpoint.get_alog().write(alevel::app,
       "Running slither server on port " + std::to_string(config.port));
 
   m_config = config;
-  print_world_info();
+  PrintWorldInfo();
 
-  m_endpoint.listen(config.port);
-  m_endpoint.start_accept();
+  endpoint.listen(config.port);
+  endpoint.start_accept();
 
   m_world.init(config.world);
-  m_init = build_init_packet();
-  next_tick(get_now_tp());
+  m_init = BuildInitPacket();
+  NextTick(GetCurrentTime());
 
   try {
-    m_endpoint.get_alog().write(websocketpp::log::alevel::app,
-                                "Server started...");
-    m_endpoint.run();
+    endpoint.get_alog().write(alevel::app, "Server started...");
+    endpoint.run();
+    return 0;
   } catch (websocketpp::exception const &e) {
     std::cout << e.what() << std::endl;
+    return 1;
   }
 }
 
-void slither_server::print_world_info() {
+void GameServer::PrintWorldInfo() {
   std::stringstream s;
   s << "World info = \n" << m_world;
-  m_endpoint.get_alog().write(websocketpp::log::alevel::app, s.str());
+  endpoint.get_alog().write(alevel::app, s.str());
 }
 
-void slither_server::next_tick(long last) {
-  m_last_time_point = last;
-  m_timer = m_endpoint.set_timer(
-      std::max(0L, timer_interval_ms - (get_now_tp() - last)),
-      bind(&slither_server::on_timer, this, _1));
+void GameServer::NextTick(long last) {
+  last_time_point = last;
+  timer = endpoint.set_timer(
+      std::max(0L, timer_interval_ms - (GetCurrentTime() - last)),
+      bind(&GameServer::on_timer, this, _1));
 }
 
-void slither_server::on_timer(error_code const &ec) {
-  const long now = get_now_tp();
-  const long dt = now - m_last_time_point;
+void GameServer::on_timer(error_code const &ec) {
+  const long now = GetCurrentTime();
+  const long dt = now - last_time_point;
 
   if (ec) {
-    m_endpoint.get_alog().write(websocketpp::log::alevel::app,
-                                "Main game loop timer error: " + ec.message());
+    endpoint.get_alog().write(alevel::app, "Main game loop timer error: " + ec.message());
     return;
   }
 
   m_world.tick(dt);
-  broadcast_debug();
-  broadcast_updates();
-  cleanup_dead();
+  BroadcastDebug();
+  BroadcastUpdates();
+  RemoveDeadSnakes();
 
-  const long step_time = get_now_tp() - now;
+  const long step_time = GetCurrentTime() - now;
   if (step_time > 10) {
-    m_endpoint.get_alog().write(
-        websocketpp::log::alevel::app,
+    endpoint.get_alog().write(alevel::app,
         "Load is too high, step took " + std::to_string(step_time) + "ms");
   }
 
-  next_tick(now);
+  NextTick(now);
 }
 
-void slither_server::broadcast_debug() {
+void GameServer::BroadcastDebug() {
   if (!m_config.debug) {
     return;
   }
@@ -122,31 +120,31 @@ void slither_server::broadcast_debug() {
     // intersection algorithm
     static const size_t head_size = 8;
     static const size_t tail_step = static_cast<size_t>(
-        world_config::sector_size / snake::tail_step_distance);
+        WorldConfig::sector_size / snake::tail_step_distance);
     static const size_t tail_step_half = tail_step / 2;
     const size_t len = s->parts.size();
 
     if (len <= head_size + tail_step) {
       for (const body &b : s->parts) {
         draw.circles.push_back(d_draw_circle{
-            sis++, {b.x, b.y}, world_config::move_step_distance, 0x646464});
+            sis++, {b.x, b.y}, WorldConfig::move_step_distance, 0x646464});
       }
     } else {
       auto p = s->parts[3];
       draw.circles.push_back(d_draw_circle{
-          sis++, {p.x, p.y}, world_config::sector_size / 2, 0x848484});
+          sis++, {p.x, p.y}, WorldConfig::sector_size / 2, 0x848484});
       p = s->parts[0];
       draw.circles.push_back(d_draw_circle{
-          sis++, {p.x, p.y}, world_config::move_step_distance, 0x646464});
+          sis++, {p.x, p.y}, WorldConfig::move_step_distance, 0x646464});
       p = s->parts[8];
       draw.circles.push_back(d_draw_circle{
-          sis++, {p.x, p.y}, world_config::move_step_distance, 0x646464});
+          sis++, {p.x, p.y}, WorldConfig::move_step_distance, 0x646464});
 
       auto end = s->parts.end();
       for (auto i = s->parts.begin() + 7 + tail_step_half; i < end;
            i += tail_step) {
         draw.circles.push_back(d_draw_circle{
-            sis++, {i->x, i->y}, world_config::sector_size / 2, 0x848484});
+            sis++, {i->x, i->y}, WorldConfig::sector_size / 2, 0x848484});
       }
     }
   }
@@ -156,7 +154,7 @@ void slither_server::broadcast_debug() {
   }
 }
 
-void slither_server::broadcast_updates() {
+void GameServer::BroadcastUpdates() {
   for (auto ptr : m_world.get_changes()) {
     const snake_id_t id = ptr->id;
     const uint8_t flags = ptr->update;
@@ -166,11 +164,11 @@ void slither_server::broadcast_updates() {
     }
 
     if (flags & change_dying) {
-      m_endpoint.get_alog().write(websocketpp::log::alevel::app,
-                                  "Found dying snake " + std::to_string(id));
+      endpoint.get_alog().write(alevel::app,
+        "Found dying snake " + std::to_string(id));
 
       if (!ptr->bot) {
-        const auto ses_i = load_session_i(id);
+        const auto ses_i = LoadSessionIter(id);
         if (ses_i != m_sessions.end()) {
           send_binary(ses_i, packet_end(packet_end::status_death));
         }
@@ -179,7 +177,7 @@ void slither_server::broadcast_updates() {
       ptr->spawn_food_when_dead(&m_world.get_sectors(), [&]() -> float {
         return m_world.next_randomf();
       });
-      send_food_update(ptr);
+      SendFoodUpdate(ptr);
 
       broadcast_binary(packet_remove_snake(ptr->id, packet_remove_snake::status_snake_died));
       broadcast_binary(packet_remove_snake(ptr->id, packet_remove_snake::status_snake_left));
@@ -234,10 +232,10 @@ void slither_server::broadcast_updates() {
           broadcast_binary(packet_move(ptr));
         }
 
-        send_food_update(ptr);
+        SendFoodUpdate(ptr);
         if (!ptr->bot) {
-          const auto ses_i = load_session_i(id);
-          send_pov_update_to(ses_i, ptr);
+          const auto ses_i = LoadSessionIter(id);
+          SendPOVUpdateTo(ses_i, ptr);
 
           if (flags & change_fullness) {
             send_binary(ses_i, packet_fullness(ptr));
@@ -251,7 +249,7 @@ void slither_server::broadcast_updates() {
   m_world.flush_changes();
 }
 
-void slither_server::send_pov_update_to(sessions::iterator ses_i, snake *ptr) {
+void GameServer::SendPOVUpdateTo(sessions::iterator ses_i, snake *ptr) {
   if (!ptr->vp.new_sectors.empty()) {
     for (const sector *s_ptr : ptr->vp.new_sectors) {
       send_binary(ses_i, packet_add_sector(s_ptr->x, s_ptr->y));
@@ -268,10 +266,10 @@ void slither_server::send_pov_update_to(sessions::iterator ses_i, snake *ptr) {
   }
 }
 
-void slither_server::send_food_update(snake *ptr) {
+void GameServer::SendFoodUpdate(snake *ptr) {
   if (!ptr->eaten.empty()) {
     const snake_id_t id = ptr->id;
-    for (const food &f : ptr->eaten) {
+    for (const Food &f : ptr->eaten) {
       // todo: to those who observers me
       broadcast_binary(packet_eat_food(id, f));
     }
@@ -279,7 +277,7 @@ void slither_server::send_food_update(snake *ptr) {
   }
 
   if (!ptr->spawn.empty()) {
-    for (const food &f : ptr->spawn) {
+    for (const Food &f : ptr->spawn) {
       // todo: to those who observers me
       broadcast_binary(packet_spawn_food(f));
     }
@@ -287,34 +285,34 @@ void slither_server::send_food_update(snake *ptr) {
   }
 }
 
-void slither_server::cleanup_dead() {
+void GameServer::RemoveDeadSnakes() {
   for (auto id : m_world.get_dead()) {
-    remove_snake(id);
+    RemoveSnake(id);
   }
 
   m_world.get_dead().clear();
 }
 
-void slither_server::on_socket_init(websocketpp::connection_hdl,
+void GameServer::on_socket_init(websocketpp::connection_hdl,
                                     boost::asio::ip::tcp::socket &s) {
   boost::asio::ip::tcp::no_delay option(true);
   s.set_option(option);
 }
 
-void slither_server::on_open(connection_hdl hdl) {
+void GameServer::on_open(connection_hdl hdl) {
   const auto new_snake_ptr = m_world.create_snake();
   m_world.add_snake(new_snake_ptr);
 
-  m_sessions[hdl] = session(new_snake_ptr->id, get_now_tp());
+  m_sessions[hdl] = Session(new_snake_ptr->id, GetCurrentTime());
   m_connections[new_snake_ptr->id] = hdl;
 
-  m_endpoint.send_binary(hdl, m_init);
+  endpoint.send_binary(hdl, m_init);
 
   // send snake
   const auto ses_i = m_sessions.find(hdl);
   broadcast_binary(packet_add_snake(new_snake_ptr.get()));
   broadcast_binary(packet_move(new_snake_ptr.get()));
-  send_pov_update_to(ses_i, new_snake_ptr.get());
+  SendPOVUpdateTo(ses_i, new_snake_ptr.get());
 
   // introduce other snakes in sectors view
   for (auto ptr : m_world.get_snakes()) {
@@ -326,9 +324,9 @@ void slither_server::on_open(connection_hdl hdl) {
   }
 }
 
-void slither_server::on_message(connection_hdl hdl, message_ptr ptr) {
+void GameServer::on_message(connection_hdl hdl, message_ptr ptr) {
   if (ptr->get_opcode() != opcode::binary) {
-    m_endpoint.get_alog().write(
+    endpoint.get_alog().write(
         alevel::app,
         "Unknown incoming message opcode " + std::to_string(ptr->get_opcode()));
     return;
@@ -343,7 +341,7 @@ void slither_server::on_message(connection_hdl hdl, message_ptr ptr) {
   // len check
   const size_t len = ptr->get_payload().size();
   if (len > 255) {
-    m_endpoint.get_alog().write(
+    endpoint.get_alog().write(
         alevel::app, "Packet '" + std::to_string(packet_type) + "' too big " +
                          std::to_string(len));
     return;
@@ -352,18 +350,18 @@ void slither_server::on_message(connection_hdl hdl, message_ptr ptr) {
   // session obtain
   const auto ses_i = m_sessions.find(hdl);
   if (ses_i == m_sessions.end()) {
-    m_endpoint.get_alog().write(alevel::app, "No session, skip packet");
+    endpoint.get_alog().write(alevel::app, "No session, skip packet");
     return;
   }
 
   // last client time manage
-  session &ss = ses_i->second;
+  Session &ss = ses_i->second;
 
   // parsing
   if (packet_type <= 250 && len == 1) {
     // in_packet_t_angle, [0 - 250]
     const float angle = world::f_pi * packet_type / 125.0f;
-    do_snake(ss.snake_id, [=](snake *s) {
+    DoSnake(ss.snake_id, [=](snake *s) {
       s->wangle = angle;
       s->update |= change_wangle;
     });
@@ -380,7 +378,7 @@ void slither_server::on_message(connection_hdl hdl, message_ptr ptr) {
       buf >> ss.skin;
       buf.str(ss.name);
 
-      do_snake(ss.snake_id, [&ss](snake *s) {
+      DoSnake(ss.snake_id, [&ss](snake *s) {
         s->name = ss.name;
         s->skin = ss.skin;
       });
@@ -395,7 +393,7 @@ void slither_server::on_message(connection_hdl hdl, message_ptr ptr) {
       buf >> packet_type;  // vfrb (virtual frames count) [0 - 127] of turning
                            // into the right direction
       // snake.eang -= mamu * v * snake.scang * snake.spang)
-      m_endpoint.get_alog().write(
+      endpoint.get_alog().write(
           alevel::app, "rotate ccw, snake " + std::to_string(ss.snake_id) +
                            ", vfrb " + std::to_string(packet_type));
       break;
@@ -404,21 +402,21 @@ void slither_server::on_message(connection_hdl hdl, message_ptr ptr) {
       buf >> packet_type;  // vfrb (virtual frames count) [0 - 127] of turning
                            // into the right direction
       // snake.eang += mamu * v * snake.scang * snake.spang)
-      m_endpoint.get_alog().write(
+      endpoint.get_alog().write(
           alevel::app, "rotate cw, snake " + std::to_string(ss.snake_id) +
                            ", vfrb " + std::to_string(packet_type));
       break;
 
     case in_packet_t_start_acc:
-      do_snake(ss.snake_id, [](snake *s) { s->acceleration = true; });
+      DoSnake(ss.snake_id, [](snake *s) { s->acceleration = true; });
       break;
 
     case in_packet_t_stop_acc:
-      do_snake(ss.snake_id, [](snake *s) { s->acceleration = false; });
+      DoSnake(ss.snake_id, [](snake *s) { s->acceleration = false; });
       break;
 
     default:
-      m_endpoint.get_alog().write(
+      endpoint.get_alog().write(
           alevel::app, "Unknown packet type " + std::to_string(packet_type) +
                            ", len " +
                            std::to_string(ptr->get_payload().size()));
@@ -426,27 +424,27 @@ void slither_server::on_message(connection_hdl hdl, message_ptr ptr) {
   }
 }
 
-void slither_server::on_close(connection_hdl hdl) {
+void GameServer::on_close(connection_hdl hdl) {
   const auto ptr = m_sessions.find(hdl);
   if (ptr != m_sessions.end()) {
     const snake_id_t snakeId = ptr->second.snake_id;
     m_sessions.erase(ptr->first);
-    remove_snake(snakeId);
+    RemoveSnake(snakeId);
   }
 }
 
-void slither_server::remove_snake(snake_id_t id) {
+void GameServer::RemoveSnake(snake_id_t id) {
   m_connections.erase(id);
   m_world.remove_snake(id);
 }
 
-packet_init slither_server::build_init_packet() {
-  packet_init init;
+PacketInit GameServer::BuildInitPacket() {
+  PacketInit init;
 
-  init.game_radius = world_config::game_radius;
-  init.max_snake_parts = world_config::max_snake_parts;
-  init.sector_size = world_config::sector_size;
-  init.sector_count_along_edge = world_config::sector_count_along_edge;
+  init.game_radius = WorldConfig::game_radius;
+  init.max_snake_parts = WorldConfig::max_snake_parts;
+  init.sector_size = WorldConfig::sector_size;
+  init.sector_count_along_edge = WorldConfig::sector_count_along_edge;
 
   init.spangdv = snake::spangdv;
   init.nsp1 = snake::nsp1;
@@ -462,16 +460,15 @@ packet_init slither_server::build_init_packet() {
   return init;
 }
 
-long slither_server::get_now_tp() {
+long GameServer::GetCurrentTime() {
   using std::chrono::milliseconds;
   using std::chrono::duration_cast;
   using std::chrono::steady_clock;
 
-  return duration_cast<milliseconds>(steady_clock::now().time_since_epoch())
-      .count();
+  return duration_cast<milliseconds>(steady_clock::now().time_since_epoch()).count();
 }
 
-void slither_server::do_snake(snake_id_t id, std::function<void(snake *)> f) {
+void GameServer::DoSnake(snake_id_t id, std::function<void(snake *)> f) {
   if (id > 0) {
     const auto snake_i = m_world.get_snake(id);
     if (snake_i->first == id) {
@@ -480,11 +477,11 @@ void slither_server::do_snake(snake_id_t id, std::function<void(snake *)> f) {
   }
 }
 
-slither_server::sessions::iterator slither_server::load_session_i(
+GameServer::sessions::iterator GameServer::LoadSessionIter(
     snake_id_t id) {
   const auto hdl_i = m_connections.find(id);
   if (hdl_i == m_connections.end()) {
-    m_endpoint.get_alog().write(
+    endpoint.get_alog().write(
         websocketpp::log::alevel::app,
         "Failed to locate snake connection " + std::to_string(id));
     return m_sessions.end();
@@ -492,7 +489,7 @@ slither_server::sessions::iterator slither_server::load_session_i(
 
   const auto ses_i = m_sessions.find(hdl_i->second);
   if (ses_i == m_sessions.end()) {
-    m_endpoint.get_alog().write(
+    endpoint.get_alog().write(
         websocketpp::log::alevel::app,
         "Failed to locate snake session " + std::to_string(id));
   }

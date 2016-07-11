@@ -17,8 +17,8 @@ snake::ptr world::create_snake() {
 
   float angle = world::f_2pi * next_randomf();
   float dist = 1000.0f + next_random(5000);
-  uint16_t x = world_config::game_radius + dist * cosf(angle);
-  uint16_t y = world_config::game_radius + dist * sinf(angle);
+  uint16_t x = WorldConfig::game_radius + dist * cosf(angle);
+  uint16_t y = WorldConfig::game_radius + dist * sinf(angle);
   angle = snake::normalize_angle(angle + f_pi);
   // const uint16_t half_radius = game_radius / 2;
   // uint16_t x = game_radius + next_random(game_radius) - half_radius;
@@ -32,8 +32,8 @@ snake::ptr world::create_snake() {
        i < len && i < snake::parts_skip_count + snake::parts_start_move_count;
        ++i) {
     s->parts.push_back(body{1.0f * x, 1.0f * y});
-    x += cosf(angle) * world_config::move_step_distance;
-    y += sinf(angle) * world_config::move_step_distance;
+    x += cosf(angle) * WorldConfig::move_step_distance;
+    y += sinf(angle) * WorldConfig::move_step_distance;
   }
 
   for (int i = snake::parts_skip_count + snake::parts_start_move_count; i < len;
@@ -108,9 +108,9 @@ void world::check_snake_bounds(snake *const s) {
 
   // world bounds
   const body &head = s->get_head();
-  if (head.distance_squared(world_config::game_radius,
-                            world_config::game_radius) >=
-      world_config::death_radius * world_config::death_radius) {
+  if (head.distance_squared(WorldConfig::game_radius,
+                            WorldConfig::game_radius) >=
+      WorldConfig::death_radius * WorldConfig::death_radius) {
     s->update |= change_dying;
     return;
   }
@@ -120,20 +120,20 @@ void world::check_snake_bounds(snake *const s) {
                s->get_snake_body_part_radius());
 
   // check bound coverage
-  const int16_t sx = static_cast<int16_t>(check.x / world_config::sector_size);
-  const int16_t sy = static_cast<int16_t>(check.y / world_config::sector_size);
+  const int16_t sx = static_cast<int16_t>(check.x / WorldConfig::sector_size);
+  const int16_t sy = static_cast<int16_t>(check.y / WorldConfig::sector_size);
   static const int16_t width = 1;
 
   // 3x3 check head coverage
   static const int16_t map_width_sectors =
-      static_cast<int16_t>(world_config::sector_count_along_edge);
+      static_cast<int16_t>(WorldConfig::sector_count_along_edge);
   for (int16_t j = sy - width; j <= sy + width; j++) {
     for (int16_t i = sx - width; i <= sx + width; i++) {
       if (i >= 0 && i < map_width_sectors && j >= 0 && j < map_width_sectors) {
         sector *sec_ptr = m_sectors.get_sector(i, j);
         // check sector intersects head
         if (sec_ptr->intersect(
-                {check.x, check.y, world_config::move_step_distance})) {
+                {check.x, check.y, WorldConfig::move_step_distance})) {
           // check sector snakes
           for (const bb *bb_ptr : sec_ptr->m_snakes) {
             const snake *s2 = bb_ptr->snake_ptr;
@@ -164,7 +164,7 @@ void world::check_snake_bounds(snake *const s) {
   // s->box.get_snakes_in_sectors_count() << std::endl;
 }
 
-void world::init(world_config config) {
+void world::init(WorldConfig config) {
   m_config = config;
   init_random();
   init_sectors();
@@ -176,21 +176,21 @@ void world::init_sectors() { m_sectors.init_sectors(); }
 
 void world::init_food() {
   for (sector &s : m_sectors) {
-    const uint8_t cx = world_config::sector_count_along_edge / 2;
+    const uint8_t cx = WorldConfig::sector_count_along_edge / 2;
     const uint8_t cy = cx;
     const uint16_t dist = (s.x - cx) * (s.x - cx) + (s.y - cy) * (s.y - cy);
     const float dp = 1.0f -
-                     1.0f * dist / (world_config::sector_count_along_edge *
-                                    world_config::sector_count_along_edge);
+                     1.0f * dist / (WorldConfig::sector_count_along_edge *
+                                    WorldConfig::sector_count_along_edge);
     const size_t density = static_cast<size_t>(dp * 10);
     for (size_t i = 0; i < density; i++) {
       s.m_food.push_back(
-          food{static_cast<uint16_t>(
-                   s.x * world_config::sector_size +
-                   next_random<uint16_t>(world_config::sector_size)),
+          Food{static_cast<uint16_t>(
+                   s.x * WorldConfig::sector_size +
+                   next_random<uint16_t>(WorldConfig::sector_size)),
                static_cast<uint16_t>(
-                   s.y * world_config::sector_size +
-                   next_random<uint16_t>(world_config::sector_size)),
+                   s.y * WorldConfig::sector_size +
+                   next_random<uint16_t>(WorldConfig::sector_size)),
                static_cast<uint8_t>(1 + next_random<uint8_t>(10)),
                next_random<uint8_t>(29)});
     }
@@ -242,11 +242,11 @@ void world::spawn_snakes(const int snakes) {
 sectors &world::get_sectors() { return m_sectors; }
 
 std::ostream &operator<<(std::ostream &out, const world &w) {
-  return out << "\tgame_radius = " << world_config::game_radius
-             << "\n\tmax_snake_parts = " << world_config::max_snake_parts
-             << "\n\tsector_size = " << world_config::sector_size
+  return out << "\tgame_radius = " << WorldConfig::game_radius
+             << "\n\tmax_snake_parts = " << WorldConfig::max_snake_parts
+             << "\n\tsector_size = " << WorldConfig::sector_size
              << "\n\tsector_count_along_edge = "
-             << world_config::sector_count_along_edge
+             << WorldConfig::sector_count_along_edge
              << "\n\tvirtual_frame_time_ms = " << w.virtual_frame_time_ms
              << "\n\tprotocol_version = "
              << static_cast<long>(w.protocol_version)
@@ -261,6 +261,6 @@ std::ostream &operator<<(std::ostream &out, const world &w) {
              << "\n\tsnake_tail_k = " << snake::snake_tail_k
              << "\n\tparts_skip_count = " << snake::parts_skip_count
              << "\n\tparts_start_move_count = " << snake::parts_start_move_count
-             << "\n\tmove_step_distance = " << world_config::move_step_distance
+             << "\n\tmove_step_distance = " << WorldConfig::move_step_distance
              << "\n\trot_step_angle = " << snake::rot_step_angle;
 }

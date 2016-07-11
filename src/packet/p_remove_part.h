@@ -4,10 +4,10 @@
 #include "game/snake.h"
 #include "packet/p_base.h"
 
-struct packet_remove_part : public packet_base {
-  packet_remove_part() : packet_base(packet_t_rem_part) {}
+struct packet_remove_part : public PacketBase {
+  packet_remove_part() : PacketBase(packet_t_rem_part) {}
   explicit packet_remove_part(const snake* s)
-      : packet_base(packet_t_rem_part),
+      : PacketBase(packet_t_rem_part),
         snakeId(s->id),
         fullness(static_cast<uint8_t>(s->fullness)) {}
 

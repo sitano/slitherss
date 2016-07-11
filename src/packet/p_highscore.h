@@ -7,8 +7,8 @@
 #include "game/snake.h"
 #include "packet/p_base.h"
 
-struct packet_highscore : public packet_base {
-  packet_highscore() : packet_base(packet_t_highscore) {}
+struct packet_highscore : public PacketBase {
+  packet_highscore() : PacketBase(packet_t_highscore) {}
 
   // 3-5    int24     J (for snake length calculation)
   // 6-8    int24     I (for snake length calculation; value / 16777215)

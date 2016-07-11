@@ -5,10 +5,10 @@
 #include "packet/p_base.h"
 
 // Sent when another snake enters range.
-struct packet_add_snake : public packet_base {
-  packet_add_snake() : packet_base(packet_t_snake), s(nullptr) {}
+struct packet_add_snake : public PacketBase {
+  packet_add_snake() : PacketBase(packet_t_snake), s(nullptr) {}
   explicit packet_add_snake(const snake* input)
-      : packet_base(packet_t_snake), s(input) {}
+      : PacketBase(packet_t_snake), s(input) {}
 
   // 3-4, int16, Snake id
   // 5-7, int24, Snake stop? value * 2*Math.PI / 16777215
@@ -36,10 +36,10 @@ struct packet_add_snake : public packet_base {
 
 // Sent when another snake leaves range (that is, close enough to be drawn on
 // screen) or dies.
-struct packet_remove_snake : public packet_base {
-  packet_remove_snake() : packet_base(packet_t_snake) {}
+struct packet_remove_snake : public PacketBase {
+  packet_remove_snake() : PacketBase(packet_t_snake) {}
   packet_remove_snake(uint16_t id, uint8_t st)
-      : packet_base(packet_t_snake), snakeId(id), status(st) {}
+      : PacketBase(packet_t_snake), snakeId(id), status(st) {}
 
   uint16_t snakeId = 0;  // 3-4, int16, Snake id
   uint8_t status =

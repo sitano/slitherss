@@ -7,6 +7,8 @@
 #include <algorithm>
 #include <limits>
 
+// Code Style here mimics exactly the same from streambuf boost implementation.
+
 template <std::size_t _Nm = 128>
 class streambuf_array : public std::streambuf, private boost::noncopyable {
  public:

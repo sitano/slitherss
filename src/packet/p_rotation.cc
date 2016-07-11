@@ -46,7 +46,7 @@ bool packet_rotation::is_clockwise() const noexcept {
 }
 
 std::ostream& operator<<(std::ostream& out, const packet_rotation& p) {
-  out << packet_base(p.get_rot_type(), p.client_time);
+  out << PacketBase(p.get_rot_type(), p.client_time);
   out << write_uint16(p.snakeId);
 
   if (p.ang != -1.0f) {

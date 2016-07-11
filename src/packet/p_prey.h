@@ -5,8 +5,8 @@
 
 // Sent when a Prey enters range / spawns or leaves range / gets eaten. The
 // exact event/format depends on the packet-length:
-struct packet_add_prey : public packet_base {
-  packet_add_prey() : packet_base(packet_t_add_prey) {}
+struct packet_add_prey : public PacketBase {
+  packet_add_prey() : PacketBase(packet_t_add_prey) {}
 
   /**
    * packet-length 22: add Prey
@@ -27,8 +27,8 @@ struct packet_add_prey : public packet_base {
 };
 
 // Sent when prey ("flying particles") is updated.
-struct packet_update_prey : public packet_base {
-  packet_update_prey() : packet_base(packet_t_mov_prey) {}
+struct packet_update_prey : public PacketBase {
+  packet_update_prey() : PacketBase(packet_t_mov_prey) {}
 
   uint16_t preyId;  // 3-4    int16    Prey ID
   uint16_t x;       // 5-6    int16    value * 3 + 1 -> x
@@ -58,8 +58,8 @@ struct packet_update_prey : public packet_base {
 
 // Sent when a Prey enters range / spawns or leaves range / gets eaten. The
 // exact event/format depends on the packet-length:
-struct packet_remove_prey : public packet_base {
-  packet_remove_prey() : packet_base(packet_t_rem_prey) {}
+struct packet_remove_prey : public PacketBase {
+  packet_remove_prey() : PacketBase(packet_t_rem_prey) {}
 
   // packet-length 5: remove Prey
   uint16_t preyId;  // 3-4    int16    Prey ID

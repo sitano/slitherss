@@ -4,14 +4,14 @@
 #include "game/snake.h"
 #include "packet/p_base.h"
 
-struct packet_fullness : public packet_base {
-  packet_fullness() : packet_base(packet_t_set_fullness) {}
+struct packet_fullness : public PacketBase {
+  packet_fullness() : PacketBase(packet_t_set_fullness) {}
   packet_fullness(uint16_t in_snakeId, uint8_t in_f)
-      : packet_base(packet_t_set_fullness),
+      : PacketBase(packet_t_set_fullness),
         snakeId(in_snakeId),
         fullness(in_f) {}
   explicit packet_fullness(const snake* s)
-      : packet_base(packet_t_set_fullness),
+      : PacketBase(packet_t_set_fullness),
         snakeId(s->id),
         fullness(static_cast<uint8_t>(s->fullness)) {}
 

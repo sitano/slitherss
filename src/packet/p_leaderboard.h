@@ -7,8 +7,8 @@
 #include "game/snake.h"
 #include "packet/p_base.h"
 
-struct packet_leaderboard : public packet_base {
-  packet_leaderboard() : packet_base(packet_t_leaderboard) {}
+struct packet_leaderboard : public PacketBase {
+  packet_leaderboard() : PacketBase(packet_t_leaderboard) {}
 
   // local players rank in leaderboard (0 means not in leaderboard,
   // otherwise this is equal to the "local players rank".

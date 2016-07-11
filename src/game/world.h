@@ -11,7 +11,7 @@
 
 class world {
  public:
-  void init(world_config config);
+  void init(WorldConfig config);
   void init_sectors();
   void init_food();
 
@@ -72,7 +72,7 @@ class world {
   long m_ticks = 0;
   uint32_t m_virtual_frames = 0;
 
-  world_config m_config;
+  WorldConfig m_config;
 };
 
 std::ostream& operator<<(std::ostream& out, const world& w);

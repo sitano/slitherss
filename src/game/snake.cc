@@ -49,7 +49,7 @@ bool snake::tick(long dt, sectors *ss) {
 
   // movement
   m_mov_ticks += dt;
-  const long mov_frame_interval = 1000 * world_config::move_step_distance / speed;
+  const long mov_frame_interval = 1000 * WorldConfig::move_step_distance / speed;
   if (m_mov_ticks >= mov_frame_interval) {
     const long frames = m_mov_ticks / mov_frame_interval;
     const long frames_ticks = frames * mov_frame_interval;
@@ -62,7 +62,7 @@ bool snake::tick(long dt, sectors *ss) {
     head.x += cosf(angle) * move_dist;
     head.y += sinf(angle) * move_dist;
 
-    sbb.update_box_new_sectors(ss, world_config::sector_size / 2, head.x,
+    sbb.update_box_new_sectors(ss, WorldConfig::sector_size / 2, head.x,
                                head.y, prev.x, prev.y);
     if (!bot) {
       vp.update_box_new_sectors(ss, head.x, head.y, prev.x, prev.y);
@@ -109,9 +109,9 @@ bool snake::tick(long dt, sectors *ss) {
       // as far as having step dist = 42, k = 0.43, sec. size = 300, this could
       // be 300 / 24.0f, with radius 150
       static const size_t tail_step =
-          static_cast<size_t>(world_config::sector_size / tail_step_distance);
+          static_cast<size_t>(WorldConfig::sector_size / tail_step_distance);
       if (j + tail_step >= i) {
-        sbb.update_box_new_sectors(ss, world_config::sector_size / 2, pt.x,
+        sbb.update_box_new_sectors(ss, WorldConfig::sector_size / 2, pt.x,
                                    pt.y, old.x, old.y);
         j = i;
       }
@@ -199,14 +199,14 @@ void snake::update_box_radius() {
   }
 
   // reserve 1 step ahead of the snake radius
-  sbb.r = (d + world_config::move_step_distance) / 2.0f;
+  sbb.r = (d + WorldConfig::move_step_distance) / 2.0f;
 
-  vp.r = world_config::sector_diag_size * 3.0f;
+  vp.r = WorldConfig::sector_diag_size * 3.0f;
 }
 
 void snake::init_box_new_sectors(sectors *ss) {
   body &head = parts[0];
-  sbb.update_box_new_sectors(ss, world_config::sector_size / 2, head.x, head.y,
+  sbb.update_box_new_sectors(ss, WorldConfig::sector_size / 2, head.x, head.y,
                              0.0f, 0.0f);
 
   if (!bot) {
@@ -216,10 +216,10 @@ void snake::init_box_new_sectors(sectors *ss) {
   const size_t len = parts.size();
   // as far as having step dist = 42, k = 0.43, sec. size = 300, this could be
   // 300 / 24.0f, with radius 150
-  static const size_t tail_step = static_cast<size_t>(world_config::sector_size / tail_step_distance);
+  static const size_t tail_step = static_cast<size_t>(WorldConfig::sector_size / tail_step_distance);
   for (size_t i = 3; i < len; i += tail_step) {
     body &pt = parts[i];
-    sbb.update_box_new_sectors(ss, world_config::sector_size / 2, pt.x, pt.y, 0.0f, 0.0f);
+    sbb.update_box_new_sectors(ss, WorldConfig::sector_size / 2, pt.x, pt.y, 0.0f, 0.0f);
   }
 }
 
@@ -227,11 +227,11 @@ void snake::update_eaten_food(sectors *ss) {
   const uint16_t hx = static_cast<uint16_t>(get_head_x());
   const uint16_t hy = static_cast<uint16_t>(get_head_y());
   const uint16_t r = static_cast<uint16_t>(14 + get_snake_body_part_radius() +
-                                           world_config::move_step_distance);
+                                           WorldConfig::move_step_distance);
   const uint32_t r2 = r * r;
 
-  const uint16_t sx = hx / world_config::sector_size;
-  const uint16_t sy = hy / world_config::sector_size;
+  const uint16_t sx = hx / WorldConfig::sector_size;
+  const uint16_t sy = hy / WorldConfig::sector_size;
 
   // head sector
   {
@@ -272,8 +272,8 @@ bb snake::get_new_box() const {
 void snake::tick_ai(long frames) {
   for (auto i = 0; i < frames; i++) {
     // 1. calc angle of radius vector
-    float ai_angle = atan2f(get_head_y() - world_config::game_radius,
-                            get_head_x() - world_config::game_radius);
+    float ai_angle = atan2f(get_head_y() - WorldConfig::game_radius,
+                            get_head_x() - WorldConfig::game_radius);
     // 2. add pi_2
     ai_angle = normalize_angle(ai_angle + f_pi / 2.0f);
     // 3. set
@@ -291,7 +291,7 @@ bool snake::intersect(bb_pos foe, std::vector<body>::const_iterator prev,
     // weak body part check
     // todo: reduce this whole thing to middle circle check
     if (intersect_circle(i->x, i->y, foe.x, foe.y,
-                         world_config::move_step_distance * 2)) {
+                         WorldConfig::move_step_distance * 2)) {
       const float r = foe.r + get_snake_body_part_radius();
 
       // check actual snake body part
@@ -312,7 +312,7 @@ bool snake::intersect(bb_pos foe, std::vector<body>::const_iterator prev,
 
 bool snake::intersect(bb_pos foe) const {
   static const size_t head_size = 8;
-  static const size_t tail_step = static_cast<size_t>(world_config::sector_size / tail_step_distance);
+  static const size_t tail_step = static_cast<size_t>(WorldConfig::sector_size / tail_step_distance);
   static const size_t tail_step_half = tail_step / 2;
   const size_t len = parts.size();
 
@@ -324,7 +324,7 @@ bool snake::intersect(bb_pos foe) const {
     // head center will be i = 3, len [0 .. 3] = 42 * 3 = 126, len [3 .. 7] =
     // 136.9, both < sector_size / 2 = 150
     auto head = parts[3];
-    if (intersect_circle(head.x, head.y, foe.x, foe.y, world_config::sector_size / 2)) {
+    if (intersect_circle(head.x, head.y, foe.x, foe.y, WorldConfig::sector_size / 2)) {
       if (intersect(foe, parts.begin(), parts.begin() + 1, parts.begin() + 9)) {
         return true;
       }
@@ -333,7 +333,7 @@ bool snake::intersect(bb_pos foe) const {
     // first tail sector center will be... skip 8 + tail_step / 2
     auto end = parts.end();
     for (auto i = parts.begin() + 7 + tail_step_half; i < end; i += tail_step) {
-      if (intersect_circle(i->x, i->y, foe.x, foe.y, world_config::sector_size / 2)) {
+      if (intersect_circle(i->x, i->y, foe.x, foe.y, WorldConfig::sector_size / 2)) {
         auto start = i - tail_step_half;
         auto last = i + tail_step_half;
         if (last > end) {
@@ -349,7 +349,7 @@ bool snake::intersect(bb_pos foe) const {
   return false;
 }
 
-void snake::eaten_food(food f) {
+void snake::eaten_food(Food f) {
   increase_snake(f.size);
   eaten.push_back(f);
 }
@@ -386,9 +386,9 @@ void snake::decrease_snake(uint16_t volume) {
   update_snake_const();
 }
 
-void snake::spawn_food(food f) {
-  const int16_t sx = static_cast<int16_t>(f.x / world_config::sector_size);
-  const int16_t sy = static_cast<int16_t>(f.y / world_config::sector_size);
+void snake::spawn_food(Food f) {
+  const int16_t sx = static_cast<int16_t>(f.x / WorldConfig::sector_size);
+  const int16_t sy = static_cast<int16_t>(f.y / WorldConfig::sector_size);
 
   for (sector *sec : sbb.m_sectors) {
     if (sec->x == sx && sec->y == sy) {
@@ -410,12 +410,12 @@ void snake::spawn_food_when_dead(sectors *ss,
   const uint8_t food_size = static_cast<uint8_t>(100 / count);
 
   for (auto i = parts.begin(); i != end; ++i) {
-    const uint16_t sx = static_cast<uint16_t>(i->x / world_config::sector_size);
-    const uint16_t sy = static_cast<uint16_t>(i->y / world_config::sector_size);
-    if (sx > 0 && sx < world_config::sector_count_along_edge - 1 && sy > 0 &&
-        sy < world_config::sector_count_along_edge - 1) {
+    const uint16_t sx = static_cast<uint16_t>(i->x / WorldConfig::sector_size);
+    const uint16_t sy = static_cast<uint16_t>(i->y / WorldConfig::sector_size);
+    if (sx > 0 && sx < WorldConfig::sector_count_along_edge - 1 && sy > 0 &&
+        sy < WorldConfig::sector_count_along_edge - 1) {
       for (size_t j = 0; j < count; j++) {
-        food f = {static_cast<uint16_t>(i->x + r - next_randomf() * r2),
+        Food f = {static_cast<uint16_t>(i->x + r - next_randomf() * r2),
                   static_cast<uint16_t>(i->y + r - next_randomf() * r2),
                   food_size, static_cast<uint8_t>(29 * next_randomf())};
 
@@ -431,17 +431,17 @@ float snake::get_snake_scale() const { return gsc; }
 
 float snake::get_snake_body_part_radius() const { return sbpr; }
 
-std::array<float, world_config::max_snake_parts> get_fmlts() {
-  std::array<float, world_config::max_snake_parts> data = {0.0f};
+std::array<float, WorldConfig::max_snake_parts> get_fmlts() {
+  std::array<float, WorldConfig::max_snake_parts> data = {0.0f};
   for (size_t i = 0; i < data.size(); i++) {
     data[i] = powf(1.0f - 1.0f * i / data.size(), 2.25f);
   }
   return data;
 }
 
-std::array<float, world_config::max_snake_parts> get_fpsls(
-    const std::array<float, world_config::max_snake_parts> &fmlts) {
-  std::array<float, world_config::max_snake_parts> data = {0.0f};
+std::array<float, WorldConfig::max_snake_parts> get_fpsls(
+    const std::array<float, WorldConfig::max_snake_parts> &fmlts) {
+  std::array<float, WorldConfig::max_snake_parts> data = {0.0f};
   for (size_t i = 1; i < data.size(); i++) {
     data[i] = data[i - 1] + 1.0f / fmlts[i - 1];
   }
@@ -449,8 +449,8 @@ std::array<float, world_config::max_snake_parts> get_fpsls(
 }
 
 uint16_t snake::get_snake_score() const {
-  static std::array<float, world_config::max_snake_parts> fmlts = get_fmlts();
-  static std::array<float, world_config::max_snake_parts> fpsls = get_fpsls(fmlts);
+  static std::array<float, WorldConfig::max_snake_parts> fmlts = get_fmlts();
+  static std::array<float, WorldConfig::max_snake_parts> fpsls = get_fpsls(fmlts);
 
   size_t sct = parts.size() - 1;
   if (sct >= fmlts.size()) {

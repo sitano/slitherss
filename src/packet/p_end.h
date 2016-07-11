@@ -4,10 +4,10 @@
 #include "packet/p_base.h"
 
 // Sent when player died (dead/disconnect packet)
-struct packet_end : public packet_base {
-  packet_end() : packet_base(packet_t_end) {}
+struct packet_end : public PacketBase {
+  packet_end() : PacketBase(packet_t_end) {}
   explicit packet_end(uint8_t death_type)
-      : packet_base(packet_t_end), status(death_type) {}
+      : PacketBase(packet_t_end), status(death_type) {}
 
   uint8_t status = status_death;  // 3, int8, 0-2; 0 is normal death, 1 is new
                                   // highscore of the day, 2 is unknown
@@ -24,8 +24,8 @@ struct packet_end : public packet_base {
 // killer isn't the local player.
 // Note: this packet is (currently) unused in the original client, so I can only
 // guess what the variables mean.
-struct packet_kill : public packet_base {
-  packet_kill() : packet_base(packet_t_kill) {}
+struct packet_kill : public PacketBase {
+  packet_kill() : PacketBase(packet_t_kill) {}
 
   uint16_t snakeId = 0;  // 3-4    int16    killer snake id
   uint32_t kills = 0;    // 5-7    int24    total number of kills

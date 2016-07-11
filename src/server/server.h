@@ -10,7 +10,7 @@ typedef websocketpp::connection_hdl connection_hdl;
 typedef websocketpp::frame::opcode::value opcode;
 typedef websocketpp::lib::error_code error_code;
 
-class server : public websocketpp::server<slither_server_config> {
+class WSPPServer : public websocketpp::server<WSPPServerConfig> {
  public:
   template <typename T>
   void send(connection_hdl hdl, T packet, opcode op, error_code &ec) {  // NOLINT(runtime/references)
@@ -51,6 +51,6 @@ class server : public websocketpp::server<slither_server_config> {
   }
 };
 
-typedef server::message_ptr message_ptr;
+typedef WSPPServer::message_ptr message_ptr;
 
 #endif  // SRC_SERVER_SERVER_H_

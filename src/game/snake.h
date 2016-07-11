@@ -65,8 +65,8 @@ struct snake : std::enable_shared_from_this<snake> {
   snake_bb sbb;
   view_port vp;
   std::vector<body> parts;
-  std::vector<food> eaten;
-  std::vector<food> spawn;
+  std::vector<Food> eaten;
+  std::vector<Food> spawn;
   size_t clientPartsIndex;
 
   bool tick(long dt, sectors *ss);
@@ -83,10 +83,10 @@ struct snake : std::enable_shared_from_this<snake> {
                  std::vector<body>::const_iterator i,
                  std::vector<body>::const_iterator end) const;
 
-  void eaten_food(food f);
+  void eaten_food(Food f);
   void increase_snake(uint16_t volume);
   void decrease_snake(uint16_t volume);
-  void spawn_food(food f);
+  void spawn_food(Food f);
   void spawn_food_when_dead(sectors *ss, std::function<float()> next_randomf);
 
   float get_snake_scale() const;
@@ -125,7 +125,7 @@ struct snake : std::enable_shared_from_this<snake> {
   static constexpr float tail_step_distance =
       24.0f;  // tail step eval for step dist = 42, k = 0.43
   static constexpr float rot_step_angle =
-      1.0f * world_config::move_step_distance / boost_speed *
+      1.0f * WorldConfig::move_step_distance / boost_speed *
       snake_angular_speed;  // radians step per max acc resolution time
   static const long rot_step_interval =
       static_cast<long>(1000.0f * rot_step_angle / snake_angular_speed);

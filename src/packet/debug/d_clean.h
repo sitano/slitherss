@@ -4,8 +4,8 @@
 #include "packet/p_base.h"
 
 // reset debug render buffer
-struct packet_debug_reset : public packet_base {
-    packet_debug_reset() : packet_base(packet_d_reset) {}
+struct packet_debug_reset : public PacketBase {
+    packet_debug_reset() : PacketBase(packet_d_reset) {}
 
     size_t get_size() const noexcept { return 3; }
 };
