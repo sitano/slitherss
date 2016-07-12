@@ -10,7 +10,7 @@
 #include "game/config.h"
 #include "game/sector.h"
 
-enum snake_changes : uint8_t {
+enum snake_changes_t : uint8_t {
   change_pos = 1,
   change_angle = 1 << 1,
   change_wangle = 1 << 2,
@@ -20,29 +20,29 @@ enum snake_changes : uint8_t {
   change_dead = 1 << 6
 };
 
-struct body {
+struct Body {
   float x;
   float y;
 
-  inline void from(const body &p) {
+  inline void From(const Body &p) {
     x = p.x;
     y = p.y;
   }
 
-  inline void offset(float dx, float dy) {
+  inline void Offset(float dx, float dy) {
     x += dx;
     y += dy;
   }
 
-  inline float distance_squared(float dx, float dy) const {
+  inline float DistanceSquared(float dx, float dy) const {
     const float a = x - dx;
     const float b = y - dy;
     return a * a + b * b;
   }
 };
 
-struct snake : std::enable_shared_from_this<snake> {
-  typedef std::shared_ptr<snake> ptr;
+struct Snake : std::enable_shared_from_this<Snake> {
+  typedef std::shared_ptr<Snake> ptr;
 
   snake_id_t id;
 
@@ -64,42 +64,43 @@ struct snake : std::enable_shared_from_this<snake> {
 
   snake_bb sbb;
   view_port vp;
-  std::vector<body> parts;
+  std::vector<Body> parts;
   std::vector<Food> eaten;
   std::vector<Food> spawn;
   size_t clientPartsIndex;
 
-  bool tick(long dt, sectors *ss);
-  void tick_ai(long frames);
-  void update_box_center();
-  void update_box_radius();
-  void update_snake_const();
-  void init_box_new_sectors(sectors *ss);
-  void update_eaten_food(sectors *ss);
+  bool Tick(long dt, sectors *ss);
+  void TickAI(long frames);
+  void UpdateBoxCenter();
+  void UpdateBoxRadius();
+  void UpdateSnakeConsts();
+  void InitBoxNewSectors(sectors *ss);
+  void UpdateEatenFood(sectors *ss);
 
-  bool intersect(bb_pos foe) const;
-  bool intersect(bb_pos foe,
-                 std::vector<body>::const_iterator prev,
-                 std::vector<body>::const_iterator i,
-                 std::vector<body>::const_iterator end) const;
+  bool Intersect(bb_pos foe) const;
+  bool Intersect(bb_pos foe,
+                 std::vector<Body>::const_iterator prev,
+                 std::vector<Body>::const_iterator i,
+                 std::vector<Body>::const_iterator end) const;
 
-  void eaten_food(Food f);
-  void increase_snake(uint16_t volume);
-  void decrease_snake(uint16_t volume);
-  void spawn_food(Food f);
-  void spawn_food_when_dead(sectors *ss, std::function<float()> next_randomf);
+  void IncreaseSnake(uint16_t volume);
+  void DecreaseSnake(uint16_t volume);
+  void SpawnFood(Food f);
+  void SpawnFoodOnDead(sectors *ss, std::function<float()> next_randomf);
+
+  void onFoodEaten(Food f);
 
   float get_snake_scale() const;
   float get_snake_body_part_radius() const;
   uint16_t get_snake_score() const;
 
-  inline const body &get_head() const { return parts[0]; }
+  inline const Body &get_head() const { return parts[0]; }
   inline float get_head_x() const { return parts[0].x; }
   inline float get_head_y() const { return parts[0].y; }
   inline float get_head_dx() const { return parts[0].x - parts[1].x; }
   inline float get_head_dy() const { return parts[0].y - parts[1].y; }
 
-  std::shared_ptr<snake> get_ptr();
+  std::shared_ptr<Snake> get_ptr();
   bb get_new_box() const;
 
   static constexpr float spangdv = 4.8f;
@@ -107,28 +108,20 @@ struct snake : std::enable_shared_from_this<snake> {
   static constexpr float nsp2 = 0.4f;
   static constexpr float nsp3 = 14.0f;
 
-  static const uint16_t base_move_speed =
-      185;  // pixel in second (convert:  1000*sp/32)
-  static const uint16_t boost_speed =
-      448;  // pixel in second (convert:  1000*sp/32)
+  static const uint16_t base_move_speed = 185;  // pixel in second (convert:  1000*sp/32)
+  static const uint16_t boost_speed = 448;  // pixel in second (convert:  1000*sp/32)
   static const uint16_t speed_acceleration = 1000;  // pixel in second
 
-  static constexpr float prey_angular_speed =
-      3.5f;  // radian in second (convert: 1000ms/8ms * ang[rad])
-  static constexpr float snake_angular_speed =
-      4.125f;  // radian in second (convert:  1000ms/8ms * ang[rad])
-  static constexpr float snake_tail_k =
-      0.43f;  // snake tail rigidity (0 .. 0.5]
+  static constexpr float prey_angular_speed = 3.5f;  // radian in second (convert: 1000ms/8ms * ang[rad])
+  static constexpr float snake_angular_speed = 4.125f;  // radian in second (convert:  1000ms/8ms * ang[rad])
+  static constexpr float snake_tail_k = 0.43f;  // snake tail rigidity (0 .. 0.5]
 
   static const int parts_skip_count = 3;
   static const int parts_start_move_count = 4;
-  static constexpr float tail_step_distance =
-      24.0f;  // tail step eval for step dist = 42, k = 0.43
-  static constexpr float rot_step_angle =
-      1.0f * WorldConfig::move_step_distance / boost_speed *
-      snake_angular_speed;  // radians step per max acc resolution time
-  static const long rot_step_interval =
-      static_cast<long>(1000.0f * rot_step_angle / snake_angular_speed);
+  static constexpr float tail_step_distance = 24.0f;  // tail step eval for step dist = 42, k = 0.43
+  static constexpr float rot_step_angle = 1.0f * WorldConfig::move_step_distance /
+    boost_speed * snake_angular_speed;  // radians step per max acc resolution time
+  static const long rot_step_interval = static_cast<long>(1000.0f * rot_step_angle / snake_angular_speed);
   static const long ai_step_interval = 1000;
 
   static constexpr float f_pi = 3.14159265358979323846f;
@@ -139,10 +132,8 @@ struct snake : std::enable_shared_from_this<snake> {
   }
 
  private:
-  float gsc = 0.0f;  // snake scale 0.5f + 0.4f / fmaxf(1.0f, 1.0f *
-                     // (parts.size() - 1 + 16) / 36.0f)
-  float sc = 0.0f;  // 106th length on snake, min 1, start from 6. Math.min(6, 1
-                    // + (f.sct - 2) / 106)
+  float gsc = 0.0f;  // snake scale 0.5f + 0.4f / fmaxf(1.0f, 1.0f * (parts.size() - 1 + 16) / 36.0f)
+  float sc = 0.0f;  // 106th length on snake, min 1, start from 6. Math.min(6, 1 + (f.sct - 2) / 106)
   float scang = 0.0f;  // .13 + .87 * Math.pow((7 - f.sc) / 6, 2)
   float ssp = 0.0f;    // nsp1 + nsp2 * f.sc;
   float fsp = 0.0f;    // f.ssp + .1;
@@ -152,9 +143,9 @@ struct snake : std::enable_shared_from_this<snake> {
   // thus, for sbpr 14.5, inner 21.20, outer 25.28
   float sbpr = 0.0f;
 
-  long m_mov_ticks = 0;
-  long m_rot_ticks = 0;
-  long m_ai_ticks = 0;
+  long mov_ticks = 0;
+  long rot_ticks = 0;
+  long ai_ticks = 0;
 };
 
 #endif  // SRC_GAME_SNAKE_H_

@@ -3,7 +3,7 @@
 std::ostream& operator<<(std::ostream& out, const packet_add_snake& p) {
   out << static_cast<PacketBase>(p);
 
-  const snake* s = p.s;
+  const Snake* s = p.s;
 
   out << write_uint16(s->id) << write_ang24(s->angle)  // ehang radians
       << write_uint8(0)                                // unknown

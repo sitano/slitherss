@@ -9,7 +9,7 @@
 #include "game/config.h"
 #include "game/food.h"
 
-struct snake;
+struct Snake;
 struct sector;
 
 /**
@@ -65,11 +65,11 @@ struct bb_pos {
 
 struct bb : bb_pos {
   snake_id_t id;
-  const snake *snake_ptr;
+  const Snake *snake_ptr;
   std::vector<sector *> m_sectors;
 
   bb() = default;
-  bb(bb_pos in_pos, uint16_t in_id, const snake *in_ptr,
+  bb(bb_pos in_pos, uint16_t in_id, const Snake *in_ptr,
      std::vector<sector *> in_sectors)
       : bb_pos(in_pos), id(in_id), snake_ptr(in_ptr), m_sectors(in_sectors) {}
 
@@ -122,7 +122,7 @@ class sectors : public std::vector<sector> {
 
 struct snake_bb : bb {
   snake_bb() = default;
-  snake_bb(bb_pos in_pos, uint16_t in_id, const snake *in_ptr,
+  snake_bb(bb_pos in_pos, uint16_t in_id, const Snake *in_ptr,
            const std::vector<sector *> &in_sectors)
       : bb(in_pos, in_id, in_ptr, in_sectors) {}
   explicit snake_bb(bb in)
@@ -140,7 +140,7 @@ struct view_port : bb {
   std::vector<sector *> old_sectors;
 
   view_port() = default;
-  view_port(bb_pos in_pos, uint16_t in_id, const snake *in_ptr,
+  view_port(bb_pos in_pos, uint16_t in_id, const Snake *in_ptr,
             const std::vector<sector *> &in_sectors)
       : bb(in_pos, in_id, in_ptr, in_sectors) {}
   explicit view_port(bb in)

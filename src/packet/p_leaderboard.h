@@ -25,7 +25,7 @@ struct packet_leaderboard : public PacketBase {
   ?-?	int8	username length
   ?-?	string	username
   */
-  std::vector<std::shared_ptr<snake>> top;  // 2 + 3 + 1 + 1 string each
+  std::vector<std::shared_ptr<Snake>> top;  // 2 + 3 + 1 + 1 string each
 
   size_t get_size() const noexcept {
     size_t size = 8;

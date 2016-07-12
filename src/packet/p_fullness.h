@@ -10,7 +10,7 @@ struct packet_fullness : public PacketBase {
       : PacketBase(packet_t_set_fullness),
         snakeId(in_snakeId),
         fullness(in_f) {}
-  explicit packet_fullness(const snake* s)
+  explicit packet_fullness(const Snake* s)
       : PacketBase(packet_t_set_fullness),
         snakeId(s->id),
         fullness(static_cast<uint8_t>(s->fullness)) {}

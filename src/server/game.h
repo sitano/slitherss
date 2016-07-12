@@ -50,13 +50,13 @@ class GameServer {
   void on_close(connection_hdl hdl);
   void on_timer(error_code const &ec);
 
-  void SendPOVUpdateTo(sessions::iterator ses_i, snake *ptr);
-  void SendFoodUpdate(snake *ptr);
+  void SendPOVUpdateTo(sessions::iterator ses_i, Snake *ptr);
+  void SendFoodUpdate(Snake *ptr);
   void BroadcastDebug();
   void BroadcastUpdates();
   session_iterator LoadSessionIter(snake_id_t id);
 
-  void DoSnake(snake_id_t id, std::function<void(snake *)> f);
+  void DoSnake(snake_id_t id, std::function<void(Snake *)> f);
   void RemoveSnake(snake_id_t id);
   void RemoveDeadSnakes();
 
@@ -101,7 +101,7 @@ class GameServer {
   long last_time_point;
   static const long timer_interval_ms = 10;
 
-  world m_world;
+  World m_world;
   PacketInit m_init;
   IncomingConfig m_config;
 

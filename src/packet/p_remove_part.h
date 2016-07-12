@@ -6,7 +6,7 @@
 
 struct packet_remove_part : public PacketBase {
   packet_remove_part() : PacketBase(packet_t_rem_part) {}
-  explicit packet_remove_part(const snake* s)
+  explicit packet_remove_part(const Snake* s)
       : PacketBase(packet_t_rem_part),
         snakeId(s->id),
         fullness(static_cast<uint8_t>(s->fullness)) {}

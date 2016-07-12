@@ -14,7 +14,7 @@ struct packet_highscore : public PacketBase {
   // 6-8    int24     I (for snake length calculation; value / 16777215)
   // 9      int8      The length of the winners name
   // 10-?   string    Winners name
-  std::shared_ptr<snake> winner;
+  std::shared_ptr<Snake> winner;
 
   // ?-?    string    Winners message
   std::string message;

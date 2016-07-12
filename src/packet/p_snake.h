@@ -7,7 +7,7 @@
 // Sent when another snake enters range.
 struct packet_add_snake : public PacketBase {
   packet_add_snake() : PacketBase(packet_t_snake), s(nullptr) {}
-  explicit packet_add_snake(const snake* input)
+  explicit packet_add_snake(const Snake* input)
       : PacketBase(packet_t_snake), s(input) {}
 
   // 3-4, int16, Snake id
@@ -27,7 +27,7 @@ struct packet_add_snake : public PacketBase {
   // ?, int24, Possibly head position (y)
   // ?, int8, Body part position (x)
   // ?, int8, Body part position (y)
-  const snake* s;
+  const Snake* s;
 
   size_t get_size() const noexcept {
     return 25 + s->name.length() + 2 * 3 + (s->parts.size() - 1 /* head */) * 2;

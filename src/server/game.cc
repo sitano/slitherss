@@ -30,7 +30,7 @@ int GameServer::Run(IncomingConfig config) {
   endpoint.listen(config.port);
   endpoint.start_accept();
 
-  m_world.init(config.world);
+  m_world.Init(config.world);
   m_init = BuildInitPacket();
   NextTick(GetCurrentTime());
 
@@ -66,7 +66,7 @@ void GameServer::on_timer(error_code const &ec) {
     return;
   }
 
-  m_world.tick(dt);
+  m_world.Tick(dt);
   BroadcastDebug();
   BroadcastUpdates();
   RemoveDeadSnakes();
@@ -87,7 +87,7 @@ void GameServer::BroadcastDebug() {
 
   packet_debug_draw draw;
 
-  for (snake *s : m_world.get_changes()) {
+  for (Snake *s : m_world.GetChangedSnakes()) {
     uint16_t sis = static_cast<uint16_t>(s->id * 1000);
 
     // bound box
@@ -100,7 +100,7 @@ void GameServer::BroadcastDebug() {
     draw.circles.push_back(
         d_draw_circle{sis++, {s->get_head_x(), s->get_head_y()}, r1, 0xc80000});
 
-    const body &sec = *(s->parts.begin() + 1);
+    const Body &sec = *(s->parts.begin() + 1);
     draw.circles.push_back(d_draw_circle{sis++, {sec.x, sec.y}, r1, 0x3c3c3c});
     draw.circles.push_back(
         d_draw_circle{sis++,
@@ -120,12 +120,12 @@ void GameServer::BroadcastDebug() {
     // intersection algorithm
     static const size_t head_size = 8;
     static const size_t tail_step = static_cast<size_t>(
-        WorldConfig::sector_size / snake::tail_step_distance);
+        WorldConfig::sector_size / Snake::tail_step_distance);
     static const size_t tail_step_half = tail_step / 2;
     const size_t len = s->parts.size();
 
     if (len <= head_size + tail_step) {
-      for (const body &b : s->parts) {
+      for (const Body &b : s->parts) {
         draw.circles.push_back(d_draw_circle{
             sis++, {b.x, b.y}, WorldConfig::move_step_distance, 0x646464});
       }
@@ -155,7 +155,7 @@ void GameServer::BroadcastDebug() {
 }
 
 void GameServer::BroadcastUpdates() {
-  for (auto ptr : m_world.get_changes()) {
+  for (auto ptr : m_world.GetChangedSnakes()) {
     const snake_id_t id = ptr->id;
     const uint8_t flags = ptr->update;
 
@@ -174,8 +174,8 @@ void GameServer::BroadcastUpdates() {
         }
       }
 
-      ptr->spawn_food_when_dead(&m_world.get_sectors(), [&]() -> float {
-        return m_world.next_randomf();
+      ptr->SpawnFoodOnDead(&m_world.GetSectors(), [&]() -> float {
+        return m_world.NextRandomf();
       });
       SendFoodUpdate(ptr);
 
@@ -185,7 +185,7 @@ void GameServer::BroadcastUpdates() {
       ptr->update |= change_dead;
 
       if (ptr->bot) {
-        m_world.get_dead().push_back(ptr->id);
+        m_world.GetDead().push_back(ptr->id);
       }
 
       continue;
@@ -246,10 +246,10 @@ void GameServer::BroadcastUpdates() {
     }
   }
 
-  m_world.flush_changes();
+  m_world.FlushChanges();
 }
 
-void GameServer::SendPOVUpdateTo(sessions::iterator ses_i, snake *ptr) {
+void GameServer::SendPOVUpdateTo(sessions::iterator ses_i, Snake *ptr) {
   if (!ptr->vp.new_sectors.empty()) {
     for (const sector *s_ptr : ptr->vp.new_sectors) {
       send_binary(ses_i, packet_add_sector(s_ptr->x, s_ptr->y));
@@ -266,7 +266,7 @@ void GameServer::SendPOVUpdateTo(sessions::iterator ses_i, snake *ptr) {
   }
 }
 
-void GameServer::SendFoodUpdate(snake *ptr) {
+void GameServer::SendFoodUpdate(Snake *ptr) {
   if (!ptr->eaten.empty()) {
     const snake_id_t id = ptr->id;
     for (const Food &f : ptr->eaten) {
@@ -286,11 +286,11 @@ void GameServer::SendFoodUpdate(snake *ptr) {
 }
 
 void GameServer::RemoveDeadSnakes() {
-  for (auto id : m_world.get_dead()) {
+  for (auto id : m_world.GetDead()) {
     RemoveSnake(id);
   }
 
-  m_world.get_dead().clear();
+  m_world.GetDead().clear();
 }
 
 void GameServer::on_socket_init(websocketpp::connection_hdl,
@@ -300,8 +300,8 @@ void GameServer::on_socket_init(websocketpp::connection_hdl,
 }
 
 void GameServer::on_open(connection_hdl hdl) {
-  const auto new_snake_ptr = m_world.create_snake();
-  m_world.add_snake(new_snake_ptr);
+  const auto new_snake_ptr = m_world.CreateSnake();
+  m_world.AddSnake(new_snake_ptr);
 
   m_sessions[hdl] = Session(new_snake_ptr->id, GetCurrentTime());
   m_connections[new_snake_ptr->id] = hdl;
@@ -315,9 +315,9 @@ void GameServer::on_open(connection_hdl hdl) {
   SendPOVUpdateTo(ses_i, new_snake_ptr.get());
 
   // introduce other snakes in sectors view
-  for (auto ptr : m_world.get_snakes()) {
+  for (auto ptr : m_world.GetSnakes()) {
     if (ptr.first != new_snake_ptr->id) {
-      const snake *s = ptr.second.get();
+      const Snake *s = ptr.second.get();
       send_binary(ses_i, packet_add_snake(s));
       send_binary(ses_i, packet_move(s));
     }
@@ -360,8 +360,8 @@ void GameServer::on_message(connection_hdl hdl, message_ptr ptr) {
   // parsing
   if (packet_type <= 250 && len == 1) {
     // in_packet_t_angle, [0 - 250]
-    const float angle = world::f_pi * packet_type / 125.0f;
-    DoSnake(ss.snake_id, [=](snake *s) {
+    const float angle = World::f_pi * packet_type / 125.0f;
+    DoSnake(ss.snake_id, [=](Snake *s) {
       s->wangle = angle;
       s->update |= change_wangle;
     });
@@ -378,7 +378,7 @@ void GameServer::on_message(connection_hdl hdl, message_ptr ptr) {
       buf >> ss.skin;
       buf.str(ss.name);
 
-      DoSnake(ss.snake_id, [&ss](snake *s) {
+      DoSnake(ss.snake_id, [&ss](Snake *s) {
         s->name = ss.name;
         s->skin = ss.skin;
       });
@@ -408,11 +408,11 @@ void GameServer::on_message(connection_hdl hdl, message_ptr ptr) {
       break;
 
     case in_packet_t_start_acc:
-      DoSnake(ss.snake_id, [](snake *s) { s->acceleration = true; });
+      DoSnake(ss.snake_id, [](Snake *s) { s->acceleration = true; });
       break;
 
     case in_packet_t_stop_acc:
-      DoSnake(ss.snake_id, [](snake *s) { s->acceleration = false; });
+      DoSnake(ss.snake_id, [](Snake *s) { s->acceleration = false; });
       break;
 
     default:
@@ -435,7 +435,7 @@ void GameServer::on_close(connection_hdl hdl) {
 
 void GameServer::RemoveSnake(snake_id_t id) {
   m_connections.erase(id);
-  m_world.remove_snake(id);
+  m_world.RemoveSnake(id);
 }
 
 PacketInit GameServer::BuildInitPacket() {
@@ -446,16 +446,16 @@ PacketInit GameServer::BuildInitPacket() {
   init.sector_size = WorldConfig::sector_size;
   init.sector_count_along_edge = WorldConfig::sector_count_along_edge;
 
-  init.spangdv = snake::spangdv;
-  init.nsp1 = snake::nsp1;
-  init.nsp2 = snake::nsp2;
-  init.nsp3 = snake::nsp3;
+  init.spangdv = Snake::spangdv;
+  init.nsp1 = Snake::nsp1;
+  init.nsp2 = Snake::nsp2;
+  init.nsp3 = Snake::nsp3;
 
-  init.snake_ang_speed = 8.0f * snake::snake_angular_speed / 1000.0f;
-  init.prey_ang_speed = 8.0f * snake::prey_angular_speed / 1000.0f;
-  init.snake_tail_k = snake::snake_tail_k;
+  init.snake_ang_speed = 8.0f * Snake::snake_angular_speed / 1000.0f;
+  init.prey_ang_speed = 8.0f * Snake::prey_angular_speed / 1000.0f;
+  init.snake_tail_k = Snake::snake_tail_k;
 
-  init.protocol_version = world::protocol_version;
+  init.protocol_version = World::protocol_version;
 
   return init;
 }
@@ -468,9 +468,9 @@ long GameServer::GetCurrentTime() {
   return duration_cast<milliseconds>(steady_clock::now().time_since_epoch()).count();
 }
 
-void GameServer::DoSnake(snake_id_t id, std::function<void(snake *)> f) {
+void GameServer::DoSnake(snake_id_t id, std::function<void(Snake *)> f) {
   if (id > 0) {
-    const auto snake_i = m_world.get_snake(id);
+    const auto snake_i = m_world.GetSnake(id);
     if (snake_i->first == id) {
       f(snake_i->second.get());
     }

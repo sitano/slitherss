@@ -8,7 +8,7 @@ struct packet_move : public PacketBase {
   packet_move() : PacketBase(packet_t_mov) {}
   packet_move(uint16_t in_snakeId, uint16_t in_x, uint16_t in_y)
       : PacketBase(packet_t_mov), snakeId(in_snakeId), x(in_x), y(in_y) {}
-  explicit packet_move(const snake* s)
+  explicit packet_move(const Snake* s)
       : PacketBase(packet_t_mov),
         snakeId(s->id),
         x(static_cast<uint16_t>(s->get_head_x())),
@@ -30,7 +30,7 @@ struct packet_move_rel : public PacketBase {
         dx(static_cast<uint8_t>(_dx + 128)),
         dy(static_cast<uint8_t>(_dy + 128)) {}
 
-  explicit packet_move_rel(const snake* s)
+  explicit packet_move_rel(const Snake* s)
       : PacketBase(packet_t_mov),
         snakeId(s->id),
         dx(static_cast<uint8_t>(s->get_head_dx())),

@@ -9,45 +9,45 @@
 #include "game/sector.h"
 #include "game/snake.h"
 
-class world {
+class World {
  public:
-  void init(WorldConfig config);
-  void init_sectors();
-  void init_food();
+  void Init(WorldConfig in_config);
+  void InitSectors();
+  void InitFood();
 
-  void tick(long dt);
+  void Tick(long dt);
 
-  snake::ptr create_snake();
-  snake::ptr create_snake_bot();
-  void spawn_snakes(const int count);
-  void check_snake_bounds(snake* s);
+  Snake::ptr CreateSnake();
+  Snake::ptr CreateSnakeBot();
+  void SpawnNumSnakes(const int count);
+  void CheckSnakeBounds(Snake *s);
 
-  void init_random();
-  int next_random();
-  float next_randomf();
+  void InitRandom();
+  int NextRandom();
+  float NextRandomf();
   template <typename T>
-  T next_random(T base);
+  T NextRandom(T base);
 
-  typedef std::unordered_map<snake_id_t, std::shared_ptr<snake>> snakes;
-  typedef std::vector<snake_id_t> v_ids;
+  typedef std::vector<Snake *> SnakeVec;
+  typedef std::unordered_map<snake_id_t, std::shared_ptr<Snake>> SnakeMap;
+  typedef SnakeMap::iterator SnakeMapIter;
+  typedef std::vector<snake_id_t> Ids;
 
-  void add_snake(snake::ptr ptr);
-  void remove_snake(snake_id_t id);
-  snakes::iterator get_snake(snake_id_t id);
-  snakes& get_snakes();
-  sectors& get_sectors();
-  v_ids& get_dead();
+  void AddSnake(Snake::ptr ptr);
+  void RemoveSnake(snake_id_t id);
+  SnakeMapIter GetSnake(snake_id_t id);
+  SnakeMap& GetSnakes();
+  sectors& GetSectors();
+  Ids& GetDead();
 
-  std::vector<snake*>& get_changes();
+  SnakeVec& GetChangedSnakes();
 
   // before calling this, snake must be flushed()
-  void flush_changes(snake_id_t id);
+  void FlushChanges(snake_id_t id);
   // before calling this, all snakes must be flushed()
-  void flush_changes();
+  void FlushChanges();
 
-  // const
-  static const long virtual_frame_time_ms = 8;
-
+  static const long frame_time_ms = 8;
   static const uint8_t protocol_version = 8;
 
   static constexpr float f_pi = 3.14159265358979323846f;
@@ -58,23 +58,22 @@ class world {
 
  private:
   // todo: reserve to collections
-  snakes m_snakes;
-  v_ids m_dead;
+  SnakeMap snakes;
+  Ids dead;
   sectors m_sectors;
-  std::vector<snake*> m_changes;
+  SnakeVec changes;
 
-  // todo fixed point arithmetic
   // todo pools
   // todo sorted checker
 
   // todo manage overflow, reuse old?
-  uint16_t m_lastSnakeId = 0;
-  long m_ticks = 0;
-  uint32_t m_virtual_frames = 0;
+  uint16_t lastSnakeId = 0;
+  long ticks = 0;
+  uint32_t virtual_frames = 0;
 
-  WorldConfig m_config;
+  WorldConfig config;
 };
 
-std::ostream& operator<<(std::ostream& out, const world& w);
+std::ostream& operator<<(std::ostream& out, const World& w);
 
 #endif  // SRC_GAME_WORLD_H_

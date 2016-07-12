@@ -12,7 +12,7 @@ struct packet_inc : public PacketBase {
         x(in_x),
         y(in_y),
         fullness(in_f) {}
-  explicit packet_inc(const snake* s)
+  explicit packet_inc(const Snake* s)
       : PacketBase(packet_t_inc),
         snakeId(s->id),
         x(static_cast<uint16_t>(s->get_head_x())),
@@ -36,7 +36,7 @@ struct packet_inc_rel : public PacketBase {
         dx(in_dx),
         dy(in_dy),
         fullness(in_f) {}
-  explicit packet_inc_rel(const snake* s)
+  explicit packet_inc_rel(const Snake* s)
       : PacketBase(packet_t_inc_rel),
 
         snakeId(s->id),
