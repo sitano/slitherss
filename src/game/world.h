@@ -37,7 +37,7 @@ class World {
   void RemoveSnake(snake_id_t id);
   SnakeMapIter GetSnake(snake_id_t id);
   SnakeMap& GetSnakes();
-  sectors& GetSectors();
+  SectorSeq& GetSectors();
   Ids& GetDead();
 
   SnakeVec& GetChangedSnakes();
@@ -60,7 +60,7 @@ class World {
   // todo: reserve to collections
   SnakeMap snakes;
   Ids dead;
-  sectors m_sectors;
+  SectorSeq m_sectors;
   SnakeVec changes;
 
   // todo pools

@@ -10,7 +10,9 @@
 #include "game/food.h"
 
 struct Snake;
-struct sector;
+struct Sector;
+
+typedef std::vector<Sector *> SectorVec;
 
 /**
  * http://stackoverflow.com/questions/563198/how-do-you-detect-where-two-line-segments-intersect
@@ -27,71 +29,80 @@ struct sector;
 bool intersect_segments(float p0_x, float p0_y, float p1_x, float p1_y,
                         float p2_x, float p2_y, float p3_x, float p3_y);
 
-// center, point, radius
-bool intersect_circle(float c_x, float c_y, float p_x, float p_y, float r);
-
 // line vw, and point p
 // http://stackoverflow.com/questions/849211/shortest-distance-between-a-point-and-a-line-segment
-float distance_squared(float v_x, float v_y, float w_x, float w_y, float p_x,
-                       float p_y);
+float distance_squared(float v_x, float v_y, float w_x, float w_y, float p_x, float p_y);
 
 // points p0, p1
-float distance_squared(float p0_x, float p0_y, float p1_x, float p1_y);
+inline float distance_squared(float p0_x, float p0_y, float p1_x, float p1_y) {
+  const float dx = p0_x - p1_x;
+  const float dy = p0_y - p1_y;
+  return dx * dx + dy * dy;
+}
 
 // points p0, p1
-uint32_t distance_squared(uint16_t p0_x, uint16_t p0_y, uint16_t p1_x, uint16_t p1_y);
+inline int32_t distance_squared(uint16_t p0_x, uint16_t p0_y, uint16_t p1_x, uint16_t p1_y) {
+  const int32_t dx = p0_x - p1_x;
+  const int32_t dy = p0_y - p1_y;
+  return dx * dx + dy * dy;
+}
+
+// center, point, radius
+inline bool intersect_circle(float c_x, float c_y, float p_x, float p_y, float r) {
+  return distance_squared(c_x, c_y, p_x, p_y) <= r * r;
+}
 
 // https://en.wikipedia.org/wiki/Methods_of_computing_square_roots
 float fastsqrt(float val);
 
-// float fastinvsqrt(float x);
+// https://en.wikipedia.org/wiki/Fast_inverse_square_root
+// https://betterexplained.com/articles/understanding-quakes-fast-inverse-square-root/
+float fastinvsqrt(float x);
 
-struct bb_pos {
+struct BoundBoxPos {
   float x;
   float y;
-  float r;  // squared radius
+  float r;
 
-  bb_pos() = default;
-  bb_pos(const bb_pos &p) : x(p.x), y(p.y), r(p.r) {}
-  bb_pos(float in_x, float in_y, float in_r) : x(in_x), y(in_y), r(in_r) {}
+  BoundBoxPos() = default;
+  BoundBoxPos(const BoundBoxPos &p) : x(p.x), y(p.y), r(p.r) {}
+  BoundBoxPos(float in_x, float in_y, float in_r) : x(in_x), y(in_y), r(in_r) {}
 
-  inline bool intersect(const bb_pos &bb2) const {
-    const float dx = x - bb2.x;
-    const float dy = y - bb2.y;
-    const float r2 = r + bb2.r;
-    return dx * dx + dy * dy <= r2 * r2;
+  inline bool Intersect(const BoundBoxPos &bb2) const {
+    return intersect_circle(x, y, bb2.x, bb2.y, r + bb2.r);
   }
 };
 
-struct bb : bb_pos {
+class BoundBox : public BoundBoxPos {
+ public:
   snake_id_t id;
-  const Snake *snake_ptr;
-  std::vector<sector *> m_sectors;
+  const Snake *snake;
+  SectorVec sectors;
 
-  bb() = default;
-  bb(bb_pos in_pos, uint16_t in_id, const Snake *in_ptr,
-     std::vector<sector *> in_sectors)
-      : bb_pos(in_pos), id(in_id), snake_ptr(in_ptr), m_sectors(in_sectors) {}
+  BoundBox() = default;
+  BoundBox(BoundBoxPos in_pos, uint16_t in_id, const Snake *in_snake, SectorVec in_sectors)
+      : BoundBoxPos(in_pos), id(in_id), snake(in_snake), sectors(in_sectors) {}
 
-  void insert_sorted(sector *s);
-  bool remove_sector_unsorted(const std::vector<sector *>::iterator &i);
-  bool binary_search(sector *s);
-  void sort();
+  void Insert(Sector *s);
+  bool RemoveUnsorted(const std::vector<Sector *>::iterator &i);
+  bool IsPresent(Sector *s);
+  void Sort();
 
   size_t get_sectors_count();
   size_t get_snakes_in_sectors_count();
 };
 
-struct sector {
+class Sector {
+ public:
   uint8_t x;
   uint8_t y;
 
-  bb_pos box;
+  BoundBoxPos box;
 
-  std::vector<bb *> m_snakes;
-  std::vector<Food> m_food;
+  std::vector<BoundBox *> snakes;
+  std::vector<Food> food;
 
-  sector(uint8_t in_x, uint8_t in_y) : x(in_x), y(in_y) {
+  Sector(uint8_t in_x, uint8_t in_y) : x(in_x), y(in_y) {
     static const uint16_t half = WorldConfig::sector_size / 2;
     static constexpr float r = WorldConfig::sector_diag_size / 2.0f;
 
@@ -99,59 +110,60 @@ struct sector {
            1.0f * (WorldConfig::sector_size * y + half), r};
   }
 
-  inline bool intersect(const bb_pos &box2) const {
-    return box.intersect(box2);
+  inline bool Intersect(const BoundBoxPos &box2) const {
+    return box.Intersect(box2);
   }
 
-  void insert_sorted(const Food &f);
-  void remove_food(const std::vector<Food>::iterator &i);
-  std::vector<Food>::iterator find_closest_food(uint16_t fx);
-  void sort();
+  void Insert(const Food &f);
+  void Remove(const std::vector<Food>::iterator &i);
+  std::vector<Food>::iterator FindClosestFood(uint16_t fx);
+  void Sort();
 
-  void remove_snake(snake_id_t id);
+  void RemoveSnake(snake_id_t id);
 };
 
-class sectors : public std::vector<sector> {
+class SectorSeq : public std::vector<Sector> {
  public:
-  sectors() : std::vector<sector>() {}
+  SectorSeq() : std::vector<Sector>() {}
 
-  void init_sectors();
+  void InitSectors();
+
   size_t get_index(const uint16_t x, const uint16_t y);
-  sector *get_sector(const uint16_t x, const uint16_t y);
+  Sector *get_sector(const uint16_t x, const uint16_t y);
 };
 
-struct snake_bb : bb {
+class snake_bb : public BoundBox {
+ public:
   snake_bb() = default;
-  snake_bb(bb_pos in_pos, uint16_t in_id, const Snake *in_ptr,
-           const std::vector<sector *> &in_sectors)
-      : bb(in_pos, in_id, in_ptr, in_sectors) {}
-  explicit snake_bb(bb in)
-      : bb({in.x, in.y, in.r}, in.id, in.snake_ptr, in.m_sectors) {}
+  snake_bb(BoundBoxPos in_pos, uint16_t in_id, const Snake *in_ptr, const std::vector<Sector *> &in_sectors)
+      : BoundBox(in_pos, in_id, in_ptr, in_sectors) {}
+  explicit snake_bb(BoundBox in) : BoundBox({in.x, in.y, in.r}, in.id, in.snake, in.sectors) {}
 
-  void insert_sorted_with_reg(sector *s);
-  void update_box_new_sectors(sectors *ss, const float bb_r,
+  void insert_sorted_with_reg(Sector *s);
+  void update_box_new_sectors(SectorSeq *ss, const float bb_r,
                               const float new_x, const float new_y,
                               const float old_x, const float old_y);
   void update_box_old_sectors();
 };
 
-struct view_port : bb {
-  std::vector<sector *> new_sectors;
-  std::vector<sector *> old_sectors;
+class view_port : public BoundBox {
+ public:
+  std::vector<Sector *> new_sectors;
+  std::vector<Sector *> old_sectors;
 
   view_port() = default;
-  view_port(bb_pos in_pos, uint16_t in_id, const Snake *in_ptr,
-            const std::vector<sector *> &in_sectors)
-      : bb(in_pos, in_id, in_ptr, in_sectors) {}
-  explicit view_port(bb in)
-      : bb({in.x, in.y, in.r}, in.id, in.snake_ptr, in.m_sectors) {}
+  view_port(BoundBoxPos in_pos, uint16_t in_id, const Snake *in_ptr,
+            const std::vector<Sector *> &in_sectors)
+      : BoundBox(in_pos, in_id, in_ptr, in_sectors) {}
+  explicit view_port(BoundBox in)
+      : BoundBox({in.x, in.y, in.r}, in.id, in.snake, in.sectors) {}
 
-  void reg_new_sector_if_missing(sector *s);
-  void reg_old_sector_if_missing(sector *s);
+  void reg_new_sector_if_missing(Sector *s);
+  void reg_old_sector_if_missing(Sector *s);
 
-  void insert_sorted_with_delta(sector *s);
+  void insert_sorted_with_delta(Sector *s);
 
-  void update_box_new_sectors(sectors *ss,
+  void update_box_new_sectors(SectorSeq *ss,
                               const float new_x, const float new_y,
                               const float old_x, const float old_y);
   void update_box_old_sectors();

@@ -25,15 +25,9 @@ bool intersect_segments(float p0_x, float p0_y, float p1_x, float p1_y,
   return !(t < 0 || t > d);
 }
 
-// center, point, radius
-bool intersect_circle(float c_x, float c_y, float p_x, float p_y, float r) {
-  return distance_squared(c_x, c_y, p_x, p_y) <= r * r;
-}
-
 // line vw, and point p
 // http://stackoverflow.com/questions/849211/shortest-distance-between-a-point-and-a-line-segment
-float distance_squared(float v_x, float v_y, float w_x, float w_y, float p_x,
-                       float p_y) {
+float distance_squared(float v_x, float v_y, float w_x, float w_y, float p_x, float p_y) {
   // Return minimum distance between line segment vw and point p
   const float l2 = distance_squared(v_x, v_y, w_x, w_y);  // i.e. |w-v|^2 -  avoid a sqrt
   if (l2 == 0.0) {  // v == w case
@@ -46,20 +40,6 @@ float distance_squared(float v_x, float v_y, float w_x, float w_y, float p_x,
   float t = ((p_x - v_x) * (w_x - v_x) + (p_y - v_y) * (w_y - v_y)) / l2;
   t = fmaxf(0, fminf(1, t));
   return distance_squared(p_x, p_y, v_x + t * (w_x - v_x), v_y + t * (w_y - v_y));
-}
-
-// points p0, p1
-float distance_squared(float p0_x, float p0_y, float p1_x, float p1_y) {
-  const float dx = p0_x - p1_x;
-  const float dy = p0_y - p1_y;
-  return dx * dx + dy * dy;
-}
-
-uint32_t distance_squared(uint16_t p0_x, uint16_t p0_y, uint16_t p1_x,
-                          uint16_t p1_y) {
-  const int32_t dx = p0_x - p1_x;
-  const int32_t dy = p0_y - p1_y;
-  return dx * dx + dy * dy;
 }
 
 // https://en.wikipedia.org/wiki/Methods_of_computing_square_roots
@@ -79,127 +59,133 @@ float fastsqrt(float val) {
   return u.val;
 }
 
-/*
+// https://en.wikipedia.org/wiki/Fast_inverse_square_root
+// https://betterexplained.com/articles/understanding-quakes-fast-inverse-square-root/
 float fastinvsqrt(float x) {
-    float xhalf = 0.5f*x;
-    int i = *(int*)&x;
-    i = 0x5f3759df - (i>>1);
-    x = *(float*)&i;
-    return x*(1.5f - xhalf*x*x);
-}
-*/
+  union {
+    int tmp;
+    float val;
+  } u;
 
-void bb::insert_sorted(sector *s) {
-  auto fwd_i = std::lower_bound(m_sectors.begin(), m_sectors.end(), s);
-  if (fwd_i != m_sectors.end()) {
-    m_sectors.insert(fwd_i, s);
+  const float xhalf = 0.5f * x;
+  u.val = x;
+  u.tmp = 0x5f3759df - (u.tmp >> 1);
+  return u.val * (1.5f - xhalf * u.val * u.val);
+}
+
+void BoundBox::Insert(Sector *s) {
+  auto fwd_i = std::lower_bound(sectors.begin(), sectors.end(), s);
+  if (fwd_i != sectors.end()) {
+    sectors.insert(fwd_i, s);
   } else {
-    m_sectors.push_back(s);
+    sectors.push_back(s);
   }
 }
 
-bool bb::remove_sector_unsorted(const std::vector<sector *>::iterator &i) {
-  if (i + 1 != m_sectors.end()) {
-    *i = m_sectors.back();
-    m_sectors.pop_back();
+bool BoundBox::RemoveUnsorted(const std::vector<Sector *>::iterator &i) {
+  if (i + 1 != sectors.end()) {
+    *i = sectors.back();
+    sectors.pop_back();
     return true;
   } else {
-    m_sectors.pop_back();
+    sectors.pop_back();
     return false;
   }
 }
 
-bool bb::binary_search(sector *s) {
-  return std::binary_search(m_sectors.begin(), m_sectors.end(), s);
+bool BoundBox::IsPresent(Sector *s) {
+  return std::binary_search(sectors.begin(), sectors.end(), s);
 }
 
-void bb::sort() { std::sort(m_sectors.begin(), m_sectors.end()); }
+void BoundBox::Sort() { std::sort(sectors.begin(), sectors.end()); }
 
-size_t bb::get_sectors_count() { return m_sectors.size(); }
+size_t BoundBox::get_sectors_count() { return sectors.size(); }
 
-size_t bb::get_snakes_in_sectors_count() {
+size_t BoundBox::get_snakes_in_sectors_count() {
   size_t i = 0;
-  for (sector *s : m_sectors) {
-    i += s->m_snakes.size();
+  for (Sector *s : sectors) {
+    i += s->snakes.size();
   }
   return i;
 }
 
-void sector::remove_snake(snake_id_t id) {
-  m_snakes.erase(std::remove_if(m_snakes.begin(), m_snakes.end(),
-                                [id](const bb *bb) { return bb->id == id; }), m_snakes.end());
+void Sector::RemoveSnake(snake_id_t id) {
+  snakes.erase(
+      std::remove_if(
+          snakes.begin(), snakes.end(),
+          [id](const BoundBox *bb) { return bb->id == id; }), snakes.end());
 }
 
-void sector::insert_sorted(const Food &f) {
-  auto fwd_i =
-      std::lower_bound(m_food.begin(), m_food.end(), f,
-                       [](const Food &a, const Food &b) { return a.x < b.x; });
-  if (fwd_i != m_food.end()) {
-    m_food.insert(fwd_i, f);
+void Sector::Insert(const Food &f) {
+  auto fwd_i = std::lower_bound(
+      food.begin(), food.end(), f,
+      [](const Food &a, const Food &b) { return a.x < b.x; });
+  if (fwd_i != food.end()) {
+    food.insert(fwd_i, f);
   } else {
-    m_food.push_back(f);
+    food.push_back(f);
   }
 }
 
-void sector::remove_food(const std::vector<Food>::iterator &i) {
-  m_food.erase(i);
+void Sector::Remove(const std::vector<Food>::iterator &i) {
+  food.erase(i);
 }
 
-void sector::sort() {
-  std::sort(m_food.begin(), m_food.end(),
+void Sector::Sort() {
+  std::sort(food.begin(), food.end(),
             [](const Food &a, const Food &b) { return a.x < b.x; });
 }
 
-std::vector<Food>::iterator sector::find_closest_food(uint16_t fx) {
+std::vector<Food>::iterator Sector::FindClosestFood(uint16_t fx) {
   return std::lower_bound(
-      m_food.begin(), m_food.end(), Food{fx, 0, 0, 0},
+      food.begin(), food.end(), Food{fx, 0, 0, 0},
       [](const Food &a, const Food &b) { return a.x < b.x; });
 }
 
-void sectors::init_sectors() {
+void SectorSeq::InitSectors() {
   const size_t len = WorldConfig::sector_count_along_edge *
                      WorldConfig::sector_count_along_edge;
   reserve(len);
   for (size_t i = 0; i < len; i++) {
-    push_back(sector{
+    push_back(Sector{
         static_cast<uint8_t>(i % WorldConfig::sector_count_along_edge),
         static_cast<uint8_t>(i / WorldConfig::sector_count_along_edge)});
   }
 }
 
-size_t sectors::get_index(const uint16_t x, const uint16_t y) {
+size_t SectorSeq::get_index(const uint16_t x, const uint16_t y) {
   return y * WorldConfig::sector_count_along_edge + x;
 }
 
-sector *sectors::get_sector(const uint16_t x, const uint16_t y) {
+Sector *SectorSeq::get_sector(const uint16_t x, const uint16_t y) {
   return &operator[](get_index(x, y));
 }
 
-void snake_bb::insert_sorted_with_reg(sector *s) {
-  insert_sorted(s);
-  s->m_snakes.push_back(this);
+void snake_bb::insert_sorted_with_reg(Sector *s) {
+  Insert(s);
+  s->snakes.push_back(this);
 }
 
-void view_port::reg_new_sector_if_missing(sector *s) {
+void view_port::reg_new_sector_if_missing(Sector *s) {
   if (std::find(new_sectors.begin(), new_sectors.end(), s) ==
       new_sectors.end()) {
     new_sectors.push_back(s);
   }
 }
 
-void view_port::reg_old_sector_if_missing(sector *s) {
+void view_port::reg_old_sector_if_missing(Sector *s) {
   if (std::find(old_sectors.begin(), old_sectors.end(), s) ==
       old_sectors.end()) {
     old_sectors.push_back(s);
   }
 }
 
-void view_port::insert_sorted_with_delta(sector *s) {
-  insert_sorted(s);
+void view_port::insert_sorted_with_delta(Sector *s) {
+  Insert(s);
   reg_new_sector_if_missing(s);
 }
 
-void snake_bb::update_box_new_sectors(sectors *ss, const float bb_r,
+void snake_bb::update_box_new_sectors(SectorSeq *ss, const float bb_r,
                                       const float new_x, const float new_y,
                                       const float old_x, const float old_y) {
   const int16_t new_sx = static_cast<int16_t>(new_x / WorldConfig::sector_size);
@@ -210,15 +196,15 @@ void snake_bb::update_box_new_sectors(sectors *ss, const float bb_r,
     return;
   }
 
-  const bb_pos box = {new_x, new_y, bb_r};
+  const BoundBoxPos box = {new_x, new_y, bb_r};
   static const int16_t map_width_sectors =
       static_cast<int16_t>(WorldConfig::sector_count_along_edge);
 
   for (int j = new_sy - 1; j <= new_sy + 1; j++) {
     for (int i = new_sx - 1; i <= new_sx + 1; i++) {
       if (i >= 0 && i < map_width_sectors && j >= 0 && j < map_width_sectors) {
-        sector *new_sector = ss->get_sector(i, j);
-        if (!binary_search(new_sector) && new_sector->intersect(box)) {
+        Sector *new_sector = ss->get_sector(i, j);
+        if (!IsPresent(new_sector) && new_sector->Intersect(box)) {
           insert_sorted_with_reg(new_sector);
         }
       }
@@ -227,15 +213,15 @@ void snake_bb::update_box_new_sectors(sectors *ss, const float bb_r,
 }
 
 void snake_bb::update_box_old_sectors() {
-  const size_t prev_len = m_sectors.size();
-  auto i = m_sectors.begin();
-  auto sec_end = m_sectors.end();
+  const size_t prev_len = sectors.size();
+  auto i = sectors.begin();
+  auto sec_end = sectors.end();
   while (i != sec_end) {
-    sector *sec = *i;
-    if (!sec->intersect(*this)) {
-      sec->remove_snake(id);
-      if (remove_sector_unsorted(i)) {
-        sec_end = m_sectors.end();
+    Sector *sec = *i;
+    if (!sec->Intersect(*this)) {
+      sec->RemoveSnake(id);
+      if (RemoveUnsorted(i)) {
+        sec_end = sectors.end();
         continue;
       } else {
         break;
@@ -244,23 +230,18 @@ void snake_bb::update_box_old_sectors() {
     i++;
   }
 
-  if (prev_len != m_sectors.size()) {
-    sort();
+  if (prev_len != sectors.size()) {
+    Sort();
   }
 }
 
-void view_port::update_box_new_sectors(sectors *ss,
+void view_port::update_box_new_sectors(SectorSeq *ss,
                                        const float new_x, const float new_y,
                                        const float old_x, const float old_y) {
-  const int16_t new_sx =
-      static_cast<int16_t>(new_x / WorldConfig::sector_size);
-  const int16_t new_sy =
-      static_cast<int16_t>(new_y / WorldConfig::sector_size);
-  const int16_t old_sx =
-      static_cast<int16_t>(old_x / WorldConfig::sector_size);
-  const int16_t old_sy =
-      static_cast<int16_t>(old_y / WorldConfig::sector_size);
-
+  const int16_t new_sx = static_cast<int16_t>(new_x / WorldConfig::sector_size);
+  const int16_t new_sy = static_cast<int16_t>(new_y / WorldConfig::sector_size);
+  const int16_t old_sx = static_cast<int16_t>(old_x / WorldConfig::sector_size);
+  const int16_t old_sy = static_cast<int16_t>(old_y / WorldConfig::sector_size);
   if (new_sx == old_sx && new_sy == old_sy) {
     return;
   }
@@ -271,8 +252,8 @@ void view_port::update_box_new_sectors(sectors *ss,
   for (int j = new_sy - 3; j <= new_sy + 3; j++) {
     for (int i = new_sx - 3; i <= new_sx + 3; i++) {
       if (i >= 0 && i < map_width_sectors && j >= 0 && j < map_width_sectors) {
-        sector *new_sector = ss->get_sector(i, j);
-        if (!binary_search(new_sector) && new_sector->intersect(*this)) {
+        Sector *new_sector = ss->get_sector(i, j);
+        if (!IsPresent(new_sector) && new_sector->Intersect(*this)) {
           insert_sorted_with_delta(new_sector);
         }
       }
@@ -281,15 +262,15 @@ void view_port::update_box_new_sectors(sectors *ss,
 }
 
 void view_port::update_box_old_sectors() {
-  const size_t prev_len = m_sectors.size();
-  auto i = m_sectors.begin();
-  auto sec_end = m_sectors.end();
+  const size_t prev_len = sectors.size();
+  auto i = sectors.begin();
+  auto sec_end = sectors.end();
   while (i != sec_end) {
-    sector *sec = *i;
-    if (!sec->intersect(*this)) {
+    Sector *sec = *i;
+    if (!sec->Intersect(*this)) {
       reg_old_sector_if_missing(sec);
-      if (remove_sector_unsorted(i)) {
-        sec_end = m_sectors.end();
+      if (RemoveUnsorted(i)) {
+        sec_end = sectors.end();
         continue;
       } else {
         break;
@@ -298,7 +279,7 @@ void view_port::update_box_old_sectors() {
     i++;
   }
 
-  if (prev_len != m_sectors.size()) {
-    sort();
+  if (prev_len != sectors.size()) {
+    Sort();
   }
 }

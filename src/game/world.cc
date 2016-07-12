@@ -112,7 +112,7 @@ void World::CheckSnakeBounds(Snake *s) {
   }
 
   // because we check after move being made
-  bb_pos check(s->get_head_x(), s->get_head_y(),
+  BoundBoxPos check(s->get_head_x(), s->get_head_y(),
                s->get_snake_body_part_radius());
 
   // check bound coverage
@@ -126,12 +126,13 @@ void World::CheckSnakeBounds(Snake *s) {
   for (int16_t j = sy - width; j <= sy + width; j++) {
     for (int16_t i = sx - width; i <= sx + width; i++) {
       if (i >= 0 && i < map_width_sectors && j >= 0 && j < map_width_sectors) {
-        sector *sec_ptr = m_sectors.get_sector(i, j);
+        Sector *sec_ptr = m_sectors.get_sector(i, j);
         // check sector intersects head
-        if (sec_ptr->intersect({check.x, check.y, WorldConfig::move_step_distance})) {
+        if (sec_ptr->Intersect(
+            {check.x, check.y, WorldConfig::move_step_distance})) {
           // check sector snakes
-          for (const bb *bb_ptr : sec_ptr->m_snakes) {
-            const Snake *s2 = bb_ptr->snake_ptr;
+          for (const BoundBox *bb_ptr : sec_ptr->snakes) {
+            const Snake *s2 = bb_ptr->snake;
             if (s == s2) {
               continue;
             }
@@ -153,7 +154,7 @@ void World::CheckSnakeBounds(Snake *s) {
     }
   }
 
-  // std::cout << "intersects " << i << ", sectors " <<
+  // std::cout << "intersects " << i << ", SectorSeq " <<
   // s->box.get_sectors_count() << ", snakes/in/s " <<
   // s->box.get_snakes_in_sectors_count() << std::endl;
 }
@@ -169,11 +170,11 @@ void World::Init(WorldConfig in_config) {
 }
 
 void World::InitSectors() {
-  m_sectors.init_sectors();
+  m_sectors.InitSectors();
 }
 
 void World::InitFood() {
-  for (sector &s : m_sectors) {
+  for (Sector &s : m_sectors) {
     const uint8_t cx = WorldConfig::sector_count_along_edge / 2;
     const uint8_t cy = cx;
     const uint16_t dist = (s.x - cx) * (s.x - cx) + (s.y - cy) * (s.y - cy);
@@ -182,7 +183,7 @@ void World::InitFood() {
                                     WorldConfig::sector_count_along_edge);
     const size_t density = static_cast<size_t>(dp * 10);
     for (size_t i = 0; i < density; i++) {
-      s.m_food.push_back(
+      s.food.push_back(
           Food{static_cast<uint16_t>(
                    s.x * WorldConfig::sector_size +
                        NextRandom<uint16_t>(WorldConfig::sector_size)),
@@ -192,7 +193,7 @@ void World::InitFood() {
                static_cast<uint8_t>(1 + NextRandom<uint8_t>(10)),
                NextRandom<uint8_t>(29)});
     }
-    s.sort();
+    s.Sort();
   }
 }
 
@@ -205,8 +206,8 @@ void World::RemoveSnake(snake_id_t id) {
 
   auto sn_i = GetSnake(id);
   if (sn_i != snakes.end()) {
-    for (auto sec_ptr : sn_i->second->sbb.m_sectors) {
-      sec_ptr->remove_snake(id);
+    for (auto sec_ptr : sn_i->second->sbb.sectors) {
+      sec_ptr->RemoveSnake(id);
     }
 
     snakes.erase(id);
@@ -226,8 +227,9 @@ std::vector<Snake *> &World::GetChangedSnakes() { return changes; }
 void World::FlushChanges() { changes.clear(); }
 
 void World::FlushChanges(snake_id_t id) {
-  changes.erase(std::remove_if(changes.begin(), changes.end(),
-                               [id](const Snake *s) { return s->id == id; }), changes.end());
+  changes.erase(
+      std::remove_if(changes.begin(), changes.end(),
+                     [id](const Snake *s) { return s->id == id; }), changes.end());
 }
 
 void World::SpawnNumSnakes(const int count) {
@@ -236,7 +238,7 @@ void World::SpawnNumSnakes(const int count) {
   }
 }
 
-sectors &World::GetSectors() { return m_sectors; }
+SectorSeq &World::GetSectors() { return m_sectors; }
 
 std::ostream &operator<<(std::ostream &out, const World &w) {
   return out << "\tgame_radius = " << WorldConfig::game_radius

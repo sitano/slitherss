@@ -21,8 +21,7 @@ GameServer::GameServer() {
 }
 
 int GameServer::Run(IncomingConfig config) {
-  endpoint.get_alog().write(alevel::app,
-      "Running slither server on port " + std::to_string(config.port));
+  endpoint.get_alog().write(alevel::app, "Running slither server on port " + std::to_string(config.port));
 
   m_config = config;
   PrintWorldInfo();
@@ -62,7 +61,8 @@ void GameServer::on_timer(error_code const &ec) {
   const long dt = now - last_time_point;
 
   if (ec) {
-    endpoint.get_alog().write(alevel::app, "Main game loop timer error: " + ec.message());
+    endpoint.get_alog().write(alevel::app,
+        "Main game loop timer error: " + ec.message());
     return;
   }
 
@@ -112,7 +112,7 @@ void GameServer::BroadcastDebug() {
         sis++, {s->parts.back().x, s->parts.back().y}, r1, 0x646464});
 
     // bounds
-    for (const sector *ss : s->sbb.m_sectors) {
+    for (const Sector *ss : s->sbb.sectors) {
       draw.circles.push_back(
           d_draw_circle{sis++, {ss->box.x, ss->box.y}, ss->box.r, 0x511883});
     }
@@ -141,8 +141,7 @@ void GameServer::BroadcastDebug() {
           sis++, {p.x, p.y}, WorldConfig::move_step_distance, 0x646464});
 
       auto end = s->parts.end();
-      for (auto i = s->parts.begin() + 7 + tail_step_half; i < end;
-           i += tail_step) {
+      for (auto i = s->parts.begin() + 7 + tail_step_half; i < end; i += tail_step) {
         draw.circles.push_back(d_draw_circle{
             sis++, {i->x, i->y}, WorldConfig::sector_size / 2, 0x848484});
       }
@@ -174,7 +173,7 @@ void GameServer::BroadcastUpdates() {
         }
       }
 
-      ptr->SpawnFoodOnDead(&m_world.GetSectors(), [&]() -> float {
+      ptr->on_dead_food_spawn(&m_world.GetSectors(), [&]() -> float {
         return m_world.NextRandomf();
       });
       SendFoodUpdate(ptr);
@@ -251,15 +250,15 @@ void GameServer::BroadcastUpdates() {
 
 void GameServer::SendPOVUpdateTo(sessions::iterator ses_i, Snake *ptr) {
   if (!ptr->vp.new_sectors.empty()) {
-    for (const sector *s_ptr : ptr->vp.new_sectors) {
+    for (const Sector *s_ptr : ptr->vp.new_sectors) {
       send_binary(ses_i, packet_add_sector(s_ptr->x, s_ptr->y));
-      send_binary(ses_i, packet_set_food(&s_ptr->m_food));
+      send_binary(ses_i, packet_set_food(&s_ptr->food));
     }
     ptr->vp.new_sectors.clear();
   }
 
   if (!ptr->vp.old_sectors.empty()) {
-    for (const sector *s_ptr : ptr->vp.old_sectors) {
+    for (const Sector *s_ptr : ptr->vp.old_sectors) {
       send_binary(ses_i, packet_remove_sector(s_ptr->x, s_ptr->y));
     }
     ptr->vp.old_sectors.clear();
@@ -293,8 +292,7 @@ void GameServer::RemoveDeadSnakes() {
   m_world.GetDead().clear();
 }
 
-void GameServer::on_socket_init(websocketpp::connection_hdl,
-                                    boost::asio::ip::tcp::socket &s) {
+void GameServer::on_socket_init(websocketpp::connection_hdl, boost::asio::ip::tcp::socket &s) {
   boost::asio::ip::tcp::no_delay option(true);
   s.set_option(option);
 }
@@ -326,8 +324,7 @@ void GameServer::on_open(connection_hdl hdl) {
 
 void GameServer::on_message(connection_hdl hdl, message_ptr ptr) {
   if (ptr->get_opcode() != opcode::binary) {
-    endpoint.get_alog().write(
-        alevel::app,
+    endpoint.get_alog().write(alevel::app,
         "Unknown incoming message opcode " + std::to_string(ptr->get_opcode()));
     return;
   }
@@ -341,9 +338,8 @@ void GameServer::on_message(connection_hdl hdl, message_ptr ptr) {
   // len check
   const size_t len = ptr->get_payload().size();
   if (len > 255) {
-    endpoint.get_alog().write(
-        alevel::app, "Packet '" + std::to_string(packet_type) + "' too big " +
-                         std::to_string(len));
+    endpoint.get_alog().write(alevel::app,
+        "Packet '" + std::to_string(packet_type) + "' too big " + std::to_string(len));
     return;
   }
 
@@ -393,18 +389,18 @@ void GameServer::on_message(connection_hdl hdl, message_ptr ptr) {
       buf >> packet_type;  // vfrb (virtual frames count) [0 - 127] of turning
                            // into the right direction
       // snake.eang -= mamu * v * snake.scang * snake.spang)
-      endpoint.get_alog().write(
-          alevel::app, "rotate ccw, snake " + std::to_string(ss.snake_id) +
-                           ", vfrb " + std::to_string(packet_type));
+      endpoint.get_alog().write(alevel::app,
+          "rotate ccw, snake " + std::to_string(ss.snake_id) + ", vfrb " +
+          std::to_string(packet_type));
       break;
 
     case in_packet_t_rot_right:
       buf >> packet_type;  // vfrb (virtual frames count) [0 - 127] of turning
                            // into the right direction
       // snake.eang += mamu * v * snake.scang * snake.spang)
-      endpoint.get_alog().write(
-          alevel::app, "rotate cw, snake " + std::to_string(ss.snake_id) +
-                           ", vfrb " + std::to_string(packet_type));
+      endpoint.get_alog().write(alevel::app,
+          "rotate cw, snake " + std::to_string(ss.snake_id) + ", vfrb " +
+          std::to_string(packet_type));
       break;
 
     case in_packet_t_start_acc:
@@ -416,10 +412,9 @@ void GameServer::on_message(connection_hdl hdl, message_ptr ptr) {
       break;
 
     default:
-      endpoint.get_alog().write(
-          alevel::app, "Unknown packet type " + std::to_string(packet_type) +
-                           ", len " +
-                           std::to_string(ptr->get_payload().size()));
+      endpoint.get_alog().write(alevel::app,
+          "Unknown packet type " + std::to_string(packet_type) + ", len " +
+          std::to_string(ptr->get_payload().size()));
       break;
   }
 }
@@ -481,16 +476,14 @@ GameServer::sessions::iterator GameServer::LoadSessionIter(
     snake_id_t id) {
   const auto hdl_i = m_connections.find(id);
   if (hdl_i == m_connections.end()) {
-    endpoint.get_alog().write(
-        websocketpp::log::alevel::app,
+    endpoint.get_alog().write(alevel::app,
         "Failed to locate snake connection " + std::to_string(id));
     return m_sessions.end();
   }
 
   const auto ses_i = m_sessions.find(hdl_i->second);
   if (ses_i == m_sessions.end()) {
-    endpoint.get_alog().write(
-        websocketpp::log::alevel::app,
+    endpoint.get_alog().write(alevel::app,
         "Failed to locate snake session " + std::to_string(id));
   }
 

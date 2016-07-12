@@ -69,16 +69,16 @@ struct Snake : std::enable_shared_from_this<Snake> {
   std::vector<Food> spawn;
   size_t clientPartsIndex;
 
-  bool Tick(long dt, sectors *ss);
+  bool Tick(long dt, SectorSeq *ss);
   void TickAI(long frames);
   void UpdateBoxCenter();
   void UpdateBoxRadius();
   void UpdateSnakeConsts();
-  void InitBoxNewSectors(sectors *ss);
-  void UpdateEatenFood(sectors *ss);
+  void InitBoxNewSectors(SectorSeq *ss);
+  void UpdateEatenFood(SectorSeq *ss);
 
-  bool Intersect(bb_pos foe) const;
-  bool Intersect(bb_pos foe,
+  bool Intersect(BoundBoxPos foe) const;
+  bool Intersect(BoundBoxPos foe,
                  std::vector<Body>::const_iterator prev,
                  std::vector<Body>::const_iterator i,
                  std::vector<Body>::const_iterator end) const;
@@ -86,9 +86,9 @@ struct Snake : std::enable_shared_from_this<Snake> {
   void IncreaseSnake(uint16_t volume);
   void DecreaseSnake(uint16_t volume);
   void SpawnFood(Food f);
-  void SpawnFoodOnDead(sectors *ss, std::function<float()> next_randomf);
 
-  void onFoodEaten(Food f);
+  void on_dead_food_spawn(SectorSeq *ss, std::function<float()> next_randomf);
+  void on_food_eaten(Food f);
 
   float get_snake_scale() const;
   float get_snake_body_part_radius() const;
@@ -101,7 +101,7 @@ struct Snake : std::enable_shared_from_this<Snake> {
   inline float get_head_dy() const { return parts[0].y - parts[1].y; }
 
   std::shared_ptr<Snake> get_ptr();
-  bb get_new_box() const;
+  BoundBox get_new_box() const;
 
   static constexpr float spangdv = 4.8f;
   static constexpr float nsp1 = 5.39f;

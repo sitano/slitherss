@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-bool Snake::Tick(long dt, sectors *ss) {
+bool Snake::Tick(long dt, SectorSeq *ss) {
   uint8_t changes = 0;
 
   if (update & (change_dying | change_dead)) {
@@ -200,7 +200,7 @@ void Snake::UpdateBoxRadius() {
   vp.r = WorldConfig::sector_diag_size * 3.0f;
 }
 
-void Snake::InitBoxNewSectors(sectors *ss) {
+void Snake::InitBoxNewSectors(SectorSeq *ss) {
   Body &head = parts[0];
   sbb.update_box_new_sectors(ss, WorldConfig::sector_size / 2, head.x, head.y, 0.0f, 0.0f);
 
@@ -218,48 +218,48 @@ void Snake::InitBoxNewSectors(sectors *ss) {
   }
 }
 
-void Snake::UpdateEatenFood(sectors *ss) {
+void Snake::UpdateEatenFood(SectorSeq *ss) {
   const uint16_t hx = static_cast<uint16_t>(get_head_x());
   const uint16_t hy = static_cast<uint16_t>(get_head_y());
   const uint16_t r = static_cast<uint16_t>(14 + get_snake_body_part_radius() +
                                            WorldConfig::move_step_distance);
-  const uint32_t r2 = r * r;
+  const int32_t r2 = r * r;
 
   const uint16_t sx = hx / WorldConfig::sector_size;
   const uint16_t sy = hy / WorldConfig::sector_size;
 
   // head sector
   {
-    sector *sec = ss->get_sector(sx, sy);
-    auto begin = sec->m_food.begin();
-    auto i = sec->find_closest_food(hx);
+    Sector *sec = ss->get_sector(sx, sy);
+    auto begin = sec->food.begin();
+    auto i = sec->FindClosestFood(hx);
     // to left
     {
       auto left = i - 1;
       while (left >= begin && distance_squared(left->x, left->y, hx, hy) <= r2) {
         // std::cout << "eaten food <left> x = " << left->x << ", y = " <<
         // left->y << std::endl;
-        onFoodEaten(*left);
-        sec->remove_food(left);
+        on_food_eaten(*left);
+        sec->Remove(left);
         i--;
         left--;
       }
     }
     // to right
     {
-      auto end = sec->m_food.end();
+      auto end = sec->food.end();
       while (i < end && distance_squared(i->x, i->y, hx, hy) <= r2) {
         // std::cout << "eaten food <right> x = " << i->x << ", y = " << i->y <<
         // std::endl;
-        onFoodEaten(*i);
-        sec->remove_food(i);
+        on_food_eaten(*i);
+        sec->Remove(i);
         end--;
       }
     }
   }
 }
 
-bb Snake::get_new_box() const {
+BoundBox Snake::get_new_box() const {
   return {{get_head_x(), get_head_y(), 0}, id, this, {}};
 }
 
@@ -278,7 +278,7 @@ void Snake::TickAI(long frames) {
   }
 }
 
-bool Snake::Intersect(bb_pos foe, std::vector<Body>::const_iterator prev,
+bool Snake::Intersect(BoundBoxPos foe, std::vector<Body>::const_iterator prev,
                       std::vector<Body>::const_iterator i,
                       std::vector<Body>::const_iterator end) const {
   while (i != end) {
@@ -303,7 +303,7 @@ bool Snake::Intersect(bb_pos foe, std::vector<Body>::const_iterator prev,
   return false;
 }
 
-bool Snake::Intersect(bb_pos foe) const {
+bool Snake::Intersect(BoundBoxPos foe) const {
   static const size_t head_size = 8;
   static const size_t tail_step = static_cast<size_t>(WorldConfig::sector_size / tail_step_distance);
   static const size_t tail_step_half = tail_step / 2;
@@ -342,7 +342,7 @@ bool Snake::Intersect(bb_pos foe) const {
   return false;
 }
 
-void Snake::onFoodEaten(Food f) {
+void Snake::on_food_eaten(Food f) {
   IncreaseSnake(f.size);
   eaten.push_back(f);
 }
@@ -383,17 +383,16 @@ void Snake::SpawnFood(Food f) {
   const int16_t sx = static_cast<int16_t>(f.x / WorldConfig::sector_size);
   const int16_t sy = static_cast<int16_t>(f.y / WorldConfig::sector_size);
 
-  for (sector *sec : sbb.m_sectors) {
+  for (Sector *sec : sbb.sectors) {
     if (sec->x == sx && sec->y == sy) {
-      sec->insert_sorted(f);
+      sec->Insert(f);
       spawn.push_back(f);
       break;
     }
   }
 }
 
-void Snake::SpawnFoodOnDead(sectors *ss,
-                            std::function<float()> next_randomf) {
+void Snake::on_dead_food_spawn(SectorSeq *ss, std::function<float()> next_randomf) {
   auto end = parts.end();
 
   const float r = get_snake_body_part_radius();
@@ -412,8 +411,8 @@ void Snake::SpawnFoodOnDead(sectors *ss,
                   static_cast<uint16_t>(i->y + r - next_randomf() * r2),
                   food_size, static_cast<uint8_t>(29 * next_randomf())};
 
-        sector *sec = ss->get_sector(sx, sy);
-        sec->insert_sorted(f);
+        Sector *sec = ss->get_sector(sx, sy);
+        sec->Insert(f);
         spawn.push_back(f);
       }
     }
