@@ -9,6 +9,11 @@
 #include "game/sector.h"
 #include "game/snake.h"
 
+typedef std::vector<Snake *> SnakeVec;
+typedef std::unordered_map<snake_id_t, std::shared_ptr<Snake>> SnakeMap;
+typedef SnakeMap::iterator SnakeMapIter;
+typedef std::vector<snake_id_t> Ids;
+
 class World {
  public:
   void Init(WorldConfig in_config);
@@ -27,11 +32,6 @@ class World {
   float NextRandomf();
   template <typename T>
   T NextRandom(T base);
-
-  typedef std::vector<Snake *> SnakeVec;
-  typedef std::unordered_map<snake_id_t, std::shared_ptr<Snake>> SnakeMap;
-  typedef SnakeMap::iterator SnakeMapIter;
-  typedef std::vector<snake_id_t> Ids;
 
   void AddSnake(Snake::ptr ptr);
   void RemoveSnake(snake_id_t id);
@@ -54,7 +54,7 @@ class World {
   static constexpr float f_2pi = 2.0f * f_pi;
 
  private:
-  void tick_snakes(long dt);
+  void TickSnakes(long dt);
 
  private:
   // todo: reserve to collections
@@ -69,7 +69,7 @@ class World {
   // todo manage overflow, reuse old?
   uint16_t lastSnakeId = 0;
   long ticks = 0;
-  uint32_t virtual_frames = 0;
+  uint32_t frames = 0;
 
   WorldConfig config;
 };

@@ -73,17 +73,17 @@ T World::NextRandom(T base) {
 
 void World::Tick(long dt) {
   ticks += dt;
-  const long frames = ticks / frame_time_ms;
-  if (frames > 0) {
-    const long virtual_frames_time = frames * frame_time_ms;
-    tick_snakes(virtual_frames_time);
+  const long vfr = ticks / frame_time_ms;
+  if (vfr > 0) {
+    const long vfr_time = vfr * frame_time_ms;
+    TickSnakes(vfr_time);
 
-    ticks -= virtual_frames_time;
-    virtual_frames += frames;
+    ticks -= vfr_time;
+    frames += vfr;
   }
 }
 
-void World::tick_snakes(long dt) {
+void World::TickSnakes(long dt) {
   for (auto pair : snakes) {
     Snake *const s = pair.second.get();
 
@@ -213,20 +213,21 @@ void World::RemoveSnake(snake_id_t id) {
   }
 }
 
-World::SnakeMap::iterator World::GetSnake(snake_id_t id) {
+SnakeMapIter World::GetSnake(snake_id_t id) {
   return snakes.find(id);
 }
 
-World::SnakeMap &World::GetSnakes() { return snakes; }
+SnakeMap &World::GetSnakes() { return snakes; }
 
-World::Ids &World::GetDead() { return dead; }
+Ids &World::GetDead() { return dead; }
 
 std::vector<Snake *> &World::GetChangedSnakes() { return changes; }
 
 void World::FlushChanges() { changes.clear(); }
 
 void World::FlushChanges(snake_id_t id) {
-  changes.erase(std::remove_if(changes.begin(), changes.end(), [id](const Snake *s) { return s->id == id; }));
+  changes.erase(std::remove_if(changes.begin(), changes.end(),
+                               [id](const Snake *s) { return s->id == id; }), changes.end());
 }
 
 void World::SpawnNumSnakes(const int count) {
@@ -241,11 +242,9 @@ std::ostream &operator<<(std::ostream &out, const World &w) {
   return out << "\tgame_radius = " << WorldConfig::game_radius
              << "\n\tmax_snake_parts = " << WorldConfig::max_snake_parts
              << "\n\tsector_size = " << WorldConfig::sector_size
-             << "\n\tsector_count_along_edge = "
-             << WorldConfig::sector_count_along_edge
+             << "\n\tsector_count_along_edge = " << WorldConfig::sector_count_along_edge
              << "\n\tvirtual_frame_time_ms = " << w.frame_time_ms
-             << "\n\tprotocol_version = "
-             << static_cast<long>(w.protocol_version)
+             << "\n\tprotocol_version = " << static_cast<long>(w.protocol_version)
              << "\n\tspangdv = " << Snake::spangdv
              << "\n\tnsp1 = " << Snake::nsp1 << "\n\tnsp2 = " << Snake::nsp2
              << "\n\tnsp3 = " << Snake::nsp3

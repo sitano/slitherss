@@ -4,11 +4,11 @@ Readme
 slither.io server in C++ emulating
 [native protocol](https://github.com/ClitherProject/Slither.io-Protocol).
 
-_Note: this was mostly experiment and fun reversing slither.io game. Thus some
-code or any parts of it may not met real world high quality production standards,
-and that was not a goal of this work._
+_Note: this was mostly an experiment and fun reversing slither.io game. Thus, some
+code or parts of it may not met real world high quality standards, and that
+was not a goal of this work._
 
-_Note: why c++? I just wanted to play with a language I touched 10 years ago
+_Note: why c++? I just wanted to play with a language I've touched 10 years ago
 last time._
 
 _Note: there are a lot of strange decisions inside of slither.io, like i.e. 8ms

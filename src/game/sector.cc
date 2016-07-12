@@ -127,7 +127,7 @@ size_t bb::get_snakes_in_sectors_count() {
 
 void sector::remove_snake(snake_id_t id) {
   m_snakes.erase(std::remove_if(m_snakes.begin(), m_snakes.end(),
-                                [id](const bb *bb) { return bb->id == id; }));
+                                [id](const bb *bb) { return bb->id == id; }), m_snakes.end());
 }
 
 void sector::insert_sorted(const Food &f) {
