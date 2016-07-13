@@ -35,7 +35,7 @@ class GameServer {
  public:
   GameServer();
 
-  int Run(IncomingConfig config);
+  int Run(IncomingConfig in_config);
 
   PacketInit BuildInitPacket();
 
@@ -101,9 +101,9 @@ class GameServer {
   long last_time_point;
   static const long timer_interval_ms = 10;
 
-  World m_world;
-  PacketInit m_init;
-  IncomingConfig m_config;
+  World world;
+  PacketInit init;
+  IncomingConfig config;
 
   // todo: reserve to collections
   sessions m_sessions;

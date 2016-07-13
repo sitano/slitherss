@@ -5,7 +5,7 @@
 #include <iostream>
 #include <vector>
 
-Snake::ptr World::CreateSnake() {
+Snake::Ptr World::CreateSnake() {
   lastSnakeId++;
 
   auto s = std::make_shared<Snake>();
@@ -44,18 +44,18 @@ Snake::ptr World::CreateSnake() {
   s->angle = Snake::normalize_angle(angle + f_pi);
   s->wangle = Snake::normalize_angle(angle + f_pi);
 
-  s->sbb = snake_bb(s->get_new_box());
-  s->vp = view_port(s->get_new_box());
+  s->sbb = SnakeBoundBox(s->get_new_box());
+  s->vp = ViewPort(s->get_new_box());
   s->UpdateBoxCenter();
   s->UpdateBoxRadius();
   s->UpdateSnakeConsts();
-  s->InitBoxNewSectors(&m_sectors);
+  s->InitBoxNewSectors(&sectors);
 
   return s;
 }
 
-Snake::ptr World::CreateSnakeBot() {
-  Snake::ptr ptr = CreateSnake();
+Snake::Ptr World::CreateSnakeBot() {
+  Snake::Ptr ptr = CreateSnake();
   ptr->bot = true;
   return ptr;
 }
@@ -73,9 +73,9 @@ T World::NextRandom(T base) {
 
 void World::Tick(long dt) {
   ticks += dt;
-  const long vfr = ticks / frame_time_ms;
+  const long vfr = ticks / WorldConfig::frame_time_ms;
   if (vfr > 0) {
-    const long vfr_time = vfr * frame_time_ms;
+    const long vfr_time = vfr * WorldConfig::frame_time_ms;
     TickSnakes(vfr_time);
 
     ticks -= vfr_time;
@@ -87,7 +87,7 @@ void World::TickSnakes(long dt) {
   for (auto pair : snakes) {
     Snake *const s = pair.second.get();
 
-    if (s->Tick(dt, &m_sectors)) {
+    if (s->Tick(dt, &sectors)) {
       changes.push_back(s);
     }
   }
@@ -126,7 +126,7 @@ void World::CheckSnakeBounds(Snake *s) {
   for (int16_t j = sy - width; j <= sy + width; j++) {
     for (int16_t i = sx - width; i <= sx + width; i++) {
       if (i >= 0 && i < map_width_sectors && j >= 0 && j < map_width_sectors) {
-        Sector *sec_ptr = m_sectors.get_sector(i, j);
+        Sector *sec_ptr = sectors.get_sector(i, j);
         // check sector intersects head
         if (sec_ptr->Intersect(
             {check.x, check.y, WorldConfig::move_step_distance})) {
@@ -170,11 +170,11 @@ void World::Init(WorldConfig in_config) {
 }
 
 void World::InitSectors() {
-  m_sectors.InitSectors();
+  sectors.InitSectors();
 }
 
 void World::InitFood() {
-  for (Sector &s : m_sectors) {
+  for (Sector &s : sectors) {
     const uint8_t cx = WorldConfig::sector_count_along_edge / 2;
     const uint8_t cy = cx;
     const uint16_t dist = (s.x - cx) * (s.x - cx) + (s.y - cy) * (s.y - cy);
@@ -197,7 +197,7 @@ void World::InitFood() {
   }
 }
 
-void World::AddSnake(Snake::ptr ptr) {
+void World::AddSnake(Snake::Ptr ptr) {
   snakes.insert({ptr->id, ptr});
 }
 
@@ -238,15 +238,15 @@ void World::SpawnNumSnakes(const int count) {
   }
 }
 
-SectorSeq &World::GetSectors() { return m_sectors; }
+SectorSeq &World::GetSectors() { return sectors; }
 
 std::ostream &operator<<(std::ostream &out, const World &w) {
   return out << "\tgame_radius = " << WorldConfig::game_radius
              << "\n\tmax_snake_parts = " << WorldConfig::max_snake_parts
              << "\n\tsector_size = " << WorldConfig::sector_size
              << "\n\tsector_count_along_edge = " << WorldConfig::sector_count_along_edge
-             << "\n\tvirtual_frame_time_ms = " << w.frame_time_ms
-             << "\n\tprotocol_version = " << static_cast<long>(w.protocol_version)
+             << "\n\tvirtual_frame_time_ms = " << WorldConfig::frame_time_ms
+             << "\n\tprotocol_version = " << static_cast<long>(WorldConfig::protocol_version)
              << "\n\tspangdv = " << Snake::spangdv
              << "\n\tnsp1 = " << Snake::nsp1 << "\n\tnsp2 = " << Snake::nsp2
              << "\n\tnsp3 = " << Snake::nsp3

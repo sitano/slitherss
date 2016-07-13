@@ -6,6 +6,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <unordered_map>
 
 #include "game/config.h"
 #include "game/sector.h"
@@ -41,8 +42,12 @@ struct Body {
   }
 };
 
-struct Snake : std::enable_shared_from_this<Snake> {
-  typedef std::shared_ptr<Snake> ptr;
+typedef std::vector<Body> BodySeq;
+typedef std::vector<Body>::const_iterator BodySeqCIter;
+
+class Snake : public std::enable_shared_from_this<Snake> {
+ public:
+  typedef std::shared_ptr<Snake> Ptr;
 
   snake_id_t id;
 
@@ -62,11 +67,11 @@ struct Snake : std::enable_shared_from_this<Snake> {
   // 0 - 100, 0 - hungry, 100 - full
   uint16_t fullness;
 
-  snake_bb sbb;
-  view_port vp;
-  std::vector<Body> parts;
-  std::vector<Food> eaten;
-  std::vector<Food> spawn;
+  SnakeBoundBox sbb;
+  ViewPort vp;
+  BodySeq parts;
+  FoodSeq eaten;
+  FoodSeq spawn;
   size_t clientPartsIndex;
 
   bool Tick(long dt, SectorSeq *ss);
@@ -78,10 +83,7 @@ struct Snake : std::enable_shared_from_this<Snake> {
   void UpdateEatenFood(SectorSeq *ss);
 
   bool Intersect(BoundBoxPos foe) const;
-  bool Intersect(BoundBoxPos foe,
-                 std::vector<Body>::const_iterator prev,
-                 std::vector<Body>::const_iterator i,
-                 std::vector<Body>::const_iterator end) const;
+  bool Intersect(BoundBoxPos foe, BodySeqCIter prev, BodySeqCIter iter, BodySeqCIter end) const;
 
   void IncreaseSnake(uint16_t volume);
   void DecreaseSnake(uint16_t volume);
@@ -132,6 +134,11 @@ struct Snake : std::enable_shared_from_this<Snake> {
   }
 
  private:
+  long mov_ticks = 0;
+  long rot_ticks = 0;
+  long ai_ticks = 0;
+
+ private:
   float gsc = 0.0f;  // snake scale 0.5f + 0.4f / fmaxf(1.0f, 1.0f * (parts.size() - 1 + 16) / 36.0f)
   float sc = 0.0f;  // 106th length on snake, min 1, start from 6. Math.min(6, 1 + (f.sct - 2) / 106)
   float scang = 0.0f;  // .13 + .87 * Math.pow((7 - f.sc) / 6, 2)
@@ -142,10 +149,11 @@ struct Snake : std::enable_shared_from_this<Snake> {
   // - gsc * sbpr * 62 / 32 for outer r.
   // thus, for sbpr 14.5, inner 21.20, outer 25.28
   float sbpr = 0.0f;
-
-  long mov_ticks = 0;
-  long rot_ticks = 0;
-  long ai_ticks = 0;
 };
+
+typedef std::vector<Snake *> SnakeVec;
+typedef std::unordered_map<snake_id_t, std::shared_ptr<Snake>> SnakeMap;
+typedef SnakeMap::iterator SnakeMapIter;
+typedef std::vector<snake_id_t> Ids;
 
 #endif  // SRC_GAME_SNAKE_H_

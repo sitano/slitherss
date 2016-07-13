@@ -62,9 +62,10 @@ bool Snake::Tick(long dt, SectorSeq *ss) {
     head.x += cosf(angle) * move_dist;
     head.y += sinf(angle) * move_dist;
 
-    sbb.update_box_new_sectors(ss, WorldConfig::sector_size / 2, head.x, head.y, prev.x, prev.y);
+    sbb.UpdateBoxNewSectors(ss, WorldConfig::sector_size / 2, head.x, head.y,
+                            prev.x, prev.y);
     if (!bot) {
-      vp.update_box_new_sectors(ss, head.x, head.y, prev.x, prev.y);
+      vp.UpdateBoxNewSectors(ss, head.x, head.y, prev.x, prev.y);
     }
 
     // bound box
@@ -108,7 +109,8 @@ bool Snake::Tick(long dt, SectorSeq *ss) {
       static const size_t tail_step =
           static_cast<size_t>(WorldConfig::sector_size / tail_step_distance);
       if (j + tail_step >= i) {
-        sbb.update_box_new_sectors(ss, WorldConfig::sector_size / 2, pt.x, pt.y, old.x, old.y);
+        sbb.UpdateBoxNewSectors(ss, WorldConfig::sector_size / 2, pt.x, pt.y,
+                                old.x, old.y);
         j = i;
       }
 
@@ -125,9 +127,9 @@ bool Snake::Tick(long dt, SectorSeq *ss) {
     vp.x = head.x;
     vp.y = head.y;
     UpdateBoxRadius();
-    sbb.update_box_old_sectors();
+    sbb.UpdateBoxOldSectors();
     if (!bot) {
-      vp.update_box_old_sectors();
+      vp.UpdateBoxOldSectors();
     }
     UpdateEatenFood(ss);
 
@@ -202,10 +204,11 @@ void Snake::UpdateBoxRadius() {
 
 void Snake::InitBoxNewSectors(SectorSeq *ss) {
   Body &head = parts[0];
-  sbb.update_box_new_sectors(ss, WorldConfig::sector_size / 2, head.x, head.y, 0.0f, 0.0f);
+  sbb.UpdateBoxNewSectors(ss, WorldConfig::sector_size / 2, head.x, head.y,
+                          0.0f, 0.0f);
 
   if (!bot) {
-    vp.update_box_new_sectors(ss, head.x, head.y, 0.0f, 0.0f);
+    vp.UpdateBoxNewSectors(ss, head.x, head.y, 0.0f, 0.0f);
   }
 
   const size_t len = parts.size();
@@ -214,7 +217,8 @@ void Snake::InitBoxNewSectors(SectorSeq *ss) {
   static const size_t tail_step = static_cast<size_t>(WorldConfig::sector_size / tail_step_distance);
   for (size_t i = 3; i < len; i += tail_step) {
     Body &pt = parts[i];
-    sbb.update_box_new_sectors(ss, WorldConfig::sector_size / 2, pt.x, pt.y, 0.0f, 0.0f);
+    sbb.UpdateBoxNewSectors(ss, WorldConfig::sector_size / 2, pt.x, pt.y, 0.0f,
+                            0.0f);
   }
 }
 
@@ -278,26 +282,24 @@ void Snake::TickAI(long frames) {
   }
 }
 
-bool Snake::Intersect(BoundBoxPos foe, std::vector<Body>::const_iterator prev,
-                      std::vector<Body>::const_iterator i,
-                      std::vector<Body>::const_iterator end) const {
-  while (i != end) {
+bool Snake::Intersect(BoundBoxPos foe, BodySeqCIter prev, BodySeqCIter iter, BodySeqCIter end) const {
+  while (iter != end) {
     // weak body part check
     // todo: reduce this whole thing to middle circle check
-    if (intersect_circle(i->x, i->y, foe.x, foe.y, WorldConfig::move_step_distance * 2)) {
+    if (intersect_circle(iter->x, iter->y, foe.x, foe.y, WorldConfig::move_step_distance * 2)) {
       const float r = foe.r + get_snake_body_part_radius();
 
       // check actual snake body part
-      if (intersect_circle(i->x, i->y, foe.x, foe.y, r) ||
+      if (intersect_circle(iter->x, iter->y, foe.x, foe.y, r) ||
           intersect_circle(prev->x, prev->y, foe.x, foe.y, r) ||
-          intersect_circle(i->x + (prev->x - i->x) / 2.0f,
-                           i->y + (prev->y - i->y) / 2.0f, foe.x, foe.y, r)) {
+          intersect_circle(iter->x + (prev->x - iter->x) / 2.0f,
+                           iter->y + (prev->y - iter->y) / 2.0f, foe.x, foe.y, r)) {
         return true;
       }
     }
 
     ++prev;
-    ++i;
+    ++iter;
   }
 
   return false;

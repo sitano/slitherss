@@ -22,6 +22,9 @@ struct WorldConfig {
   // sector_diag_size = 1 + sqrtf(sector_size * sector_size * 2)
   static const uint16_t sector_diag_size = 425;
   static const uint16_t move_step_distance = 42;
+
+  static const long frame_time_ms = 8;
+  static const uint8_t protocol_version = 8;
 };
 
 #endif  // SRC_GAME_CONFIG_H_

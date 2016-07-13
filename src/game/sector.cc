@@ -43,7 +43,7 @@ float distance_squared(float v_x, float v_y, float w_x, float w_y, float p_x, fl
 }
 
 // https://en.wikipedia.org/wiki/Methods_of_computing_square_roots
-float fastsqrt(float val) {
+float fast_sqrt(float val) {
   union {
     int tmp;
     float val;
@@ -61,7 +61,7 @@ float fastsqrt(float val) {
 
 // https://en.wikipedia.org/wiki/Fast_inverse_square_root
 // https://betterexplained.com/articles/understanding-quakes-fast-inverse-square-root/
-float fastinvsqrt(float x) {
+float fast_inv_sqrt(float x) {
   union {
     int tmp;
     float val;
@@ -110,16 +110,16 @@ size_t BoundBox::get_snakes_in_sectors_count() {
 }
 
 void Sector::RemoveSnake(snake_id_t id) {
-  snakes.erase(
-      std::remove_if(
-          snakes.begin(), snakes.end(),
-          [id](const BoundBox *bb) { return bb->id == id; }), snakes.end());
+  snakes.erase(std::remove_if(
+      snakes.begin(), snakes.end(),
+      [id](const BoundBox *bb) { return bb->id == id; }), snakes.end());
 }
 
 void Sector::Insert(const Food &f) {
   auto fwd_i = std::lower_bound(
       food.begin(), food.end(), f,
       [](const Food &a, const Food &b) { return a.x < b.x; });
+
   if (fwd_i != food.end()) {
     food.insert(fwd_i, f);
   } else {
@@ -127,7 +127,7 @@ void Sector::Insert(const Food &f) {
   }
 }
 
-void Sector::Remove(const std::vector<Food>::iterator &i) {
+void Sector::Remove(const FoodSeqIter &i) {
   food.erase(i);
 }
 
@@ -136,7 +136,7 @@ void Sector::Sort() {
             [](const Food &a, const Food &b) { return a.x < b.x; });
 }
 
-std::vector<Food>::iterator Sector::FindClosestFood(uint16_t fx) {
+FoodSeqIter Sector::FindClosestFood(uint16_t fx) {
   return std::lower_bound(
       food.begin(), food.end(), Food{fx, 0, 0, 0},
       [](const Food &a, const Food &b) { return a.x < b.x; });
@@ -161,33 +161,33 @@ Sector *SectorSeq::get_sector(const uint16_t x, const uint16_t y) {
   return &operator[](get_index(x, y));
 }
 
-void snake_bb::insert_sorted_with_reg(Sector *s) {
+void SnakeBoundBox::InsertSortedWithReg(Sector *s) {
   Insert(s);
   s->snakes.push_back(this);
 }
 
-void view_port::reg_new_sector_if_missing(Sector *s) {
+void ViewPort::RegNewSectorIfMissing(Sector *s) {
   if (std::find(new_sectors.begin(), new_sectors.end(), s) ==
       new_sectors.end()) {
     new_sectors.push_back(s);
   }
 }
 
-void view_port::reg_old_sector_if_missing(Sector *s) {
+void ViewPort::RegOldSectorIfMissing(Sector *s) {
   if (std::find(old_sectors.begin(), old_sectors.end(), s) ==
       old_sectors.end()) {
     old_sectors.push_back(s);
   }
 }
 
-void view_port::insert_sorted_with_delta(Sector *s) {
+void ViewPort::InsertSortedWithDelta(Sector *s) {
   Insert(s);
-  reg_new_sector_if_missing(s);
+  RegNewSectorIfMissing(s);
 }
 
-void snake_bb::update_box_new_sectors(SectorSeq *ss, const float bb_r,
-                                      const float new_x, const float new_y,
-                                      const float old_x, const float old_y) {
+void SnakeBoundBox::UpdateBoxNewSectors(SectorSeq *ss, const float bb_r,
+                                        const float new_x, const float new_y,
+                                        const float old_x, const float old_y) {
   const int16_t new_sx = static_cast<int16_t>(new_x / WorldConfig::sector_size);
   const int16_t new_sy = static_cast<int16_t>(new_y / WorldConfig::sector_size);
   const int16_t old_sx = static_cast<int16_t>(old_x / WorldConfig::sector_size);
@@ -205,14 +205,14 @@ void snake_bb::update_box_new_sectors(SectorSeq *ss, const float bb_r,
       if (i >= 0 && i < map_width_sectors && j >= 0 && j < map_width_sectors) {
         Sector *new_sector = ss->get_sector(i, j);
         if (!IsPresent(new_sector) && new_sector->Intersect(box)) {
-          insert_sorted_with_reg(new_sector);
+          InsertSortedWithReg(new_sector);
         }
       }
     }
   }
 }
 
-void snake_bb::update_box_old_sectors() {
+void SnakeBoundBox::UpdateBoxOldSectors() {
   const size_t prev_len = sectors.size();
   auto i = sectors.begin();
   auto sec_end = sectors.end();
@@ -235,9 +235,9 @@ void snake_bb::update_box_old_sectors() {
   }
 }
 
-void view_port::update_box_new_sectors(SectorSeq *ss,
-                                       const float new_x, const float new_y,
-                                       const float old_x, const float old_y) {
+void ViewPort::UpdateBoxNewSectors(SectorSeq *ss,
+                                   const float new_x, const float new_y,
+                                   const float old_x, const float old_y) {
   const int16_t new_sx = static_cast<int16_t>(new_x / WorldConfig::sector_size);
   const int16_t new_sy = static_cast<int16_t>(new_y / WorldConfig::sector_size);
   const int16_t old_sx = static_cast<int16_t>(old_x / WorldConfig::sector_size);
@@ -254,21 +254,21 @@ void view_port::update_box_new_sectors(SectorSeq *ss,
       if (i >= 0 && i < map_width_sectors && j >= 0 && j < map_width_sectors) {
         Sector *new_sector = ss->get_sector(i, j);
         if (!IsPresent(new_sector) && new_sector->Intersect(*this)) {
-          insert_sorted_with_delta(new_sector);
+          InsertSortedWithDelta(new_sector);
         }
       }
     }
   }
 }
 
-void view_port::update_box_old_sectors() {
+void ViewPort::UpdateBoxOldSectors() {
   const size_t prev_len = sectors.size();
   auto i = sectors.begin();
   auto sec_end = sectors.end();
   while (i != sec_end) {
     Sector *sec = *i;
     if (!sec->Intersect(*this)) {
-      reg_old_sector_if_missing(sec);
+      RegOldSectorIfMissing(sec);
       if (RemoveUnsorted(i)) {
         sec_end = sectors.end();
         continue;

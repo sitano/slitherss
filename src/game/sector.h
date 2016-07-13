@@ -53,11 +53,11 @@ inline bool intersect_circle(float c_x, float c_y, float p_x, float p_y, float r
 }
 
 // https://en.wikipedia.org/wiki/Methods_of_computing_square_roots
-float fastsqrt(float val);
+float fast_sqrt(float val);
 
 // https://en.wikipedia.org/wiki/Fast_inverse_square_root
 // https://betterexplained.com/articles/understanding-quakes-fast-inverse-square-root/
-float fastinvsqrt(float x);
+float fast_inv_sqrt(float x);
 
 struct BoundBoxPos {
   float x;
@@ -115,8 +115,8 @@ class Sector {
   }
 
   void Insert(const Food &f);
-  void Remove(const std::vector<Food>::iterator &i);
-  std::vector<Food>::iterator FindClosestFood(uint16_t fx);
+  void Remove(const FoodSeqIter &i);
+  FoodSeqIter FindClosestFood(uint16_t fx);
   void Sort();
 
   void RemoveSnake(snake_id_t id);
@@ -132,41 +132,44 @@ class SectorSeq : public std::vector<Sector> {
   Sector *get_sector(const uint16_t x, const uint16_t y);
 };
 
-class snake_bb : public BoundBox {
+class SnakeBoundBox : public BoundBox {
  public:
-  snake_bb() = default;
-  snake_bb(BoundBoxPos in_pos, uint16_t in_id, const Snake *in_ptr, const std::vector<Sector *> &in_sectors)
-      : BoundBox(in_pos, in_id, in_ptr, in_sectors) {}
-  explicit snake_bb(BoundBox in) : BoundBox({in.x, in.y, in.r}, in.id, in.snake, in.sectors) {}
+  SnakeBoundBox() = default;
 
-  void insert_sorted_with_reg(Sector *s);
-  void update_box_new_sectors(SectorSeq *ss, const float bb_r,
-                              const float new_x, const float new_y,
-                              const float old_x, const float old_y);
-  void update_box_old_sectors();
+  SnakeBoundBox(BoundBoxPos in_pos, uint16_t in_id,
+                const Snake *in_ptr, const SectorVec &in_sectors)
+      : BoundBox(in_pos, in_id, in_ptr, in_sectors) {}
+
+  explicit SnakeBoundBox(BoundBox in) : BoundBox({in.x, in.y, in.r}, in.id, in.snake, in.sectors) {}
+
+  void InsertSortedWithReg(Sector *s);
+  void UpdateBoxNewSectors(SectorSeq *ss, const float bb_r,
+                           const float new_x, const float new_y,
+                           const float old_x, const float old_y);
+  void UpdateBoxOldSectors();
 };
 
-class view_port : public BoundBox {
+class ViewPort : public BoundBox {
  public:
-  std::vector<Sector *> new_sectors;
-  std::vector<Sector *> old_sectors;
+  SectorVec new_sectors;
+  SectorVec old_sectors;
 
-  view_port() = default;
-  view_port(BoundBoxPos in_pos, uint16_t in_id, const Snake *in_ptr,
-            const std::vector<Sector *> &in_sectors)
+  ViewPort() = default;
+
+  ViewPort(BoundBoxPos in_pos, uint16_t in_id, const Snake *in_ptr, const SectorVec &in_sectors)
       : BoundBox(in_pos, in_id, in_ptr, in_sectors) {}
-  explicit view_port(BoundBox in)
-      : BoundBox({in.x, in.y, in.r}, in.id, in.snake, in.sectors) {}
 
-  void reg_new_sector_if_missing(Sector *s);
-  void reg_old_sector_if_missing(Sector *s);
+  explicit ViewPort(BoundBox in) : BoundBox({in.x, in.y, in.r}, in.id, in.snake, in.sectors) {}
 
-  void insert_sorted_with_delta(Sector *s);
+  void RegNewSectorIfMissing(Sector *s);
+  void RegOldSectorIfMissing(Sector *s);
 
-  void update_box_new_sectors(SectorSeq *ss,
-                              const float new_x, const float new_y,
-                              const float old_x, const float old_y);
-  void update_box_old_sectors();
+  void InsertSortedWithDelta(Sector *s);
+
+  void UpdateBoxNewSectors(SectorSeq *ss,
+                           const float new_x, const float new_y,
+                           const float old_x, const float old_y);
+  void UpdateBoxOldSectors();
 };
 
 #endif  // SRC_GAME_SECTOR_H_
