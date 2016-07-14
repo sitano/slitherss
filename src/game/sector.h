@@ -72,7 +72,7 @@ class Sector {
     return box.Intersect(box2);
   }
 
-  void Insert(const Food &f);
+  void Insert(Food f);
   void Remove(const FoodSeqIter &i);
   FoodSeqIter FindClosestFood(uint16_t fx);
   void Sort();

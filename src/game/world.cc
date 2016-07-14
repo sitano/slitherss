@@ -185,7 +185,7 @@ void World::InitFood() {
                                     WorldConfig::sector_count_along_edge);
     const size_t density = static_cast<size_t>(dp * 10);
     for (size_t i = 0; i < density; i++) {
-      s.food.push_back(
+      s.Insert(
           Food{static_cast<uint16_t>(
                    s.x * WorldConfig::sector_size +
                        NextRandom<uint16_t>(WorldConfig::sector_size)),

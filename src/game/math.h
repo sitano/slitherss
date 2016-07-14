@@ -1,7 +1,8 @@
-#ifndef SRC_SERVER_MATH_H_
-#define SRC_SERVER_MATH_H_
+#ifndef SRC_GAME_MATH_H_
+#define SRC_GAME_MATH_H_
 
-#include "math.h"
+#include <cmath>
+#include <cstdint>
 
 struct Point {
   float x;
@@ -39,59 +40,18 @@ class Math {
    * described in other answers by Elemental, Dan and Wodzu. It's also probably faster than the code posted by
    * KingNestor because it's all multiplication and division, no square roots!
    */
-  inline static bool intersect_segments(float p0_x, float p0_y, float p1_x, float p1_y,
-                                        float p2_x, float p2_y, float p3_x, float p3_y) {
-    const float s1_x = p1_x - p0_x;
-    const float s1_y = p1_y - p0_y;
-    const float s2_x = p3_x - p2_x;
-    const float s2_y = p3_y - p2_y;
-
-    const float d = (-s2_x * s1_y + s1_x * s2_y);
-    static const float epsilon = 0.0001f;
-    if (d <= epsilon && d >= -epsilon) {
-      return false;
-    }
-
-    // todo check is it better to have 2 more mul, then 1 branch
-    const float s = (-s1_y * (p0_x - p2_x) + s1_x * (p0_y - p2_y));
-    if (s < 0 || s > d) {
-      return false;
-    }
-
-    const float t = (s2_x * (p0_y - p2_y) - s2_y * (p0_x - p2_x));
-    return !(t < 0 || t > d);
-  }
+  static bool intersect_segments(float p0_x, float p0_y, float p1_x, float p1_y,
+                                 float p2_x, float p2_y, float p3_x, float p3_y);
 
   // line vw, and point p
   // http://stackoverflow.com/questions/849211/shortest-distance-between-a-point-and-a-line-segment
-  inline static float distance_squared(float v_x, float v_y, float w_x, float w_y, float p_x, float p_y) {
-    // Return minimum distance between line segment vw and point p
-    const float l2 = distance_squared(v_x, v_y, w_x, w_y);  // i.e. |w-v|^2 -  avoid a sqrt
-    if (l2 == 0.0) {  // v == w case
-      return distance_squared(p_x, p_y, w_x, w_x);
-    }
-    // Consider the line extending the segment, parameterized as v + t (w - v).
-    // We find projection of point p onto the line.
-    // It falls where t = [(p-v) . (w-v)] / |w-v|^2
-    // We clamp t from [0,1] to handle points outside the segment vw.
-    float t = ((p_x - v_x) * (w_x - v_x) + (p_y - v_y) * (w_y - v_y)) / l2;
-    t = fmaxf(0, fminf(1, t));
-    return distance_squared(p_x, p_y, v_x + t * (w_x - v_x), v_y + t * (w_y - v_y));
-  }
+  static float distance_squared(float v_x, float v_y, float w_x, float w_y, float p_x, float p_y);
 
   // points p0, p1
-  inline static float distance_squared(float p0_x, float p0_y, float p1_x, float p1_y) {
-    const float dx = p0_x - p1_x;
-    const float dy = p0_y - p1_y;
-    return dx * dx + dy * dy;
-  }
+  static float distance_squared(float p0_x, float p0_y, float p1_x, float p1_y);
 
   // points p0, p1
-  inline static int32_t distance_squared(uint16_t p0_x, uint16_t p0_y, uint16_t p1_x, uint16_t p1_y) {
-    const int32_t dx = p0_x - p1_x;
-    const int32_t dy = p0_y - p1_y;
-    return dx * dx + dy * dy;
-  }
+  static int32_t distance_squared(uint16_t p0_x, uint16_t p0_y, uint16_t p1_x, uint16_t p1_y);
 
   // center, point, radius
   inline static bool intersect_circle(float c_x, float c_y, float p_x, float p_y, float r) {
@@ -128,7 +88,6 @@ class Math {
     u.tmp = 0x5f3759df - (u.tmp >> 1);
     return u.val * (1.5f - xhalf * u.val * u.val);
   }
-
 };
 
-#endif  // SRC_SERVER_MATH_H_
+#endif  // SRC_GAME_MATH_H_

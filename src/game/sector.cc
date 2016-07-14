@@ -44,7 +44,7 @@ void Sector::RemoveSnake(snake_id_t id) {
       [id](const BoundBox *bb) { return bb->id == id; }), snakes.end());
 }
 
-void Sector::Insert(const Food &f) {
+void Sector::Insert(Food f) {
   auto fwd_i = std::lower_bound(
       food.begin(), food.end(), f,
       [](const Food &a, const Food &b) { return a.x < b.x; });
