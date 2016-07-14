@@ -39,9 +39,9 @@ class GameServer {
 
   PacketInit BuildInitPacket();
 
-  typedef std::unordered_map<snake_id_t, connection_hdl> connections;
-  typedef std::map<connection_hdl, Session, std::owner_less<connection_hdl>> sessions;
-  typedef sessions::iterator session_iterator;
+  typedef std::unordered_map<snake_id_t, connection_hdl> ConnectionMap;
+  typedef std::map<connection_hdl, Session, std::owner_less<connection_hdl>> SessionMap;
+  typedef SessionMap::iterator SessionIter;
 
  private:
   void on_socket_init(connection_hdl, boost::asio::ip::tcp::socket &s);  // NOLINT(runtime/references)
@@ -50,11 +50,11 @@ class GameServer {
   void on_close(connection_hdl hdl);
   void on_timer(error_code const &ec);
 
-  void SendPOVUpdateTo(sessions::iterator ses_i, Snake *ptr);
+  void SendPOVUpdateTo(SessionIter ses_i, Snake *ptr);
   void SendFoodUpdate(Snake *ptr);
   void BroadcastDebug();
   void BroadcastUpdates();
-  session_iterator LoadSessionIter(snake_id_t id);
+  SessionIter LoadSessionIter(snake_id_t id);
 
   void DoSnake(snake_id_t id, std::function<void(Snake *)> f);
   void RemoveSnake(snake_id_t id);
@@ -67,7 +67,7 @@ class GameServer {
 
  private:
   template <typename T>
-  void send_binary(sessions::iterator s, T packet) {
+  void send_binary(SessionMap::iterator s, T packet) {
     const long now = GetCurrentTime();
     const uint16_t interval =
         static_cast<uint16_t>(now - s->second.last_packet_time);
@@ -79,7 +79,7 @@ class GameServer {
   template <typename T>
   void broadcast_binary(T packet) {
     const long now = GetCurrentTime();
-    for (auto &s : m_sessions) {
+    for (auto &s : sessions) {
       const uint16_t interval =
           static_cast<uint16_t>(now - s.second.last_packet_time);
       s.second.last_packet_time = now;
@@ -90,7 +90,7 @@ class GameServer {
 
   template <typename T>
   void broadcast_debug(T packet) {
-    for (auto &s : m_sessions) {
+    for (auto &s : sessions) {
       endpoint.send_binary(s.first, packet);
     }
   }
@@ -106,8 +106,8 @@ class GameServer {
   IncomingConfig config;
 
   // todo: reserve to collections
-  sessions m_sessions;
-  connections m_connections;
+  SessionMap sessions;
+  ConnectionMap connections;
 };
 
 #endif  // SRC_SERVER_GAME_H_

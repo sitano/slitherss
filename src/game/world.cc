@@ -5,6 +5,8 @@
 #include <iostream>
 #include <vector>
 
+#include "game/math.h"
+
 Snake::Ptr World::CreateSnake() {
   lastSnakeId++;
 
@@ -15,11 +17,11 @@ Snake::Ptr World::CreateSnake() {
   s->speed = Snake::base_move_speed;
   s->fullness = 0;
 
-  float angle = World::f_2pi * NextRandomf();
+  float angle = Math::f_2pi * NextRandomf();
   float dist = 1000.0f + NextRandom(5000);
   uint16_t x = static_cast<uint16_t>(WorldConfig::game_radius + dist * cosf(angle));
   uint16_t y = static_cast<uint16_t>(WorldConfig::game_radius + dist * sinf(angle));
-  angle = Snake::normalize_angle(angle + f_pi);
+  angle = Math::normalize_angle(angle + Math::f_pi);
   // const uint16_t half_radius = game_radius / 2;
   // uint16_t x = game_radius + NextRandom(game_radius) - half_radius;
   // uint16_t y = game_radius + NextRandom(game_radius) - half_radius;
@@ -41,8 +43,8 @@ Snake::Ptr World::CreateSnake() {
   }
 
   s->clientPartsIndex = s->parts.size();
-  s->angle = Snake::normalize_angle(angle + f_pi);
-  s->wangle = Snake::normalize_angle(angle + f_pi);
+  s->angle = Math::normalize_angle(angle + Math::f_pi);
+  s->wangle = Math::normalize_angle(angle + Math::f_pi);
 
   s->sbb = SnakeBoundBox(s->get_new_box());
   s->vp = ViewPort(s->get_new_box());

@@ -2,6 +2,8 @@
 
 #include <iostream>
 
+#include "game/math.h"
+
 bool Snake::Tick(long dt, SectorSeq *ss) {
   uint8_t changes = 0;
 
@@ -28,10 +30,10 @@ bool Snake::Tick(long dt, SectorSeq *ss) {
       const long frames = rot_ticks / rot_step_interval;
       const long frames_ticks = frames * rot_step_interval;
       const float rotation = snake_angular_speed * frames_ticks / 1000.0f;
-      float dAngle = normalize_angle(wangle - angle);
+      float dAngle = Math::normalize_angle(wangle - angle);
 
-      if (dAngle > f_pi) {
-        dAngle -= f_2pi;
+      if (dAngle > Math::f_pi) {
+        dAngle -= Math::f_2pi;
       }
 
       if (fabsf(dAngle) < rotation) {
@@ -40,7 +42,7 @@ bool Snake::Tick(long dt, SectorSeq *ss) {
         angle += rotation * (dAngle > 0 ? 1.0f : -1.0f);
       }
 
-      angle = normalize_angle(angle);
+      angle = Math::normalize_angle(angle);
 
       changes |= change_angle;
       rot_ticks -= frames_ticks;
@@ -240,7 +242,7 @@ void Snake::UpdateEatenFood(SectorSeq *ss) {
     // to left
     {
       auto left = i - 1;
-      while (left >= begin && distance_squared(left->x, left->y, hx, hy) <= r2) {
+      while (left >= begin && Math::distance_squared(left->x, left->y, hx, hy) <= r2) {
         // std::cout << "eaten food <left> x = " << left->x << ", y = " <<
         // left->y << std::endl;
         on_food_eaten(*left);
@@ -252,7 +254,7 @@ void Snake::UpdateEatenFood(SectorSeq *ss) {
     // to right
     {
       auto end = sec->food.end();
-      while (i < end && distance_squared(i->x, i->y, hx, hy) <= r2) {
+      while (i < end && Math::distance_squared(i->x, i->y, hx, hy) <= r2) {
         // std::cout << "eaten food <right> x = " << i->x << ", y = " << i->y <<
         // std::endl;
         on_food_eaten(*i);
@@ -273,7 +275,7 @@ void Snake::TickAI(long frames) {
     float ai_angle = atan2f(get_head_y() - WorldConfig::game_radius,
                             get_head_x() - WorldConfig::game_radius);
     // 2. add pi_2
-    ai_angle = normalize_angle(ai_angle + f_pi / 2.0f);
+    ai_angle = Math::normalize_angle(ai_angle + Math::f_pi / 2.0f);
     // 3. set
     if (fabsf(wangle - ai_angle) > 0.01f) {
       wangle = ai_angle;
@@ -286,14 +288,14 @@ bool Snake::Intersect(BoundBoxPos foe, BodySeqCIter prev, BodySeqCIter iter, Bod
   while (iter != end) {
     // weak body part check
     // todo: reduce this whole thing to middle circle check
-    if (intersect_circle(iter->x, iter->y, foe.x, foe.y, WorldConfig::move_step_distance * 2)) {
+    if (Math::intersect_circle(iter->x, iter->y, foe.x, foe.y, WorldConfig::move_step_distance * 2)) {
       const float r = foe.r + get_snake_body_part_radius();
 
       // check actual snake body part
-      if (intersect_circle(iter->x, iter->y, foe.x, foe.y, r) ||
-          intersect_circle(prev->x, prev->y, foe.x, foe.y, r) ||
-          intersect_circle(iter->x + (prev->x - iter->x) / 2.0f,
-                           iter->y + (prev->y - iter->y) / 2.0f, foe.x, foe.y, r)) {
+      if (Math::intersect_circle(iter->x, iter->y, foe.x, foe.y, r) ||
+          Math::intersect_circle(prev->x, prev->y, foe.x, foe.y, r) ||
+          Math::intersect_circle(iter->x + (prev->x - iter->x) / 2.0f,
+                                 iter->y + (prev->y - iter->y) / 2.0f, foe.x, foe.y, r)) {
         return true;
       }
     }
@@ -319,7 +321,7 @@ bool Snake::Intersect(BoundBoxPos foe) const {
     // head center will be i = 3, len [0 .. 3] = 42 * 3 = 126, len [3 .. 7] =
     // 136.9, both < sector_size / 2 = 150
     auto head = parts[3];
-    if (intersect_circle(head.x, head.y, foe.x, foe.y, WorldConfig::sector_size / 2)) {
+    if (Math::intersect_circle(head.x, head.y, foe.x, foe.y, WorldConfig::sector_size / 2)) {
       if (Intersect(foe, parts.begin(), parts.begin() + 1, parts.begin() + 9)) {
         return true;
       }
@@ -328,7 +330,7 @@ bool Snake::Intersect(BoundBoxPos foe) const {
     // first tail sector center will be... skip 8 + tail_step / 2
     auto end = parts.end();
     for (auto i = parts.begin() + 7 + tail_step_half; i < end; i += tail_step) {
-      if (intersect_circle(i->x, i->y, foe.x, foe.y, WorldConfig::sector_size / 2)) {
+      if (Math::intersect_circle(i->x, i->y, foe.x, foe.y, WorldConfig::sector_size / 2)) {
         auto start = i - tail_step_half;
         auto last = i + tail_step_half;
         if (last > end) {

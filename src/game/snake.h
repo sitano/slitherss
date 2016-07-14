@@ -126,13 +126,6 @@ class Snake : public std::enable_shared_from_this<Snake> {
   static const long rot_step_interval = static_cast<long>(1000.0f * rot_step_angle / snake_angular_speed);
   static const long ai_step_interval = 1000;
 
-  static constexpr float f_pi = 3.14159265358979323846f;
-  static constexpr float f_2pi = 2.0f * f_pi;
-
-  inline static float normalize_angle(float ang) {
-    return ang - f_2pi * floorf(ang / f_2pi);
-  }
-
  private:
   long mov_ticks = 0;
   long rot_ticks = 0;

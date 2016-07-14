@@ -2,6 +2,8 @@
 
 #include <algorithm>
 
+#include "game/math.h"
+
 GameServer::GameServer() {
   // set up access channels to only log interesting things
   endpoint.clear_access_channels(alevel::all);
@@ -168,7 +170,7 @@ void GameServer::BroadcastUpdates() {
 
       if (!ptr->bot) {
         const auto ses_i = LoadSessionIter(id);
-        if (ses_i != m_sessions.end()) {
+        if (ses_i != sessions.end()) {
           send_binary(ses_i, packet_end(packet_end::status_death));
         }
       }
@@ -248,7 +250,7 @@ void GameServer::BroadcastUpdates() {
   world.FlushChanges();
 }
 
-void GameServer::SendPOVUpdateTo(sessions::iterator ses_i, Snake *ptr) {
+void GameServer::SendPOVUpdateTo(SessionIter ses_i, Snake *ptr) {
   if (!ptr->vp.new_sectors.empty()) {
     for (const Sector *s_ptr : ptr->vp.new_sectors) {
       send_binary(ses_i, packet_add_sector(s_ptr->x, s_ptr->y));
@@ -301,13 +303,13 @@ void GameServer::on_open(connection_hdl hdl) {
   const auto new_snake_ptr = world.CreateSnake();
   world.AddSnake(new_snake_ptr);
 
-  m_sessions[hdl] = Session(new_snake_ptr->id, GetCurrentTime());
-  m_connections[new_snake_ptr->id] = hdl;
+  sessions[hdl] = Session(new_snake_ptr->id, GetCurrentTime());
+  connections[new_snake_ptr->id] = hdl;
 
   endpoint.send_binary(hdl, init);
 
   // send snake
-  const auto ses_i = m_sessions.find(hdl);
+  const auto ses_i = sessions.find(hdl);
   broadcast_binary(packet_add_snake(new_snake_ptr.get()));
   broadcast_binary(packet_move(new_snake_ptr.get()));
   SendPOVUpdateTo(ses_i, new_snake_ptr.get());
@@ -344,8 +346,8 @@ void GameServer::on_message(connection_hdl hdl, message_ptr ptr) {
   }
 
   // session obtain
-  const auto ses_i = m_sessions.find(hdl);
-  if (ses_i == m_sessions.end()) {
+  const auto ses_i = sessions.find(hdl);
+  if (ses_i == sessions.end()) {
     endpoint.get_alog().write(alevel::app, "No session, skip packet");
     return;
   }
@@ -356,7 +358,7 @@ void GameServer::on_message(connection_hdl hdl, message_ptr ptr) {
   // parsing
   if (packet_type <= 250 && len == 1) {
     // in_packet_t_angle, [0 - 250]
-    const float angle = World::f_pi * packet_type / 125.0f;
+    const float angle = Math::f_pi * packet_type / 125.0f;
     DoSnake(ss.snake_id, [=](Snake *s) {
       s->wangle = angle;
       s->update |= change_wangle;
@@ -420,16 +422,16 @@ void GameServer::on_message(connection_hdl hdl, message_ptr ptr) {
 }
 
 void GameServer::on_close(connection_hdl hdl) {
-  const auto ptr = m_sessions.find(hdl);
-  if (ptr != m_sessions.end()) {
+  const auto ptr = sessions.find(hdl);
+  if (ptr != sessions.end()) {
     const snake_id_t snakeId = ptr->second.snake_id;
-    m_sessions.erase(ptr->first);
+    sessions.erase(ptr->first);
     RemoveSnake(snakeId);
   }
 }
 
 void GameServer::RemoveSnake(snake_id_t id) {
-  m_connections.erase(id);
+  connections.erase(id);
   world.RemoveSnake(id);
 }
 
@@ -472,17 +474,17 @@ void GameServer::DoSnake(snake_id_t id, std::function<void(Snake *)> f) {
   }
 }
 
-GameServer::sessions::iterator GameServer::LoadSessionIter(
+GameServer::SessionMap::iterator GameServer::LoadSessionIter(
     snake_id_t id) {
-  const auto hdl_i = m_connections.find(id);
-  if (hdl_i == m_connections.end()) {
+  const auto hdl_i = connections.find(id);
+  if (hdl_i == connections.end()) {
     endpoint.get_alog().write(alevel::app,
         "Failed to locate snake connection " + std::to_string(id));
-    return m_sessions.end();
+    return sessions.end();
   }
 
-  const auto ses_i = m_sessions.find(hdl_i->second);
-  if (ses_i == m_sessions.end()) {
+  const auto ses_i = sessions.find(hdl_i->second);
+  if (ses_i == sessions.end()) {
     endpoint.get_alog().write(alevel::app,
         "Failed to locate snake session " + std::to_string(id));
   }

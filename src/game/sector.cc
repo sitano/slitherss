@@ -2,77 +2,6 @@
 
 #include <algorithm>
 
-bool intersect_segments(float p0_x, float p0_y, float p1_x, float p1_y,
-                        float p2_x, float p2_y, float p3_x, float p3_y) {
-  const float s1_x = p1_x - p0_x;
-  const float s1_y = p1_y - p0_y;
-  const float s2_x = p3_x - p2_x;
-  const float s2_y = p3_y - p2_y;
-
-  const float d = (-s2_x * s1_y + s1_x * s2_y);
-  static const float epsilon = 0.0001f;
-  if (d <= epsilon && d >= -epsilon) {
-    return false;
-  }
-
-  // todo check is it better to have 2 more mul, then 1 branch
-  const float s = (-s1_y * (p0_x - p2_x) + s1_x * (p0_y - p2_y));
-  if (s < 0 || s > d) {
-    return false;
-  }
-
-  const float t = (s2_x * (p0_y - p2_y) - s2_y * (p0_x - p2_x));
-  return !(t < 0 || t > d);
-}
-
-// line vw, and point p
-// http://stackoverflow.com/questions/849211/shortest-distance-between-a-point-and-a-line-segment
-float distance_squared(float v_x, float v_y, float w_x, float w_y, float p_x, float p_y) {
-  // Return minimum distance between line segment vw and point p
-  const float l2 = distance_squared(v_x, v_y, w_x, w_y);  // i.e. |w-v|^2 -  avoid a sqrt
-  if (l2 == 0.0) {  // v == w case
-    return distance_squared(p_x, p_y, w_x, w_x);
-  }
-  // Consider the line extending the segment, parameterized as v + t (w - v).
-  // We find projection of point p onto the line.
-  // It falls where t = [(p-v) . (w-v)] / |w-v|^2
-  // We clamp t from [0,1] to handle points outside the segment vw.
-  float t = ((p_x - v_x) * (w_x - v_x) + (p_y - v_y) * (w_y - v_y)) / l2;
-  t = fmaxf(0, fminf(1, t));
-  return distance_squared(p_x, p_y, v_x + t * (w_x - v_x), v_y + t * (w_y - v_y));
-}
-
-// https://en.wikipedia.org/wiki/Methods_of_computing_square_roots
-float fast_sqrt(float val) {
-  union {
-    int tmp;
-    float val;
-  } u;
-
-  u.val = val;
-  u.tmp -= 1 << 23; /* Remove last bit so 1.0 gives 1.0 */
-  /* tmp is now an approximation to logbase2(val) */
-  u.tmp >>= 1;      /* divide by 2 */
-  u.tmp += 1 << 29; /* add 64 to exponent: (e+127)/2 =(e/2)+63, */
-  /* that represents (e/2)-64 but we want e/2 */
-
-  return u.val;
-}
-
-// https://en.wikipedia.org/wiki/Fast_inverse_square_root
-// https://betterexplained.com/articles/understanding-quakes-fast-inverse-square-root/
-float fast_inv_sqrt(float x) {
-  union {
-    int tmp;
-    float val;
-  } u;
-
-  const float xhalf = 0.5f * x;
-  u.val = x;
-  u.tmp = 0x5f3759df - (u.tmp >> 1);
-  return u.val * (1.5f - xhalf * u.val * u.val);
-}
-
 void BoundBox::Insert(Sector *s) {
   auto fwd_i = std::lower_bound(sectors.begin(), sectors.end(), s);
   if (fwd_i != sectors.end()) {
@@ -82,7 +11,7 @@ void BoundBox::Insert(Sector *s) {
   }
 }
 
-bool BoundBox::RemoveUnsorted(const std::vector<Sector *>::iterator &i) {
+bool BoundBox::RemoveUnsorted(const SectorIter &i) {
   if (i + 1 != sectors.end()) {
     *i = sectors.back();
     sectors.pop_back();
@@ -93,7 +22,7 @@ bool BoundBox::RemoveUnsorted(const std::vector<Sector *>::iterator &i) {
   }
 }
 
-bool BoundBox::IsPresent(Sector *s) {
+bool BoundBox::IsPresent(const Sector *s) {
   return std::binary_search(sectors.begin(), sectors.end(), s);
 }
 
@@ -167,15 +96,13 @@ void SnakeBoundBox::InsertSortedWithReg(Sector *s) {
 }
 
 void ViewPort::RegNewSectorIfMissing(Sector *s) {
-  if (std::find(new_sectors.begin(), new_sectors.end(), s) ==
-      new_sectors.end()) {
+  if (std::find(new_sectors.begin(), new_sectors.end(), s) == new_sectors.end()) {
     new_sectors.push_back(s);
   }
 }
 
 void ViewPort::RegOldSectorIfMissing(Sector *s) {
-  if (std::find(old_sectors.begin(), old_sectors.end(), s) ==
-      old_sectors.end()) {
+  if (std::find(old_sectors.begin(), old_sectors.end(), s) == old_sectors.end()) {
     old_sectors.push_back(s);
   }
 }
