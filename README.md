@@ -26,9 +26,7 @@ is out of the scope of this article.
 
 * Boost: `sudo apt-get install libboost-dev libboost-system-dev libboost-thread-dev libboost-program-options-dev`
 * Zlib: `sudo apt-get install zlib1g-dev`
-* Cmake: `sudo apt-get install cmake`
-* Clang: `sudo apt-get install clang`, its better to use latest 3.8, 3.9.
-* Valgrind: `sudo apt-get install valgrind`
+* CMake env: `sudo apt-get install cmake gcc g++ clang clang-3.5 cppcheck valgrind git`, its better to use latest 3.8, 3.9.
 
 #### Building
 
