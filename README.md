@@ -2,7 +2,7 @@ Readme
 ------
 
 slither.io server in C++ emulating
-[native protocol](https://github.com/ClitherProject/Slither.io-Protocol).
+[native protocol](https://github.com/sitano/Slither.io-Protocol).
 
 _Note: this was mostly an experiment and fun reversing slither.io game. Thus, some
 code or parts of it may not met real world high quality standards, and that
@@ -73,11 +73,11 @@ with lines length 120.
 TODO
 ----
 
-- fix code style
-- make performance tests
+- force died snake disconnect 
 - fix eating food
 - optimize snake intersection
 - snake observability tracking
+- make performance tests
 
 OTHER
 -----
