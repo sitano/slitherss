@@ -428,7 +428,7 @@ float Snake::get_snake_scale() const { return gsc; }
 float Snake::get_snake_body_part_radius() const { return sbpr; }
 
 std::array<float, WorldConfig::max_snake_parts> get_fmlts() {
-  std::array<float, WorldConfig::max_snake_parts> data = {0.0f};
+  std::array<float, WorldConfig::max_snake_parts> data = {{0.0f}};
   for (size_t i = 0; i < data.size(); i++) {
     data[i] = powf(1.0f - 1.0f * i / data.size(), 2.25f);
   }
@@ -437,7 +437,7 @@ std::array<float, WorldConfig::max_snake_parts> get_fmlts() {
 
 std::array<float, WorldConfig::max_snake_parts> get_fpsls(
     const std::array<float, WorldConfig::max_snake_parts> &fmlts) {
-  std::array<float, WorldConfig::max_snake_parts> data = {0.0f};
+  std::array<float, WorldConfig::max_snake_parts> data = {{0.0f}};
   for (size_t i = 1; i < data.size(); i++) {
     data[i] = data[i - 1] + 1.0f / fmlts[i - 1];
   }

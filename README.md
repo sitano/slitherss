@@ -34,7 +34,7 @@ is out of the scope of this article.
 
 1. `git clone https://github.com/sitano/slitherss`
 1. `git submodule update --init`
-1. `cmake -DCMAKE_C_COMPILER=/usr/bin/clang -DCMAKE_CXX_COMPILER=/usr/bin/clang++`
+1. `cmake -DCMAKE_C_COMPILER=/usr/bin/clang -DCMAKE_CXX_COMPILER=/usr/bin/clang++ -DCMAKE_BUILD_TYPE=Debug .`
 1. `make -j`
 
 _Note: Make sure boost lib was built using the same compiler or at least
