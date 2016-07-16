@@ -14,6 +14,8 @@ last time._
 _Note: there are a lot of strange decisions inside of slither.io, like i.e. 8ms
 simulation tick - I will ignore that._
 
+![anim](https://cloud.githubusercontent.com/assets/564610/16897363/2b0b032a-4baf-11e6-9bf5-5668d1518b6d.gif)
+
 How to build
 ------------
 
@@ -59,10 +61,23 @@ Memory
 
     valgrind --track-origins=yes -v ./bin/slither_server
 
+VGDB
+
+    $ valgrind --vgdb=yes --vgdb-error=0 ./bin/slither_server --bots 5000
+    gdb: target remote | vgdb
+
 SystemTap
 ---------
 
     stap -v -d ./bin/slither_server -L 'process("*/slither_server").function("*")'
+
+Vagrant
+-------
+
+There is vagrant configuration with all dependencies required for development.
+
+    vagrant up
+    vagrant ssh
 
 Code style
 ----------
