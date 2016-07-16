@@ -271,7 +271,7 @@ void GameServer::SendFoodUpdate(Snake *ptr) {
   if (!ptr->eaten.empty()) {
     const snake_id_t id = ptr->id;
     for (const Food &f : ptr->eaten) {
-      // todo: to those who observers me
+      // TODO(john.koepi): to those who observers me
       broadcast_binary(packet_eat_food(id, f));
     }
     ptr->eaten.clear();
@@ -279,7 +279,7 @@ void GameServer::SendFoodUpdate(Snake *ptr) {
 
   if (!ptr->spawn.empty()) {
     for (const Food &f : ptr->spawn) {
-      // todo: to those who observers me
+      // TODO(john.koepi): to those who observers me
       broadcast_binary(packet_spawn_food(f));
     }
     ptr->spawn.clear();

@@ -13,7 +13,7 @@ bool Math::intersect_segments(float p0_x, float p0_y, float p1_x, float p1_y,
     return false;
   }
 
-  // todo check is it better to have 2 more mul, then 1 branch
+  // TODO(john.koepi): check is it better to have 2 more mul, then 1 branch
   const float s = (-s1_y * (p0_x - p2_x) + s1_x * (p0_y - p2_y));
   if (s < 0 || s > d) {
     return false;

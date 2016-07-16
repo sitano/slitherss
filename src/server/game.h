@@ -105,7 +105,7 @@ class GameServer {
   PacketInit init;
   IncomingConfig config;
 
-  // todo: reserve to collections
+  // TODO(john.koepi): reserve to collections
   SessionMap sessions;
   ConnectionMap connections;
 };

@@ -25,7 +25,7 @@ Snake::Ptr World::CreateSnake() {
   // const uint16_t half_radius = game_radius / 2;
   // uint16_t x = game_radius + NextRandom(game_radius) - half_radius;
   // uint16_t y = game_radius + NextRandom(game_radius) - half_radius;
-  // todo: reserve snake.parts at least for sizeof(snake) bytes
+  // TODO(john.koepi): reserve snake.parts at least for sizeof(snake) bytes
   const int len = 1 /* head */ + 2 /* body min = 2 */ +
     std::max(config.snake_min_length,
     NextRandom(config.snake_average_length));

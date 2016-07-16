@@ -46,16 +46,16 @@ class World {
   void TickSnakes(long dt);
 
  private:
-  // todo: reserve to collections
+  // TODO(john.koepi): reserve to collections
   SnakeMap snakes;
   Ids dead;
   SectorSeq sectors;
   SnakeVec changes;
 
-  // todo pools
-  // todo sorted checker
+  // TODO(john.koepi) pools
+  // TODO(john.koepi) sorted checker
 
-  // todo manage overflow, reuse old?
+  // TODO(john.koepi) manage overflow, reuse old?
   uint16_t lastSnakeId = 0;
   long ticks = 0;
   uint32_t frames = 0;

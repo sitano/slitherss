@@ -287,7 +287,7 @@ void Snake::TickAI(long frames) {
 bool Snake::Intersect(BoundBoxPos foe, BodySeqCIter prev, BodySeqCIter iter, BodySeqCIter end) const {
   while (iter != end) {
     // weak body part check
-    // todo: reduce this whole thing to middle circle check
+    // TODO(john.koepi): reduce this whole thing to middle circle check
     if (Math::intersect_circle(iter->x, iter->y, foe.x, foe.y, WorldConfig::move_step_distance * 2)) {
       const float r = foe.r + get_snake_body_part_radius();
 
@@ -370,7 +370,7 @@ void Snake::DecreaseSnake(uint16_t volume) {
         const Body &last = parts.back();
         SpawnFood({static_cast<uint16_t>(last.x),
                    static_cast<uint16_t>(last.y),
-                   100,  // todo size dep on snake mass, use random
+                   100,  // TODO(john.koepi) size dep on snake mass, use random
                    skin});
         parts.pop_back();
       }
