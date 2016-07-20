@@ -26,6 +26,13 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wnon-virtual-dtor -Wno-unused-parameter
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -ffast-math -funroll-loops -march=native -O3")
 
+# for old clang 3.5, 3.6 vs gcc 4.8 includes
+# need for ubuntu 14.04
+# don't need for ubuntu 16.04
+# if (CMAKE_COMPILER_IS_CLANGXX)
+#    set (CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-stdlib=libc++")
+# endif ()
+
 # Source & includes
 file (GLOB_RECURSE SOURCE_FILES src/*.cc)
 file (GLOB_RECURSE HEADER_FILES src/*.h)

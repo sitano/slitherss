@@ -1,6 +1,7 @@
 #include "game/snake.h"
 
 #include <iostream>
+#include <array>
 
 #include "game/math.h"
 

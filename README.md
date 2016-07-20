@@ -28,17 +28,25 @@ is out of the scope of this article.
 
 * Boost: `sudo apt-get install libboost-dev libboost-system-dev libboost-thread-dev libboost-program-options-dev`
 * Zlib: `sudo apt-get install zlib1g-dev`
-* CMake env: `sudo apt-get install cmake gcc g++ clang clang-3.5 cppcheck valgrind git`, its better to use latest 3.8, 3.9.
+* CMake env: `sudo apt-get install cmake gcc g++ cppcheck valgrind git`
 
 #### Building
 
 1. `git clone https://github.com/sitano/slitherss`
 1. `git submodule update --init`
-1. `cmake -DCMAKE_C_COMPILER=/usr/bin/clang -DCMAKE_CXX_COMPILER=/usr/bin/clang++ -DCMAKE_BUILD_TYPE=Debug .`
+1. `cmake -DCMAKE_C_COMPILER=/usr/bin/cc -DCMAKE_CXX_COMPILER=/usr/bin/c++ -DCMAKE_BUILD_TYPE=Debug .`
 1. `make -j`
 
 _Note: Make sure boost lib was built using the same compiler or at least
 compatible ABI._
+
+Clang users:
+
+- 3.5, 3.6 will require -stdlib=libc++ and libc++-dev package and it will not
+  compile old boost at https://github.com/chriskohlhoff/asio/issues/76
+- 3.8 and latest env of ubuntu 16.04 will do fine, but native repo boost
+  program options library have been compiled with latest gcc with incomptible abi.
+  rebuild boost with clang if you want.
 
 How to play
 -----------
