@@ -19,7 +19,13 @@ IncomingConfig ParseCommandLine(const int argc, const char *const *argv) {
       "port,p", po::value<uint16_t>(&config.port)->default_value(config.port),
       "bind port")("debug,d",
                    po::bool_switch(&config.debug)->default_value(config.debug),
-                   "enable debug mode");
+                   "enable debug mode")(
+      "tls", po::bool_switch(&config.use_tls),
+      "enable TLS/SSL (WSS) support")(
+      "cert", po::value<std::string>(&config.tls_cert_file),
+      "path to TLS certificate file (required when --tls is enabled)")(
+      "key", po::value<std::string>(&config.tls_key_file),
+      "path to TLS private key file (required when --tls is enabled)");
 
   po::options_description conf("Configuration");
   conf.add_options()(
@@ -50,6 +56,14 @@ IncomingConfig ParseCommandLine(const int argc, const char *const *argv) {
     std::cerr << "Usage: slither_server [OPTIONS]\n";
     std::cerr << cmdline_options << '\n';
     exit(1);
+  }
+
+  // Validate TLS options
+  if (config.use_tls) {
+    if (config.tls_cert_file.empty() || config.tls_key_file.empty()) {
+      std::cerr << "error: --cert and --key are required when --tls is enabled\n";
+      exit(1);
+    }
   }
 
   return config;
