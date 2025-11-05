@@ -45,6 +45,7 @@ class GameServer {
 
  private:
   void on_socket_init(connection_hdl, boost::asio::ip::tcp::socket &s);  // NOLINT(runtime/references)
+  websocketpp::lib::shared_ptr<boost::asio::ssl::context> on_tls_init(connection_hdl hdl);
   void on_open(connection_hdl hdl);
   void on_message(connection_hdl hdl, message_ptr ptr);
   void on_close(connection_hdl hdl);

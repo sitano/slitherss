@@ -10,9 +10,13 @@ endif ()
 
 # Include our cmake macros
 set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR})
-include (cmake/cppcheck-target-cmake/FindCPPCHECK)
-include (cmake/cppcheck-target-cmake/CPPCheck)
-include (cmake/StyleCheck)
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/cmake/cppcheck-target-cmake/FindCPPCHECK")
+    include (cmake/cppcheck-target-cmake/FindCPPCHECK)
+    include (cmake/cppcheck-target-cmake/CPPCheck)
+endif()
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/cmake/StyleCheck.cmake")
+    include (cmake/StyleCheck)
+endif()
 
 # Detect clang. Not officially reported by cmake.
 execute_process(COMMAND "${CMAKE_CXX_COMPILER}" "-v" ERROR_VARIABLE CXX_VER_STDERR)
@@ -75,16 +79,27 @@ endif ()
 
 # find_package(ZLIB)
 
+# OpenSSL for TLS/WSS support
+find_package(OpenSSL REQUIRED)
+if(OPENSSL_FOUND)
+    include_directories(${OPENSSL_INCLUDE_DIR})
+    message(STATUS "OpenSSL found: ${OPENSSL_VERSION}")
+endif()
+
 # Build
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 
-target_link_libraries (${PROJECT_NAME} ${Boost_LIBRARIES})
+target_link_libraries (${PROJECT_NAME} ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES})
 # target_link_libraries (${PROJECT_NAME} ${ZLIB_LIBRARIES})
 
 set_target_properties (${PROJECT_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin)
 
 # CppCheck
-cppcheck_target_sources (${PROJECT_NAME})
+if(COMMAND cppcheck_target_sources)
+    cppcheck_target_sources (${PROJECT_NAME})
+endif()
 
 # StyleCheck
-add_style_check_target (${PROJECT_NAME} "${FILES}")
+if(COMMAND add_style_check_target)
+    add_style_check_target (${PROJECT_NAME} "${FILES}")
+endif()

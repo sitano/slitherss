@@ -16,6 +16,7 @@ GameServer::GameServer() {
 
   // Bind the handlers we are using
   endpoint.set_socket_init_handler(bind(&GameServer::on_socket_init, this, ::_1, ::_2));
+  endpoint.set_tls_init_handler(bind(&GameServer::on_tls_init, this, ::_1));
 
   endpoint.set_open_handler(bind(&GameServer::on_open, this, _1));
   endpoint.set_message_handler(bind(&GameServer::on_message, this, _1, _2));
@@ -23,9 +24,13 @@ GameServer::GameServer() {
 }
 
 int GameServer::Run(IncomingConfig in_config) {
-  endpoint.get_alog().write(alevel::app, "Running slither server on port " + std::to_string(in_config.port));
-
   config = in_config;
+
+  std::string protocol = config.use_tls ? "wss://" : "ws://";
+  endpoint.get_alog().write(alevel::app,
+      "Running slither server on port " + std::to_string(in_config.port) +
+      " (" + protocol + ")");
+
   PrintWorldInfo();
 
   endpoint.listen(in_config.port);
@@ -297,6 +302,27 @@ void GameServer::RemoveDeadSnakes() {
 void GameServer::on_socket_init(websocketpp::connection_hdl, boost::asio::ip::tcp::socket &s) {
   boost::asio::ip::tcp::no_delay option(true);
   s.set_option(option);
+}
+
+websocketpp::lib::shared_ptr<boost::asio::ssl::context> GameServer::on_tls_init(connection_hdl hdl) {
+  namespace asio = boost::asio;
+
+  auto ctx = websocketpp::lib::make_shared<asio::ssl::context>(asio::ssl::context::tlsv12);
+
+  try {
+    ctx->set_options(asio::ssl::context::default_workarounds |
+                     asio::ssl::context::no_sslv2 |
+                     asio::ssl::context::no_sslv3 |
+                     asio::ssl::context::single_dh_use);
+
+    ctx->use_certificate_chain_file(config.tls_cert_file);
+    ctx->use_private_key_file(config.tls_key_file, asio::ssl::context::pem);
+  } catch (std::exception &e) {
+    endpoint.get_elog().write(elevel::fatal,
+        "TLS initialization error: " + std::string(e.what()));
+  }
+
+  return ctx;
 }
 
 void GameServer::on_open(connection_hdl hdl) {

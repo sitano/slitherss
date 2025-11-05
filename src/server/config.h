@@ -3,7 +3,7 @@
 
 #include "game/config.h"
 
-#include <websocketpp/config/asio_no_tls.hpp>
+#include <websocketpp/config/asio.hpp>
 // #include <websocketpp/extensions/permessage_deflate/enabled.hpp>
 
 using websocketpp::log::alevel;
@@ -16,6 +16,10 @@ struct IncomingConfig {
   bool version = false;
   bool verbose = false;
   bool debug = false;
+  bool use_tls = false;
+
+  std::string tls_cert_file;
+  std::string tls_key_file;
 
   WorldConfig world;
 };
